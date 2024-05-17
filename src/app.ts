@@ -49,7 +49,6 @@ app.get(SETTINGS.BASE_URL + "videos/:id", (req, resp) => {
     const video = db.videos.filter( (video) => video.id === +videoId)
 
     if (video.length === 0){
-        console.log(video.length)
         resp
             .sendStatus(404)
         return;
@@ -85,6 +84,13 @@ app.delete(SETTINGS.BASE_URL + "videos/:id", (req, resp) =>{
 
 app.put(SETTINGS.BASE_URL + "videos/:id", (req, resp) =>{
     const videoId = +req.params.id;
+
+    if (isNaN(videoId)){
+        resp
+            .sendStatus(404)
+        return;
+    }
+
     const bodyModule = new BodyModule(req.body)
     const failedFields = bodyModule.validate()
 
@@ -92,12 +98,6 @@ app.put(SETTINGS.BASE_URL + "videos/:id", (req, resp) =>{
         resp
             .status(400)
             .json({"errorsMessages": failedFields})
-        return;
-    }
-
-    if (isNaN(videoId)){
-        resp
-            .sendStatus(404)
         return;
     }
 
