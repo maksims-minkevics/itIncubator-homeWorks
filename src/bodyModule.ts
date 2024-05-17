@@ -114,7 +114,6 @@ class BodyModule {
         const creationDate = new Date();
 
         const publicationDate = new Date(new Date().setDate(creationDate.getDate() + 1));
-        console.log(publicationDate)
         return {
             id : +videos.length,
             title : this.title,

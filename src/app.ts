@@ -5,7 +5,7 @@ import {BodyModule} from "./bodyModule"
 
 
 export const app = express()
-export const {videos} = createDb();
+export const db = createDb();
 
 const jsonBodyMiddleWare = express.json()
 app.use(jsonBodyMiddleWare)
@@ -34,7 +34,7 @@ type Response = {
 app.get(SETTINGS.BASE_URL + "videos/", (req, resp) => {
     resp
         .status(200)
-        .json(videos)
+        .json(db.videos)
 })
 
 app.get(SETTINGS.BASE_URL + "videos/:id", (req, resp) => {
@@ -46,7 +46,7 @@ app.get(SETTINGS.BASE_URL + "videos/:id", (req, resp) => {
         return
     }
 
-    const video = videos.filter( (video) => video.id === +videoId)
+    const video = db.videos.filter( (video) => video.id === +videoId)
 
     if (video.length === 0){
         resp
@@ -70,9 +70,9 @@ app.delete(SETTINGS.BASE_URL + "videos/:id", (req, resp) =>{
         return;
     }
 
-    for(let i = 0; i < videos.length; i++){
-        if ( +videoId === videos[i].id){
-            video = videos.splice(i, 1);
+    for(let i = 0; i < db.videos.length; i++){
+        if ( +videoId === db.videos[i].id){
+            video = db.videos.splice(i, 1);
             break;
         }
     }
@@ -105,7 +105,7 @@ app.put(SETTINGS.BASE_URL + "videos/:id", (req, resp) =>{
         return;
     }
 
-    const video = videos.filter( (video) => video.id === videoId)
+    const video = db.videos.filter( (video) => video.id === videoId)
 
     if (video.length === 0){
         resp
@@ -131,11 +131,18 @@ app.post(SETTINGS.BASE_URL + "videos/", (req, resp) =>{
         return;
     }
 
-    const video = bodyModule.getNewVideoRecord(videos);
+    const video = bodyModule.getNewVideoRecord(db.videos);
     // @ts-ignore
     videos.push(video);
 
     resp
-        .status(204)
+        .status(201)
         .json(video)
+})
+
+app.delete(SETTINGS.BASE_URL + "testing/all-data", (req, resp) =>{
+    db.videos = [];
+    resp
+        .sendStatus(204)
+
 })
