@@ -71,7 +71,7 @@ app.delete(SETTINGS.BASE_URL + "videos/:id", (req, resp) =>{
 
     const video = db.videos.filter( (video) => video.id === +videoId)
 
-    if (!video){
+    if (video.length === 0){
         resp
             .sendStatus(404)
         return;
