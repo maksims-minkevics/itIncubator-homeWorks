@@ -2,5 +2,5 @@
   "version": 2,
   "name": "itIncubator-homeWorks",
   "builds": [{"src": "src/index.ts", "use" : "@vercel/node"}],
-  "routes": [{"src": "/hometask_01/api/(.*)", "dest" : "src/index.ts"}]
+  "routes": [{"src": "/(.*)", "dest" : "src/index.ts"}]
 }
