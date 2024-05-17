@@ -42,15 +42,16 @@ app.get(SETTINGS.BASE_URL + "videos/:id", (req, resp) => {
 
     if (isNaN(videoId)){
         resp
-            .status(404);
-        return
+            .sendStatus(404)
+        return;
     }
 
     const video = db.videos.filter( (video) => video.id === +videoId)
 
     if (video.length === 0){
+        console.log(video.length)
         resp
-            .status(404)
+            .sendStatus(404)
         return;
     }
 
@@ -62,26 +63,21 @@ app.get(SETTINGS.BASE_URL + "videos/:id", (req, resp) => {
 
 app.delete(SETTINGS.BASE_URL + "videos/:id", (req, resp) =>{
     const videoId = +req.params.id;
-    let video = undefined;
 
     if (isNaN(videoId)){
         resp
-            .status(404)
+            .sendStatus(404)
         return;
     }
 
-    for(let i = 0; i < db.videos.length; i++){
-        if ( +videoId === db.videos[i].id){
-            video = db.videos.splice(i, 1);
-            break;
-        }
-    }
+    const video = db.videos.filter( (video) => video.id === +videoId)
 
     if (!video){
         resp
             .sendStatus(404)
         return;
     }
+    db.videos.splice(video[0].id,1);
     resp
         .sendStatus(204)
 
@@ -120,7 +116,6 @@ app.put(SETTINGS.BASE_URL + "videos/:id", (req, resp) =>{
 })
 
 app.post(SETTINGS.BASE_URL + "videos/", (req, resp) =>{
-
     const bodyModule = new BodyModule(req.body)
     const failedFields = bodyModule.validate()
 
@@ -133,7 +128,7 @@ app.post(SETTINGS.BASE_URL + "videos/", (req, resp) =>{
 
     const video = bodyModule.getNewVideoRecord(db.videos);
     // @ts-ignore
-    videos.push(video);
+    db.videos.push(video);
 
     resp
         .status(201)
