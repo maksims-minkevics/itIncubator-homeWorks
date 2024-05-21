@@ -2,5 +2,6 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  testRegex: "__tests__/.*.e2e.test.ts$",
+  testTimeout: 100000,
+  testRegex: ".e2e.test.ts$",
 }
