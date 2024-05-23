@@ -10,27 +10,6 @@ export const db = createDb();
 const jsonBodyMiddleWare = express.json()
 app.use(jsonBodyMiddleWare)
 
-type Request = {
-    "id": number,
-    "title": "string",
-    "author": "string",
-    "canBeDownloaded": boolean,
-    "minAgeRestriction": number ,
-    "createdAt": Date,
-    "publicationDate": Date,
-    "availableResolutions": []
-};
-type Response = {
-            "id": number,
-            "title": "string",
-            "author": "string",
-            "canBeDownloaded": boolean,
-            "minAgeRestriction": number,
-            "createdAt": Date,
-            "publicationDate": Date,
-            "availableResolutions": []
-};
-
 app.get(SETTINGS.BASE_URL + "videos/", (req, resp) => {
     resp
         .status(200)
@@ -42,7 +21,7 @@ app.get(SETTINGS.BASE_URL + "videos/:id", (req, resp) => {
 
     if (isNaN(videoId)){
         resp
-            .sendStatus(404)
+            .sendStatus(400)
         return;
     }
 
@@ -65,7 +44,7 @@ app.delete(SETTINGS.BASE_URL + "videos/:id", (req, resp) =>{
 
     if (isNaN(videoId)){
         resp
-            .sendStatus(404)
+            .sendStatus(400)
         return;
     }
 
@@ -87,7 +66,7 @@ app.put(SETTINGS.BASE_URL + "videos/:id", (req, resp) =>{
 
     if (isNaN(videoId)){
         resp
-            .sendStatus(404)
+            .sendStatus(400)
         return;
     }
 

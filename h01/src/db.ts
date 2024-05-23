@@ -1,3 +1,4 @@
+import {Video} from "./ObjectTypes";
 export  const createDb = () => {
     return {
         videos: [
@@ -9,7 +10,7 @@ export  const createDb = () => {
                 minAgeRestriction: null,
                 createdAt: "2024-05-17T21:23:49.724Z",
                 publicationDate: new Date().toISOString(),
-                availableResolutions: ["P144", "P240", "P360", "P480"]
+                availableResolutions: ["P144", "P240", "P360", "P480"],
             },
             {
                 id: 1,
@@ -19,7 +20,7 @@ export  const createDb = () => {
                 minAgeRestriction: null,
                 createdAt: new Date().toISOString(),
                 publicationDate: (new Date().toISOString()),
-                availableResolutions: ["P144", "P240", "P360", "P480", "P720", "P1080", "P1440", "P2160"]
+                availableResolutions: ["P144", "P240", "P360", "P480", "P720", "P1080", "P1440", "P2160"],
             },
             {
                 id: 2,
@@ -29,7 +30,7 @@ export  const createDb = () => {
                 minAgeRestriction: 12,
                 createdAt: new Date().toISOString(),
                 publicationDate: new Date().toISOString(),
-                availableResolutions: ["P144", "P240", "P360", "P480", "P720", "P1080", "P1440", "P2160"]
+                availableResolutions: ["P144", "P240", "P360", "P480", "P720", "P1080", "P1440", "P2160"],
             }
 
         ]
