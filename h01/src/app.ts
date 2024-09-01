@@ -1,7 +1,7 @@
 import express from 'express';
 import {SETTINGS} from "./settings";
 import {createDb} from "./db";
-import {BodyModule} from "./bodyModule"
+import {VideoDataValidation} from "./dataValidations/videoDataValidation"
 import {testingRouter} from "./routes/testing-router";
 import {videoRouter} from "./routes/video-router";
 
