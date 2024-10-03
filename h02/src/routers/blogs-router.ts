@@ -1,0 +1,94 @@
+import {Router} from "express";
+import {blogDbHandlerClass} from "../db-handlers/blogs-db-handler";
+export const blogRouter = Router({});
+const blogDbHandler = new blogDbHandlerClass();
+
+blogRouter.get("/", (req, resp) => {
+    resp
+        .status(200)
+        .json(blogDbHandler.findBlog())
+})
+blogRouter.get("/:id", (req, resp) => {
+    const blogId = req.params.id;
+
+    if (!blogId){
+        resp
+            .sendStatus(400)
+        return;
+    }
+
+    const blog = blogDbHandler.findBlog(blogId);
+
+    if (!blog){
+        resp
+            .sendStatus(404)
+        return;
+    }
+
+    return resp
+        .status(200)
+        .json(blog)
+
+})
+blogRouter.delete("/:id", (req, resp) =>{
+    const blogId = req.params.id;
+
+    if (!blogId){
+        resp
+            .sendStatus(400)
+        return;
+    }
+    const deletedBlogId = blogDbHandler.deleteblog(blogId);
+
+    if (!deletedBlogId){
+        resp
+            .sendStatus(404)
+        return;
+    }
+    resp
+        .status(200)
+        .json(deletedBlogId)
+
+})
+blogRouter.put("/:id", (req, resp) =>{
+    const blogId = req.params.id;
+
+    if (!blogId){
+        resp
+            .sendStatus(400)
+        return;
+    }
+    const updatedBlog = blogDbHandler.updateBlog(blogId, req.body);
+
+    if(Array.isArray(updatedBlog)){
+        resp
+            .status(400)
+            .json({"errorsMessages": updatedBlog})
+        return;
+
+    }
+
+    if (!updatedBlog){
+        resp
+            .sendStatus(404)
+        return;
+    }
+    resp
+        .status(200)
+        .json(updatedBlog)
+
+})
+blogRouter.post("/", (req, resp) =>{
+    const blog = blogDbHandler.createBlog(req.body);
+
+    if (Array.isArray(blog)){
+        resp
+            .status(400)
+            .json({"errorsMessages": blog})
+        return;
+    }
+
+    resp
+        .status(201)
+        .json(blog)
+})
