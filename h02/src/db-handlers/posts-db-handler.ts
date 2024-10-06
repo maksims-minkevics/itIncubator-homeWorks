@@ -1,5 +1,7 @@
 import {PostViewModel, PostInputModel} from "../object-types";
 import {postsDb} from "../dbs/posts-db";
+import {blogDbHandlerClass} from "./blogs-db-handler";
+const blogDbHandler = new blogDbHandlerClass();
 class postDbHandlerClass {
 
     findPost(id: string): PostViewModel;
@@ -16,14 +18,14 @@ class postDbHandlerClass {
 
     createPost(post: PostInputModel): PostViewModel{
         const newPost : PostViewModel = {
-            id: postsDb.dbRows.length.toString(),
+            id: (1+postsDb.dbRows.length).toString(),
             title: post.title,
             shortDescription: post.shortDescription,
             content: post.content || "",
             blogId: post.blogId,
-            blogName: ""// TO DO
+            blogName: blogDbHandler.findBlog(post.blogId).name,
         }
-
+        postsDb.dbRows.push(newPost)
         return newPost;
     };
 
@@ -60,6 +62,13 @@ class postDbHandlerClass {
     }
     getPostEntryIndex(post : PostViewModel){
         return postsDb.dbRows.findIndex(obj => obj.id === post.id);
+    }
+    checkId(blogId: string){
+        const blog = blogDbHandler.findBlog(blogId)
+        if(!blog){
+            throw new Error('No such blog id');
+        }
+        return true
     }
     dropDb(){
         postsDb.dbRows = [];

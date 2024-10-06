@@ -1,5 +1,6 @@
-import {blogDataValidatorClass} from "../validations/blog-validation";
 import {BlogViewModel, BlogError} from "../object-types";
+import {blogsDb} from "../dbs/blogs-db";
+import {postsDb} from "../dbs/posts-db";
 class blogDbHandlerClass {
 
     findBlog(id: string): BlogViewModel;
@@ -7,26 +8,22 @@ class blogDbHandlerClass {
     findBlog(id?: string): BlogViewModel | BlogViewModel[] | undefined {
 
         if (id) {
-            return blogs.filter(blog => blog.id === id)[0];
+            return blogsDb.dbRows.filter(blog => blog.id === id)[0];
         } else {
-            return blogs
+            return blogsDb.dbRows
         }
 
     };
 
     createBlog(blog: BlogViewModel): BlogViewModel | BlogError[] {
-        const validationErrors = new blogDataValidatorClass(blog);
-        validationErrors.validate();
-        if (validationErrors.failedValidations.length != 0) {
-            return validationErrors.failedValidations;
-        }
+
         const newblog : BlogViewModel = {
-            id: blogs.length.toString(),
+            id: (1+blogsDb.dbRows.length).toString(),
             name: blog.name,
             description: blog.description,
             websiteUrl: blog.websiteUrl || "",
         }
-        blogs.push(newblog);
+        blogsDb.dbRows.push(newblog);
         return newblog;
     };
 
@@ -35,12 +32,6 @@ class blogDbHandlerClass {
             return undefined;
         }
 
-        const validationErrors = new blogDataValidatorClass(fieldsToUpdate);
-        validationErrors.validate();
-
-        if (validationErrors.failedValidations.length) {
-            return validationErrors.failedValidations;
-        }
         const blogToUpdate = this.findBlog(id);
         if (!blogToUpdate) {
             return undefined;
@@ -64,15 +55,17 @@ class blogDbHandlerClass {
         if (!blogToDelete) {
             return undefined;
         }
-        blogs.splice(this.getBlogEntryIndex(blogToDelete), 1);
+        blogsDb.dbRows.splice(this.getBlogEntryIndex(blogToDelete), 1);
         return id;
     }
 
     getBlogEntryIndex(blog: BlogViewModel){
-        return blogs.findIndex(obj => obj.id === blog.id);
+        return blogsDb.dbRows.findIndex(obj => obj.id === blog.id);
     }
+
     dropDb(){
-        return blogs = [];
+        blogsDb.dbRows = [];
     }
+
 }
 export {blogDbHandlerClass}

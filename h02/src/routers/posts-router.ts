@@ -1,5 +1,9 @@
-import {Router} from "express";
 import {postDbHandlerClass} from "../db-handlers/posts-db-handler";
+import {validationResult} from "express-validator";
+import {Request, Response, Router} from "express";
+import {postValidation} from "../validations/post-validation";
+import {validationParser} from "../validations/validation-parser";
+import {authorization} from "../validations/authorization-validation";
 export const postRouter = Router({});
 const postDbHandler = new postDbHandlerClass();
 
@@ -30,7 +34,9 @@ postRouter.get("/:id", (req, resp) => {
         .json(post)
 
 })
-postRouter.delete("/:id", (req, resp) =>{
+postRouter.delete("/:id",
+    authorization,
+    (req, resp) =>{
     const postId = req.params.id;
 
     if (!postId){
@@ -50,7 +56,11 @@ postRouter.delete("/:id", (req, resp) =>{
         .json(deletedPostgId)
 
 })
-postRouter.put("/:id", (req, resp) =>{
+postRouter.put("/:id",
+    authorization,
+    postValidation,
+    validationParser,
+    (req: Request, resp: Response) =>{
     const postId = req.params.id;
 
     if (!postId){
@@ -59,14 +69,6 @@ postRouter.put("/:id", (req, resp) =>{
         return;
     }
     const updatedPost = postDbHandler.updatePost(postId, req.body);
-
-    if(Array.isArray(updatedPost)){
-        resp
-            .status(400)
-            .json({"errorsMessages": updatedPost})
-        return;
-
-    }
 
     if (!updatedPost){
         resp
@@ -78,16 +80,12 @@ postRouter.put("/:id", (req, resp) =>{
         .json(updatedPost)
 
 })
-postRouter.post("/", (req, resp) =>{
+postRouter.post("/",
+    authorization,
+    postValidation,
+    validationParser,
+    (req: Request, resp: Response) =>{
     const post = postDbHandler.createPost(req.body);
-
-    if (Array.isArray(post)){
-        resp
-            .status(400)
-            .json({"errorsMessages": post})
-        return;
-    }
-
     resp
         .status(201)
         .json(post)

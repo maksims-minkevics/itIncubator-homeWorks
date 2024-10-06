@@ -7,6 +7,8 @@ export const SETTINGS = {
         OK: 200,
         NO_CONTENT: 204,
         BAD_REQUEST: 400
-    }
+    },
+    SUPER_SECRET_NAME: "admin",
+    SUPER_SECRET_PSWRD: "qwerty",
 };
 

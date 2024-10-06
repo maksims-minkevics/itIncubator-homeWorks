@@ -35,3 +35,7 @@ export type PostError = {
 export type PostsDb = {
     dbRows : PostViewModel[],
 };
+
+export type BlogDb = {
+    dbRows : BlogViewModel[],
+};

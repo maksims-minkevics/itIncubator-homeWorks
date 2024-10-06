@@ -1,5 +1,8 @@
-import {Router} from "express";
+import {Router, Response, Request} from "express";
 import {blogDbHandlerClass} from "../db-handlers/blogs-db-handler";
+import {blogValidation} from "../validations/blog-validation";
+import {validationParser} from "../validations/validation-parser";
+import {authorization} from "../validations/authorization-validation";
 export const blogRouter = Router({});
 const blogDbHandler = new blogDbHandlerClass();
 
@@ -30,7 +33,9 @@ blogRouter.get("/:id", (req, resp) => {
         .json(blog)
 
 })
-blogRouter.delete("/:id", (req, resp) =>{
+blogRouter.delete("/:id",
+    authorization,
+    (req, resp) =>{
     const blogId = req.params.id;
 
     if (!blogId){
@@ -50,7 +55,11 @@ blogRouter.delete("/:id", (req, resp) =>{
         .json(deletedBlogId)
 
 })
-blogRouter.put("/:id", (req, resp) =>{
+blogRouter.put("/:id",
+    authorization,
+    blogValidation,
+    validationParser,
+    (req: Request, resp: Response) =>{
     const blogId = req.params.id;
 
     if (!blogId){
@@ -78,7 +87,11 @@ blogRouter.put("/:id", (req, resp) =>{
         .json(updatedBlog)
 
 })
-blogRouter.post("/", (req, resp) =>{
+blogRouter.post("/",
+    authorization,
+    blogValidation,
+    validationParser,
+    (req: Request, resp: Response) =>{
     const blog = blogDbHandler.createBlog(req.body);
 
     if (Array.isArray(blog)){
