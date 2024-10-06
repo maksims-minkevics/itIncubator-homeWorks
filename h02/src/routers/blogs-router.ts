@@ -51,8 +51,7 @@ blogRouter.delete("/:id",
         return;
     }
     resp
-        .status(200)
-        .json(deletedBlogId)
+        .sendStatus(204)
 
 })
 blogRouter.put("/:id",
@@ -83,8 +82,7 @@ blogRouter.put("/:id",
         return;
     }
     resp
-        .status(200)
-        .json(updatedBlog)
+        .sendStatus(204)
 
 })
 blogRouter.post("/",

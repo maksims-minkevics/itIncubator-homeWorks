@@ -52,8 +52,7 @@ postRouter.delete("/:id",
         return;
     }
     resp
-        .status(200)
-        .json(deletedPostgId)
+        .sendStatus(204)
 
 })
 postRouter.put("/:id",
@@ -76,8 +75,7 @@ postRouter.put("/:id",
         return;
     }
     resp
-        .status(200)
-        .json(updatedPost)
+        .sendStatus(204)
 
 })
 postRouter.post("/",

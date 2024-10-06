@@ -1,11 +1,22 @@
 import {NextFunction, Request, Response} from "express";
-import {validationResult} from "express-validator";
+import {validationResult, ResultFactory} from "express-validator";
+const customValidator: ResultFactory<string> = validationResult.withDefaults({
+    formatter: (error) => {
+        return {
+            message: error.msg as string,
+            field: error.path as string,
+        };
+    }
+});
+
 export const validationParser = (req: Request, resp: Response, next: NextFunction) =>{
-    const errors = validationResult(req);
+
+
+    const errors = customValidator(req);
     if (!errors.isEmpty()){
         resp
             .status(400)
-            .json(validationResult(req).array({ onlyFirstError: true }))
+            .json({errorsMessages: errors.array({ onlyFirstError: true })})
         return;
     }
     next();
