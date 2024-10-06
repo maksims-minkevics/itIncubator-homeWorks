@@ -2,6 +2,7 @@ import {checkSchema} from "express-validator";
 
 export const blogValidation = checkSchema({
     name: {
+        trim: true,
         isLength: {
             options: {
                 min: 1,
@@ -10,6 +11,7 @@ export const blogValidation = checkSchema({
         isString: true
     },
     description: {
+        trim: true,
         isLength:{
             options: {
                 min: 1,
@@ -19,6 +21,7 @@ export const blogValidation = checkSchema({
         isString: true
     },
     websiteUrl: {
+        trim: true,
         isLength: {
             options: {
                 min: 1,

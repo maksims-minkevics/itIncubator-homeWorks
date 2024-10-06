@@ -3,6 +3,7 @@ import {postDbHandlerClass} from "../db-handlers/posts-db-handler";
 const posDbHandler = new postDbHandlerClass();
 export const postValidation = checkSchema({
     title: {
+        trim: true,
         isLength: {
             options: {
                 min: 1,
@@ -12,6 +13,7 @@ export const postValidation = checkSchema({
         isString: true
     },
     shortDescription: {
+        trim: true,
         isLength:{
             options: {
                 min: 1,
@@ -21,6 +23,7 @@ export const postValidation = checkSchema({
         isString: true
     },
     content: {
+        trim: true,
         isLength: {
             options: {
                 min: 1,
@@ -30,6 +33,7 @@ export const postValidation = checkSchema({
         isString: true
     },
     blogId: {
+        trim: true,
         isLength: {
             options: {
                 min: 1
@@ -40,4 +44,4 @@ export const postValidation = checkSchema({
             options: posDbHandler.checkId
         }
     }
-}, ['body']);
+});
