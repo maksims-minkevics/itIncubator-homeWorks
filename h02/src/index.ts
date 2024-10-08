@@ -1,6 +1,5 @@
 import {app} from "./app";
-import {SETTINGS} from "./settings";
 
-app.listen(SETTINGS.PORT, () =>{
-    console.log("started on -- " + SETTINGS.PORT)
+app.listen(process.env.PORT, () =>{
+    console.log("started on -- " + process.env.PORT)
 })
