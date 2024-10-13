@@ -1,3 +1,5 @@
+import dotenv from 'dotenv'
+export const dotEnv = dotenv.config
 export const SETTINGS = {
     RESP_CODES: {
         NOT_FOUND_ERR: 404,
@@ -6,6 +8,5 @@ export const SETTINGS = {
         NO_CONTENT: 204,
         BAD_REQUEST: 400
     },
-    DB_KEY: "pgS1fKrAonlQas5H",
 };
 
