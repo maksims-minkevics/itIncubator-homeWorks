@@ -4,7 +4,7 @@ import {BlogViewModel, PostViewModel} from "../object-types";
 
 dotenv.config()
 const mongoURI: string = process.env.MONGO_URL || "mongodb://localhost:27017";
-const dbClient = new MongoClient("mongodb+srv://user_test:admin@blogerplatform.x4yv8.mongodb.net/?retryWrites=true&w=majority&appName=BlogerPlatform");
+const dbClient = new MongoClient(mongoURI);
 const blogerPlatform = dbClient.db("BlogerPlatform");
 export const postsCollection = blogerPlatform.collection<PostViewModel>("Posts");
 export const blogCollection = blogerPlatform.collection<BlogViewModel>("Blogs")

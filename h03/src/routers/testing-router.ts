@@ -5,7 +5,7 @@ import {postDbHandlerClass} from "../db-handlers/posts-db-handler";
 
 export const testingRouter = Router({});
 
-testingRouter.delete("testing/all-data", (req, resp) =>{
+testingRouter.delete("/all-data", (req, resp) =>{
     const blogDbHandler = new blogDbHandlerClass();
     const postDbHandler = new postDbHandlerClass();
     blogDbHandler.dropDb();
