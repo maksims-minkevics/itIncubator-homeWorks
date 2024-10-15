@@ -4,10 +4,10 @@ import {blogCollection, dbIndexes, postsCollection} from "./db";
 const blogDbHandler = new blogDbHandlerClass();
 class postDbHandlerClass {
     async findPostbyId(id: string): Promise<PostViewModel | null> {
-        return await postsCollection.findOne({id: id})
+        return await postsCollection.findOne({id: id}, {projection: { _id: 0 } })
     };
     async getAllPosts(): Promise<PostViewModel[] | null> {
-        return await postsCollection.find().toArray()
+        return await postsCollection.find({}, {projection: { _id: 0 } }).toArray()
     };
 
     async createPost(post: PostInputModel): Promise<PostViewModel>{

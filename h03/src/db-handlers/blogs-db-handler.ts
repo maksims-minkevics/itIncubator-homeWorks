@@ -4,10 +4,10 @@ import {dbIndexes} from "./db";
 class blogDbHandlerClass {
 
     async findBlogbyId(id?: string): Promise<BlogViewModel | null> {
-        return await blogCollection.findOne({id: id})
+        return await blogCollection.findOne({id: id},{ projection: { _id: 0 } })
     };
     async getAllBlogs(): Promise<BlogViewModel[] | null> {
-        return await blogCollection.find().toArray()
+        return await blogCollection.find({},{ projection: { _id: 0 } }).toArray()
     };
     async createBlog(blog: BlogInputModel): Promise<BlogViewModel> {
 
