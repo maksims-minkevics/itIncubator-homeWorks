@@ -1,5 +1,5 @@
 import {BlogViewModel, BlogInputModel} from "../object-types";
-import {blogCollection} from "./db";
+import {blogCollection, postsCollection} from "./db";
 import {dbIndexes} from "./db";
 class blogDbHandlerClass {
 
@@ -12,14 +12,14 @@ class blogDbHandlerClass {
     async createBlog(blog: BlogInputModel): Promise<BlogViewModel> {
 
         const newBlog:BlogViewModel = {
-            id: dbIndexes.BLOG_INDEX.toString(),
+            id: (await blogCollection.countDocuments() + 1).toString(),
             name: blog.name,
             description: blog.description,
             websiteUrl: blog.websiteUrl || "",
             isMembership: false,
             createdAt: new Date().toISOString()
         };
-        dbIndexes.BLOG_INDEX +=1;
+        //dbIndexes.BLOG_INDEX +=1;
         const result = await blogCollection.insertOne(newBlog);
         return newBlog;
     };

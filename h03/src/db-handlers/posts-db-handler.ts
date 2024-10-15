@@ -1,6 +1,6 @@
 import {PostViewModel, PostInputModel, BlogViewModel} from "../object-types";
 import {blogDbHandlerClass} from "./blogs-db-handler";
-import {dbIndexes, postsCollection} from "./db";
+import {blogCollection, dbIndexes, postsCollection} from "./db";
 const blogDbHandler = new blogDbHandlerClass();
 class postDbHandlerClass {
     async findPostbyId(id: string): Promise<PostViewModel | null> {
@@ -12,7 +12,7 @@ class postDbHandlerClass {
 
     async createPost(post: PostInputModel): Promise<PostViewModel>{
         const newPost : PostViewModel = {
-            id: dbIndexes.POST_INDEX.toString(),
+            id: (await postsCollection.countDocuments() + 1).toString(),
             title: post.title,
             shortDescription: post.shortDescription,
             content: post.content || "",
@@ -20,7 +20,7 @@ class postDbHandlerClass {
             blogName: (await blogDbHandler.findBlogbyId(post.blogId))?.name || "",
             createdAt: new Date().toISOString()
         }
-        dbIndexes.POST_INDEX +=1;
+        //dbIndexes.POST_INDEX +=1;
         await postsCollection.insertOne(newPost);
         return newPost;
     };
