@@ -1,7 +1,6 @@
 import {PostViewModel, PostInputModel, BlogViewModel} from "../object-types";
-import {postsDb} from "../dbs/posts-db";
 import {blogDbHandlerClass} from "./blogs-db-handler";
-import {blogCollection, postsCollection} from "./db";
+import {dbIndexes, postsCollection} from "./db";
 const blogDbHandler = new blogDbHandlerClass();
 class postDbHandlerClass {
     async findPostbyId(id: string): Promise<PostViewModel | null> {
@@ -11,21 +10,23 @@ class postDbHandlerClass {
         return await postsCollection.find().toArray()
     };
 
-    async createPost(post: PostViewModel): Promise<PostViewModel>{
-        const newPost : any = {
+    async createPost(post: PostInputModel): Promise<PostViewModel>{
+        const newPost : PostViewModel = {
+            id: dbIndexes.POST_INDEX.toString(),
             title: post.title,
             shortDescription: post.shortDescription,
             content: post.content || "",
             blogId: post.blogId,
             blogName: (await blogDbHandler.findBlogbyId(post.blogId))?.name || "",
+            createdAt: new Date().toISOString()
         }
-        const result:any = await postsCollection.insertOne(newPost);
-        newPost._id = result._id
+        dbIndexes.POST_INDEX +=1;
+        await postsCollection.insertOne(newPost);
         return newPost;
     };
 
     async updatePost(id: string, fieldsToUpdate: PostInputModel): Promise<boolean>{
-        return (await postsCollection.updateOne({id:id}, fieldsToUpdate)).matchedCount !== 0
+        return (await postsCollection.updateOne({id:id}, {$set: fieldsToUpdate})).matchedCount !== 0
     }
 
     async deletePost(id: string): Promise<boolean> {

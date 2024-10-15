@@ -1,5 +1,6 @@
-import {BlogViewModel, BlogError, BlogInputModel} from "../object-types";
+import {BlogViewModel, BlogInputModel} from "../object-types";
 import {blogCollection} from "./db";
+import {dbIndexes} from "./db";
 class blogDbHandlerClass {
 
     async findBlogbyId(id?: string): Promise<BlogViewModel | null> {
@@ -8,21 +9,23 @@ class blogDbHandlerClass {
     async getAllBlogs(): Promise<BlogViewModel[] | null> {
         return await blogCollection.find().toArray()
     };
-    async createBlog(blog: BlogViewModel): Promise<BlogViewModel | BlogError[]> {
-        const result = await blogCollection.insertOne(blog);
-        
-        return {
-            id: result.insertedId.toString(),
+    async createBlog(blog: BlogInputModel): Promise<BlogViewModel> {
+
+        const newBlog:BlogViewModel = {
+            id: dbIndexes.BLOG_INDEX.toString(),
             name: blog.name,
             description: blog.description,
             websiteUrl: blog.websiteUrl || "",
+            isMembership: false,
+            createdAt: new Date().toISOString()
         };
+        dbIndexes.BLOG_INDEX +=1;
+        const result = await blogCollection.insertOne(newBlog);
+        return newBlog;
     };
     async updateBlog(id: string, fieldsToUpdate: BlogViewModel): Promise<boolean | null>{
-        console.log(id)
-        console.log(await blogCollection.findOne({id:id}))
         const updatedBlog = await blogCollection.updateOne(
-                                                                        {id:id},{$set:{fieldsToUpdate}});
+                                                                        {id:id},{$set:fieldsToUpdate});
         return updatedBlog.matchedCount !==0
     };
     async deleteblog(id: string): Promise<boolean> {

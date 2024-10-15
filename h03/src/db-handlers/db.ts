@@ -3,22 +3,20 @@ import {MongoClient, ServerApiVersion} from 'mongodb'
 import {BlogViewModel, PostViewModel} from "../object-types";
 
 dotenv.config()
-
-const mongoURI: string = "mongodb://localhost:27017"
-const dbClient = new MongoClient(mongoURI, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
-});
+const mongoURI: string = process.env.MONGO_URL || "mongodb://localhost:27017";
+const dbClient = new MongoClient("mongodb+srv://user_test:admin@blogerplatform.x4yv8.mongodb.net/?retryWrites=true&w=majority&appName=BlogerPlatform");
 const blogerPlatform = dbClient.db("BlogerPlatform");
 export const postsCollection = blogerPlatform.collection<PostViewModel>("Posts");
 export const blogCollection = blogerPlatform.collection<BlogViewModel>("Blogs")
 export async function dbRun(){
     try {
         await dbClient.connect();
-        await dbClient.db("admin").command({ ping: 1 });
+        await dbClient.db("BlogerPlatform").command({ ping: 1 });
+        const postCount = await postsCollection.countDocuments();
+        const blogCount = await blogCollection.countDocuments();
+
+        dbIndexes.POST_INDEX = postCount;
+        dbIndexes.BLOG_INDEX = blogCount;
         console.log("connected to DB");
     }
     catch (e) {
@@ -26,3 +24,8 @@ export async function dbRun(){
         await dbClient.close();
     }
 }
+
+export const dbIndexes = {
+    POST_INDEX: 0,
+    BLOG_INDEX: 0
+};

@@ -2,7 +2,9 @@ export type BlogViewModel = {
     id: string,
     name: string,
     description: string,
-    websiteUrl: string
+    websiteUrl: string,
+    createdAt: string,
+    isMembership: boolean
 };
 export type BlogInputModel = {
     name: string,
@@ -15,27 +17,12 @@ export type PostViewModel = {
     shortDescription: string,
     content: string,
     blogId: string,
-    blogName: string
+    blogName: string,
+    createdAt: string
 };
 export type PostInputModel = {
     title: string,
     shortDescription: string,
     content: string,
     blogId: string,
-};
-export type BlogError = {
-    message : string,
-    field : string,
-};
-export type PostError = {
-    message : string,
-    field : string,
-};
-
-export type PostsDb = {
-    dbRows : PostViewModel[],
-};
-
-export type BlogDb = {
-    dbRows : BlogViewModel[],
 };

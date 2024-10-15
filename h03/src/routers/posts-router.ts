@@ -1,5 +1,4 @@
 import {postDbHandlerClass} from "../db-handlers/posts-db-handler";
-import {validationResult} from "express-validator";
 import {Request, Response, Router} from "express";
 import {postValidation} from "../validations/post-validation";
 import {validationParser} from "../validations/validation-parser";
