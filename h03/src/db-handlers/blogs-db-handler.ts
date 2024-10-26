@@ -10,18 +10,27 @@ class blogDbHandlerClass {
         return await blogCollection.find({},{ projection: { _id: 0 } }).toArray()
     };
     async createBlog(blog: BlogInputModel): Promise<BlogViewModel> {
-
+        const createdAt = new Date().toISOString();
+        const newId = (await blogCollection.countDocuments() + 1).toString()
         const newBlog:BlogViewModel = {
-            id: (await blogCollection.countDocuments() + 1).toString(),
+            id: newId,
             name: blog.name,
             description: blog.description,
             websiteUrl: blog.websiteUrl || "",
             isMembership: false,
-            createdAt: new Date().toISOString()
+            createdAt: createdAt
         };
         //dbIndexes.BLOG_INDEX +=1;
-        const result = await blogCollection.insertOne(newBlog);
-        return newBlog;
+        await blogCollection.insertOne(newBlog);
+        const result:BlogViewModel = {
+            id: newId,
+            name: blog.name,
+            description: blog.description,
+            websiteUrl: blog.websiteUrl || "",
+            isMembership: false,
+            createdAt: createdAt
+        };
+        return result;
     };
     async updateBlog(id: string, fieldsToUpdate: BlogViewModel): Promise<boolean | null>{
         const updatedBlog = await blogCollection.updateOne(

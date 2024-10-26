@@ -11,18 +11,30 @@ class postDbHandlerClass {
     };
 
     async createPost(post: PostInputModel): Promise<PostViewModel>{
+        const createdAt = new Date().toISOString();
+        const newId = (await postsCollection.countDocuments() + 1).toString()
+        const blogName = (await blogDbHandler.findBlogbyId(post.blogId))?.name || ""
         const newPost : PostViewModel = {
-            id: (await postsCollection.countDocuments() + 1).toString(),
+            id: newId,
             title: post.title,
             shortDescription: post.shortDescription,
             content: post.content || "",
             blogId: post.blogId,
-            blogName: (await blogDbHandler.findBlogbyId(post.blogId))?.name || "",
-            createdAt: new Date().toISOString()
+            blogName: blogName,
+            createdAt: createdAt
         }
         //dbIndexes.POST_INDEX +=1;
         await postsCollection.insertOne(newPost);
-        return newPost;
+        const result : PostViewModel = {
+            id: newId,
+            title: post.title,
+            shortDescription: post.shortDescription,
+            content: post.content || "",
+            blogId: post.blogId,
+            blogName: blogName,
+            createdAt: createdAt
+        }
+        return result;
     };
 
     async updatePost(id: string, fieldsToUpdate: PostInputModel): Promise<boolean>{
