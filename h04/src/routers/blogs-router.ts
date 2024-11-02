@@ -4,7 +4,7 @@ import { blogValidation } from "../midlewares/validations/blog-validation";
 import { validationParser } from "../midlewares/validations/validation-parser";
 import { authorization } from "../midlewares/validations/authorization-validation";
 import { postDbHandlerClass } from "../db-handlers/posts-db-handler";
-import { postValidation } from "../midlewares/validations/post-validation";
+import {postValidation, queryIdValidation} from "../midlewares/validations/post-validation";
 import { blogIdExtander } from "../midlewares/extanders/blog-id-extander";
 import {getParamExtander} from "../midlewares/extanders/get-req-param-extander";
 
@@ -83,29 +83,19 @@ blogRouter.post("/", authorization, blogValidation, validationParser, async (req
 blogRouter.post(
     "/:id/posts",
     authorization,
+    queryIdValidation,
     blogIdExtander,
     getParamExtander,
     postValidation,
     validationParser,
     async (req: Request, resp: Response) => {
-        const blogId = req.body.blogId;
-        if (!blogId) {
-            resp.sendStatus(404);
-            return;
-        }
         const post = await postDbHandler.createPost(req.body);
         resp.status(201).json(post);
     }
 );
 
-blogRouter.get("/:id/posts", getParamExtander, async (req: Request, resp: Response) => {
+blogRouter.get("/:id/posts", queryIdValidation,getParamExtander, async (req: Request, resp: Response) => {
     const blogId = req.params.id;
-
-    if (!blogId) {
-        resp.sendStatus(404);
-        return;
-    }
-
     const posts = await postDbHandler.findPostsbyBlogId(
         blogId,
         req.query.sortBy as string,

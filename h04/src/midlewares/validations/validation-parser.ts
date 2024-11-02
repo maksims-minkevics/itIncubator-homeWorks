@@ -10,8 +10,6 @@ const customValidator: ResultFactory<any> = validationResult.withDefaults({
 });
 
 export const validationParser = (req: Request, resp: Response, next: NextFunction) =>{
-
-
     const errors = customValidator(req);
     if (!errors.isEmpty()){
         resp
