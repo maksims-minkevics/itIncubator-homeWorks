@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 dotenv.config();
 export const app = express()
 
+
 const jsonBodyMiddleWare = express.json()
 app.use(jsonBodyMiddleWare)
 app.use(process.env.BASE_URL + "testing", testingRouter);
