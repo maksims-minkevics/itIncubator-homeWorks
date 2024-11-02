@@ -10,7 +10,9 @@ class blogDbHandlerClass {
                       sortBy: string = "createdAt",
                       sortDirection: number = -1,
                       pageNumber: number = 1,
-                      pageSize: number = 10): Promise<GetResult> {
+                      pageSize: number = 10
+    ): Promise<GetResult> {
+        console.log(sortDirection)
         const matchStage = searchNameTerm
             ? { name: { $regex: searchNameTerm, $options: "i" } }
             : {};

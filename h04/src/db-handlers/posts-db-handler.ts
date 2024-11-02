@@ -6,8 +6,40 @@ class postDbHandlerClass {
     async findPostbyId(id: string): Promise<PostViewModel | null> {
         return await postsCollection.findOne({id: id}, {projection: { _id: 0 } })
     };
-    async findPostsbyBlogId(id: string): Promise<PostViewModel[] | null> {
-        return await postsCollection.find({blogId: id}, {projection: { _id: 0 } }).toArray()
+    async findPostsbyBlogId(
+        id: string,
+        sortBy: string = "createdAt",
+        sortDirection: number = -1,
+        pageNumber: number = 1,
+        pageSize: number = 10
+    ): Promise<GetResult> {
+        const DbResult = await postsCollection.aggregate([
+            { $match: {blogId: id} },
+            {
+                $facet: {
+
+                    data: [
+                        { $sort: { [sortBy]: sortDirection } },
+                        { $skip: (pageNumber - 1) * pageSize },
+                        { $limit: pageSize },
+                        { $project: { _id: 0 } }
+                    ],
+                    totalCount: [
+                        { $match: {blogId: id} },
+                        { $count: "count" }
+                    ]
+                }
+            }
+        ]).toArray();
+        const totalDocuments = DbResult[0].totalCount[0]?.count || 0;
+        return {
+            pagesCount: Math.ceil(totalDocuments / pageSize),
+            page: pageNumber,
+            pageSize,
+            totalCount: totalDocuments,
+            items: DbResult[0].data
+        };
+
     };
     async getAllPosts(
         sortBy: string = "createdAt",
