@@ -84,6 +84,7 @@ blogRouter.post(
     "/:id/posts",
     authorization,
     blogIdExtander,
+    getParamExtander,
     postValidation,
     validationParser,
     async (req: Request, resp: Response) => {
@@ -101,11 +102,17 @@ blogRouter.get("/:id/posts", getParamExtander, async (req: Request, resp: Respon
     const blogId = req.params.id;
 
     if (!blogId) {
-        resp.sendStatus(400);
+        resp.sendStatus(404);
         return;
     }
 
-    const posts = await postDbHandler.findPostsbyBlogId(blogId);
+    const posts = await postDbHandler.findPostsbyBlogId(
+        blogId,
+        req.query.sortBy as string,
+        +(req.query.sortDirection as string),
+        +(req.query.pageNumber as string),
+        +(req.query.pageSize as string)
+    );
 
     if (!posts) {
         resp.sendStatus(404);
