@@ -12,15 +12,14 @@ class blogDbHandlerClass {
                       pageNumber: number = 1,
                       pageSize: number = 10
     ): Promise<GetResult> {
-        console.log(sortDirection)
         const matchStage = searchNameTerm
             ? { name: { $regex: searchNameTerm, $options: "i" } }
             : {};
+        console.log(matchStage)
         const DbResult = await blogCollection.aggregate([
             { $match: matchStage },
             {
                 $facet: {
-
                     data: [
                         { $sort: { [sortBy]: sortDirection } },
                         { $skip: (pageNumber - 1) * pageSize },
@@ -28,13 +27,13 @@ class blogDbHandlerClass {
                         { $project: { _id: 0 } }
                     ],
                     totalCount: [
-                        { $match: matchStage },
                         { $count: "count" }
                     ]
                 }
             }
         ]).toArray();
         const totalDocuments = DbResult[0].totalCount[0]?.count || 0;
+        console.log(DbResult[0])
         return {
             pagesCount: Math.ceil(totalDocuments / pageSize),
             page: pageNumber,

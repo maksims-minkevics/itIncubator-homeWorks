@@ -1,26 +1,56 @@
+import {userDbHandlerClass} from "../db-handlers/user-db-handler";
+import {errorResult, UserInputModel, UserViewModel} from "../object-types";
+
 const bcrypt = require('bcrypt');
-export const UserHelper = {
-    hashPwrd: async (pswrd: string): Promise<string | undefined> => {
+const userDbHandler = new userDbHandlerClass();
+export const userHelper = {
+    dbHandler: new userDbHandlerClass(),
+
+    hashPwrd: async (pswrd: string): Promise<string> => {
         try {
             const SALT_ROUNDS = 10;
-            return await bcrypt.hash(pswrd, SALT_ROUNDS)            
+            return await bcrypt.hash(pswrd, SALT_ROUNDS);
+        } catch (e) {
+            console.error("Password hash failed", e);
+            throw new Error("Failed to hash password");
         }
-        catch (e) {
-            console.log("Password hash failed", e);
-            return
-        }
-
-
     },
 
-    compare: (pswrdHash: string, pawrd: string): boolean => {
+    compare: async (pswrdHash: string, pawrd: string): Promise<boolean> => {
         try {
-            return bcrypt.compare(pswrdHash, pawrd)
+            return await bcrypt.compare(pawrd, pswrdHash);
+        } catch (e) {
+            console.error("Password compare failed", e);
+            return false;
         }
-        catch (e) {
-            console.log("Password compare failed", e);
-            return false
-        }
-    }
+    },
 
-}
+    isUserEmailUnique: async (email: string): Promise<boolean> => {
+        const user = await userHelper.dbHandler.getUserByField('email', email);
+        return !user;
+    },
+
+    isUserLoginUnique: async (login: string): Promise<boolean> => {
+        const user = await userHelper.dbHandler.getUserByField('login', login);
+        return !user;
+    },
+
+    createNewUser: async (user: UserInputModel): Promise<UserViewModel | errorResult> => {
+        if (!await userHelper.isUserLoginUnique(user.login)) {
+            return {
+                errorsMessages: [{message: 'login should be unique',  field: 'login'}]
+            };
+        }
+
+        if (!await userHelper.isUserEmailUnique(user.email)) {
+            return {
+                errorsMessages: [{message: 'email should be unique', field: 'email'}]
+            };
+        }
+
+        const hashedPassword = await userHelper.hashPwrd(user.password);
+        user.password = hashedPassword;
+        const newUser = await userHelper.dbHandler.create(user);
+        return newUser;
+    },
+};

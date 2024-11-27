@@ -1,16 +1,25 @@
 import {GetResult, PostInputModel, PostViewModel, UserDbModel, UserInputModel, UserViewModel} from "../object-types";
 import {postsCollection, userCollection} from "./db";
-class UserDbHandlerClass {
-    async getAllUsers(
-        sortBy: string = "createdAt",
-        sortDirection: number = -1,
-        pageNumber: number = 1,
-        pageSize: number = 10): Promise<GetResult> {
+class userDbHandlerClass {
+    async getAllUsers({
+        sortBy = "createdAt",
+        sortDirection = -1,
+        pageNumber = 1,
+        pageSize = 10,
+        searchLoginTerm = "",
+        searchEmailTerm = ""
+        }): Promise<GetResult> {
+        const matchStage = searchLoginTerm || searchEmailTerm
+            ? { login: { $regex: searchLoginTerm, $options: "i" }, email: { $regex: searchEmailTerm, $options: "i" } }
+            : {};
+
         const DbResult = await userCollection.aggregate([
+            { $match: matchStage },
             {
                 $facet: {
 
                     data: [
+
                         {$sort: {[sortBy]: sortDirection}},
                         {$skip: (pageNumber - 1) * pageSize},
                         {$limit: pageSize},
@@ -31,6 +40,12 @@ class UserDbHandlerClass {
             items: DbResult[0].data
         };
     };
+
+    async getUserByField(fieldName: string, value: string): Promise<UserViewModel | null>{
+        const result = await userCollection.findOne({[fieldName]:value}, {projection: { _id: 0 }});
+        return result;
+
+    };
     async create(user: UserInputModel): Promise<UserViewModel>{
         const createdAt = new Date().toISOString();
         const newId = (await userCollection.countDocuments() + 1).toString()
@@ -43,15 +58,23 @@ class UserDbHandlerClass {
         }
 
         await userCollection.insertOne(newrecord);
-        const result : UserViewModel = {
-            id: newId,
-            createdAt: createdAt
-            id: newId,
-            login: string,
-            email: string,
-            createdAt: string,
-        }
+            const result : UserViewModel = {
+                id: newId,
+                createdAt: createdAt,
+                login: user.login,
+                email: user.email,
+            }
         return result;
     };
+
+    async deleteUser(id: string): Promise<boolean> {
+        return (await userCollection.deleteOne({id: id})).deletedCount === 1;
+    }
+
+    async dropDb(){
+        userCollection.drop();
+    }
+
+
 }
-export {UserDbHandlerClass}
+export {userDbHandlerClass}

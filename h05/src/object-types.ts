@@ -56,3 +56,12 @@ export type GetResult = {
     totalCount: number,
     items: BlogViewModel[] | PostViewModel[] | []
 };
+
+export type error = {
+    field: string
+    message: string
+};
+
+export type errorResult = {
+    errorsMessages: error[]
+};
