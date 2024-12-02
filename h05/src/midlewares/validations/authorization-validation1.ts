@@ -16,7 +16,7 @@ export const authValidation = checkSchema({
     }
 })
 
-export const authorization = [
+export const loginAuthorization = [
     ...authValidation,
     validationParser,
     async (req: Request, res: Response, next: NextFunction) => {

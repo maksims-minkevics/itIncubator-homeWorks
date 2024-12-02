@@ -25,6 +25,7 @@ userRouter.get("/",
 })
 
 userRouter.post("/",
+    authorization,
     userValidation,
     validationParser,
     async (req: Request, resp: Response) =>{
@@ -49,7 +50,7 @@ userRouter.delete("/:id",
 
     if (!usertId){
         resp
-            .sendStatus(400)
+            .sendStatus(404)
         return;
     }
 
@@ -62,6 +63,6 @@ userRouter.delete("/:id",
     }
 
     return resp
-        .status(200)
+        .status(204)
         .json(user)
 })

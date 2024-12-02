@@ -13,10 +13,10 @@ class userDbHandlerClass {
             ? {$or:
                 [
                     {
-                        login: { $regex: searchLoginTerm}
+                        login: { $regex: searchLoginTerm, $options: "i"}
                     },
                     {
-                        email: { $regex: searchEmailTerm, $options: "i" }
+                        email: { $regex: searchEmailTerm, $options: "i"}
                     }
                 ]
             }
