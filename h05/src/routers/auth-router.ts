@@ -7,5 +7,5 @@ authRouter.post("/login",
     validationParser,
     async (req: Request, resp: Response) =>{
         resp
-            .sendStatus(201)
+            .sendStatus(204)
     })
