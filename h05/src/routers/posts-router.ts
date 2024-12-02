@@ -3,10 +3,10 @@ import {Request, Response, Router} from "express";
 import {postValidation} from "../midlewares/validations/post-validation";
 import {validationParser} from "../midlewares/validations/validation-parser";
 import {authorization} from "../midlewares/validations/authorization-validation";
-import {getParamExtander} from "../midlewares/extanders/get-req-param-extander";
+import {getBlogParamExtander} from "../midlewares/extanders/get-req-param-extanders";
 export const postRouter = Router({});
 const postDbHandler = new postDbHandlerClass();
-postRouter.get("/", getParamExtander, async (req, resp) => {
+postRouter.get("/", getBlogParamExtander, async (req, resp) => {
     resp
         .status(200)
         .json(await postDbHandler.
@@ -41,7 +41,7 @@ postRouter.get("/:id", async (req, resp) => {
 })
 postRouter.delete("/:id",
     authorization,
-    async (req, resp) =>{
+    async (req: Request, resp: Response) =>{
     const postId = req.params.id;
 
     if (!postId){

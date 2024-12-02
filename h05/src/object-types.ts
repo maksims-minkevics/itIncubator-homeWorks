@@ -54,7 +54,7 @@ export type GetResult = {
     page: number,
     pageSize: number,
     totalCount: number,
-    items: BlogViewModel[] | PostViewModel[] | []
+    items: BlogViewModel[] | PostViewModel[] | UserViewModel[] | []
 };
 
 export type error = {
