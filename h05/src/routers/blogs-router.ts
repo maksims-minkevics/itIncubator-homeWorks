@@ -2,7 +2,7 @@ import { Router, Response, Request } from "express";
 import { blogDbHandlerClass } from "../db-handlers/blogs-db-handler";
 import { blogValidation } from "../midlewares/validations/blog-validation";
 import { validationParser } from "../midlewares/validations/validation-parser";
-import {authorization, authorization1} from "../midlewares/validations/authorization-validation";
+import {authorization1} from "../midlewares/validations/authorization-validation";
 import { postDbHandlerClass } from "../db-handlers/posts-db-handler";
 import {postValidation, queryIdValidation} from "../midlewares/validations/post-validation";
 import { blogIdExtander } from "../midlewares/extanders/blog-id-extander";
@@ -75,7 +75,7 @@ blogRouter.put("/:id", authorization1, blogValidation, validationParser, async (
     resp.sendStatus(204);
 });
 
-blogRouter.post("/", authorization, blogValidation, validationParser, async (req: Request, resp: Response) => {
+blogRouter.post("/", authorization1, blogValidation, validationParser, async (req: Request, resp: Response) => {
     const blog = await blogDbHandler.createBlog(req.body);
     resp.status(201).json(blog);
 });

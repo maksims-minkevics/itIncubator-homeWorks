@@ -2,7 +2,7 @@ import {postDbHandlerClass} from "../db-handlers/posts-db-handler";
 import {Request, Response, Router} from "express";
 import {postValidation} from "../midlewares/validations/post-validation";
 import {validationParser} from "../midlewares/validations/validation-parser";
-import {authorization, authorization1} from "../midlewares/validations/authorization-validation";
+import {authorization1} from "../midlewares/validations/authorization-validation";
 import {getBlogParamExtander} from "../midlewares/extanders/get-req-param-extanders";
 export const postRouter = Router({});
 const postDbHandler = new postDbHandlerClass();
