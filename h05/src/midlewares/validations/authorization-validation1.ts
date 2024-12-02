@@ -17,28 +17,25 @@ export const authValidation = checkSchema({
 })
 
 export const loginAuthorization = [
-    ...authValidation,
+    authValidation,
     validationParser,
     async (req: Request, res: Response, next: NextFunction) => {
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith("Basic ")) {
+        const authHeader = req.body;
+        if (!authHeader) {
             return res.sendStatus(401);
         }
 
-
-        const authBase64String = Buffer.from(authHeader.split(" ")[1], "base64").toString();
-        const [login, password] = authBase64String.split(":");
-
-        if (!login || !password) {
+        if (!authHeader.loginOrEmail || !authHeader.password) {
             return res.sendStatus(401);
         }
 
-        const user = await userHelper.dbHandler.getUserByEmailLogin(login, login);
+        const user = await userHelper.dbHandler.getUserByEmailLogin(authHeader.loginOrEmail, authHeader.loginOrEmail);
         if (!user) {
             return res.sendStatus(401);
         }
         const isAuthorized =
-            (login === user.login || login === user.email) && await userHelper.compare(user.password, password)
+            (authHeader.loginOrEmail === user.login || authHeader.loginOrEmail === user.email)
+            && await userHelper.compare(user.password, authHeader.password)
         if (!isAuthorized) {
             return res.sendStatus(401);
         }
