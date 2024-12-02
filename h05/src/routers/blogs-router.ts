@@ -28,7 +28,7 @@ blogRouter.get("/:id", async (req, resp) => {
     const blogId = req.params.id;
 
     if (!blogId) {
-        resp.sendStatus(400);
+        resp.sendStatus(404);
         return;
     }
 
@@ -46,7 +46,7 @@ blogRouter.delete("/:id", authorization1, async (req: Request, resp: Response) =
     const blogId = req.params.id;
 
     if (!blogId) {
-        resp.sendStatus(400);
+        resp.sendStatus(404);
         return;
     }
 
@@ -63,7 +63,7 @@ blogRouter.put("/:id", authorization1, blogValidation, validationParser, async (
     const blogId = req.params.id;
 
     if (!blogId) {
-        resp.sendStatus(400);
+        resp.sendStatus(404);
         return;
     }
 

@@ -5,7 +5,7 @@ export const authRouter = Router({});
 authRouter.post("/login",
     loginAuthorization,
     validationParser,
-    async (req: Request, resp: Response) =>{
+    (req: Request, resp: Response) =>{
         resp
             .sendStatus(204)
     })

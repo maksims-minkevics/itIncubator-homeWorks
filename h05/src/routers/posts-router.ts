@@ -22,7 +22,7 @@ postRouter.get("/:id", async (req, resp) => {
 
     if (!postId){
         resp
-            .sendStatus(400)
+            .sendStatus(404)
         return;
     }
 
@@ -46,7 +46,7 @@ postRouter.delete("/:id",
 
     if (!postId){
         resp
-            .sendStatus(400)
+            .sendStatus(404)
         return;
     }
     const isDeleted = await postDbHandler.deletePost(postId);
@@ -69,7 +69,7 @@ postRouter.put("/:id",
 
     if (!postId){
         resp
-            .sendStatus(400)
+            .sendStatus(404)
         return;
     }
     const updatedPost = await postDbHandler.updatePost(postId, req.body);
