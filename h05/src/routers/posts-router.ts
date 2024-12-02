@@ -2,7 +2,7 @@ import {postDbHandlerClass} from "../db-handlers/posts-db-handler";
 import {Request, Response, Router} from "express";
 import {postValidation} from "../midlewares/validations/post-validation";
 import {validationParser} from "../midlewares/validations/validation-parser";
-import {authorization} from "../midlewares/validations/authorization-validation";
+import {authorization, authorization1} from "../midlewares/validations/authorization-validation";
 import {getBlogParamExtander} from "../midlewares/extanders/get-req-param-extanders";
 export const postRouter = Router({});
 const postDbHandler = new postDbHandlerClass();
@@ -40,7 +40,7 @@ postRouter.get("/:id", async (req, resp) => {
 
 })
 postRouter.delete("/:id",
-    authorization,
+    authorization1,
     async (req: Request, resp: Response) =>{
     const postId = req.params.id;
 
@@ -61,7 +61,7 @@ postRouter.delete("/:id",
 
 })
 postRouter.put("/:id",
-    authorization,
+    authorization1,
     postValidation,
     validationParser,
     async (req: Request, resp: Response) =>{
@@ -84,7 +84,7 @@ postRouter.put("/:id",
 
 })
 postRouter.post("/",
-    authorization,
+    authorization1,
     postValidation,
     validationParser,
     async (req: Request, resp: Response) =>{

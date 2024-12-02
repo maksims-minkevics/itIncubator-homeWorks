@@ -3,11 +3,11 @@ import {userValidation} from "../midlewares/validations/user-validation";
 import {userHelper} from "../business-logic/user-business-logic";
 import {validationParser} from "../midlewares/validations/validation-parser";
 import {getUserParamExtander} from "../midlewares/extanders/get-req-param-extanders";
-import {authorization} from "../midlewares/validations/authorization-validation";
+import {authorization, authorization1} from "../midlewares/validations/authorization-validation";
 export const userRouter = Router({});
 
 userRouter.get("/",
-    authorization,
+    authorization1,
     getUserParamExtander,
     async (req: Request, resp: Response) =>{
     resp
@@ -25,7 +25,7 @@ userRouter.get("/",
 })
 
 userRouter.post("/",
-    authorization,
+    authorization1,
     userValidation,
     validationParser,
     async (req: Request, resp: Response) =>{
@@ -44,7 +44,7 @@ userRouter.post("/",
 })
 
 userRouter.delete("/:id",
-    authorization,
+    authorization1,
     async (req: Request, resp: Response) =>{
     const usertId = req.params.id;
 
