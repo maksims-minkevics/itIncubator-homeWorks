@@ -10,8 +10,16 @@ class userDbHandlerClass {
         searchEmailTerm = ""
         }): Promise<GetResult> {
         const matchStage = searchLoginTerm || searchEmailTerm
-            ? {login: { $regex: searchLoginTerm},
-                email: { $regex: searchEmailTerm, $options: "i" }}
+            ? {$or:
+                [
+                    {
+                        login: { $regex: searchLoginTerm}
+                    },
+                    {
+                        email: { $regex: searchEmailTerm, $options: "i" }
+                    }
+                ]
+            }
             : {};
 
         const DbResult = await userCollection.aggregate([
