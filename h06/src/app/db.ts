@@ -7,7 +7,7 @@ dotenv.config()
 const mongoURI: string = process.env.MONGO_URL || "mongodb://localhost:27017";
 const dbClient = new MongoClient(mongoURI);
 const blogerPlatform = dbClient.db(consts.DB_NAME);
-export const postsCollection = blogerPlatform.collection<PostViewModel>(consts.BLOGS_COLLECTION);
+export const postsCollection = blogerPlatform.collection<PostViewModel>(consts.POSTS_COLLECTION);
 export const blogCollection = blogerPlatform.collection<BlogViewModel>(consts.BLOGS_COLLECTION);
 export const userCollection = blogerPlatform.collection<UserDbModel>(consts.USER_COLLECTION);
 export const commentCollection = blogerPlatform.collection<CommentDbModel>(consts.COMMENTS_COLLECTION);
