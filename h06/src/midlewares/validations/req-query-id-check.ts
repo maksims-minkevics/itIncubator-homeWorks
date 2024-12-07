@@ -4,7 +4,7 @@ dotenv.config();
 
 
 export const queryIdValidator = (req: Request, resp: Response, next: NextFunction) =>{
-    const id= req.query.id;
+    const id= req.params.id;
     if (!id){
         resp
             .sendStatus(404);

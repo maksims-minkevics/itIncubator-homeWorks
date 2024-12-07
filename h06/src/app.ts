@@ -5,6 +5,7 @@ import {postRouter} from "./routers/posts-router";
 import dotenv from "dotenv";
 import {userRouter} from "./routers/users-router";
 import {authRouter} from "./app/auth-router";
+import {commentRouter} from "./routers/comments-router";
 dotenv.config();
 export const app = express()
 
@@ -16,4 +17,4 @@ app.use(process.env.BASE_URL + "posts", postRouter);
 app.use(process.env.BASE_URL + "blogs", blogRouter);
 app.use(process.env.BASE_URL + "users", userRouter);
 app.use(process.env.BASE_URL + "auth", authRouter);
-app.use(process.env.BASE_URL + "comments", authRouter);
+app.use(process.env.BASE_URL + "comments", commentRouter);
