@@ -11,7 +11,7 @@ commentRouter.get("/:id",
     queryIdValidator,
     validationParser,
     async (req: Request, resp: Response) =>{
-        const comment = commentDbHandler.get(req.params.id as string);
+        const comment = await commentDbHandler.get(req.params.id as string);
         if (!comment){
             resp.sendStatus(404);
             return;

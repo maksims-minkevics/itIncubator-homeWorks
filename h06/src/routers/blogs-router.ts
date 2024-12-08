@@ -92,6 +92,7 @@ blogRouter.post(
     "/:id/posts",
     authorization1,
     queryIdValidator,
+    queryIdValidation,
     blogIdExtander,
     getBlogParamExtander,
     postValidation,
