@@ -115,7 +115,6 @@ postRouter.post("/:id/comments",
     })
 
 postRouter.get("/:id/comments",
-    jwtTokenAuthorization,
     getBlogParamExtander,
     queryIdValidator,
     validationParser,

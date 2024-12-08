@@ -118,7 +118,7 @@ blogRouter.get("/:id/posts",
             +(req.query.pageSize as string)
         );
 
-        if (!posts) {
+        if (posts.totalCount === 0) {
             resp.sendStatus(404);
             return;
         }

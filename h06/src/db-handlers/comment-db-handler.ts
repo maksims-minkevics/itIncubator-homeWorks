@@ -24,7 +24,9 @@ class commentDbHandlerClass {
     ): Promise<GetResult>
     {
         const DbResult = await commentCollection.aggregate([
+            { $match: {postId: id} },
             {
+
                 $facet: {
 
                     data: [
