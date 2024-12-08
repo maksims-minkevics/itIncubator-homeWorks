@@ -103,7 +103,8 @@ export type CommentDbModel = {
     content: string,
     id: string,
     commentatorInfo: CommentatorInfo,
-    createdAt: string
+    createdAt: string,
+    postId: string
 };
 
 export type JwtTokenData = {

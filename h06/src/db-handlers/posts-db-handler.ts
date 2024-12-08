@@ -104,6 +104,7 @@ class postDbHandlerClass {
     async deletePost(id: string): Promise<boolean> {
         return (await postsCollection.deleteOne({id: id})).deletedCount === 1;
     }
+    
     async dropDb(){
         postsCollection.drop();
     }

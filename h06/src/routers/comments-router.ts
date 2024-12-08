@@ -1,9 +1,6 @@
 import {Request, Response, Router} from "express";
-import {userValidation} from "../midlewares/validations/user-validation";
-import {userHelper} from "../business-logic/user-business-logic";
 import {validationParser} from "../midlewares/validations/validation-parser";
-import {getUserParamExtander} from "../midlewares/extanders/get-req-param-extanders";
-import {authorization1, jwtTokenAuthorization} from "../midlewares/validations/authorization";
+import {jwtTokenAuthorization} from "../midlewares/validations/authorization";
 import {commentValidation} from "../midlewares/validations/comment-validation";
 import {queryIdValidator} from "../midlewares/validations/req-query-id-check";
 import {commentDbHandlerClass} from "../db-handlers/comment-db-handler";
@@ -14,7 +11,7 @@ commentRouter.get("/:id",
     queryIdValidator,
     validationParser,
     async (req: Request, resp: Response) =>{
-        const comment = commentDbHandler.get(req.query.id as string);
+        const comment = commentDbHandler.get(req.params.id as string);
         if (!comment){
             resp.sendStatus(404);
             return;
@@ -32,11 +29,17 @@ commentRouter.put("/:id",
     validationParser,
     async (req: Request, resp: Response) =>{
         const isUpdated = await commentDbHandler.update(
-            req.query.id as string,
-            req.body
+            req.params.id as string,
+            req.body,
+            req.user
         )
-        if(!isUpdated){
+        if(isUpdated === undefined){
             resp.sendStatus(404);
+            return
+        }
+
+        if(!isUpdated){
+            resp.sendStatus(403);
             return
         }
 
@@ -50,11 +53,18 @@ commentRouter.delete("/:id",
     queryIdValidator,
     validationParser,
     async (req: Request, resp: Response) =>{
-    const isDeleted = await commentDbHandler.delete(req.query.id as string);
-    if (!isDeleted){
-        resp.sendStatus(404);
-        return;
-    }
+    const isDeleted = await commentDbHandler.delete(
+        req.params.id as string,
+        req.user);
+        if(isDeleted === undefined){
+            resp.sendStatus(404);
+            return
+        }
+
+        if(!isDeleted){
+            resp.sendStatus(403);
+            return
+        }
 
     resp.sendStatus(204);
     return;

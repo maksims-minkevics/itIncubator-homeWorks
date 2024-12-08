@@ -1,7 +1,7 @@
 import {checkSchema} from "express-validator";
 
 export const commentValidation = checkSchema({
-    login: {
+    content: {
         trim: true,
         isLength: {
             options: {

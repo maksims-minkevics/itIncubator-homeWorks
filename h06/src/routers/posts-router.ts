@@ -2,9 +2,11 @@ import {postDbHandlerClass} from "../db-handlers/posts-db-handler";
 import {Request, Response, Router} from "express";
 import {postValidation} from "../midlewares/validations/post-validation";
 import {validationParser} from "../midlewares/validations/validation-parser";
-import {authorization1} from "../midlewares/validations/authorization";
+import {authorization1, jwtTokenAuthorization} from "../midlewares/validations/authorization";
 import {getBlogParamExtander} from "../midlewares/extanders/get-req-param-extanders";
 import {commentDbHandlerClass} from "../db-handlers/comment-db-handler";
+import {queryIdValidator} from "../midlewares/validations/req-query-id-check";
+import {commentValidation} from "../midlewares/validations/comment-validation";
 export const postRouter = Router({});
 const postDbHandler = new postDbHandlerClass();
 const commentDbHandler = new commentDbHandlerClass();
@@ -98,12 +100,38 @@ postRouter.post("/",
 })
 
 postRouter.post("/:id/comments",
-    authorization1,
-    postValidation,
+    jwtTokenAuthorization,
+    commentValidation,
     validationParser,
     async (req: Request, resp: Response) =>{
-        const post = await postDbHandler.createPost(req.body);
+        const comment = await commentDbHandler.create(req.body, req.user, req.params.id)
+        if(!comment){
+            return resp
+                .sendStatus(404);
+        }
         return resp
             .status(201)
-            .json(post)
+            .json(comment)
+    })
+
+postRouter.get("/:id/comments",
+    jwtTokenAuthorization,
+    getBlogParamExtander,
+    queryIdValidator,
+    validationParser,
+    async (req: Request, resp: Response) =>{
+        const comments = await commentDbHandler.getByPostId(
+            req.params.id,
+            req.query.sortBy as string,
+            +(req.query.sortDirection as string),
+            +(req.query.pageNumber  as string),
+            +(req.query.pageSize as string)
+        )
+        if(comments.totalCount === 0){
+            return resp
+                .sendStatus(404);
+        }
+        return resp
+            .status(200)
+            .json(comments)
     })
