@@ -9,4 +9,4 @@ const startApp = async () => {
         console.log("started on -- " + process.env.PORT)
     });
 }
-startApp(); 
+startApp();
