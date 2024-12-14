@@ -90,6 +90,7 @@ export const userHelper = {
 
     confirmRegistration: async (code: string): Promise<userDataValidationResult> => {
         const isActivated =  await userHelper.dbHandler.checkAndConfirmEmail(code);
+        console.log(isActivated)
         if (!isActivated){
             return {
                 _isValidationFailed: true, data: {errorsMessages: [{message: 'incorrect code',  field: 'code'}]}
@@ -108,8 +109,16 @@ export const userHelper = {
                 _isValidationFailed: true, data: {errorsMessages: [{message: 'incorrect email',  field: 'email'}]}
             }
         }
+
+        if (user.isActivated){
+            return {
+                _isValidationFailed: true, data: {errorsMessages: [{message: 'User has already been confirmed',  field: 'email'}]}
+            }
+        }
+
+        const updatedUser = await userHelper.dbHandler.updateUserConfirmationCode(await userHelper.generateConfirmationCode(), email);
         return {
-            _isValidationFailed: false, data: {}, user: user
+            _isValidationFailed: false, data: {}, user: updatedUser as UserDbModel
         }
 
     },

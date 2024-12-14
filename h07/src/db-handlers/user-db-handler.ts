@@ -1,5 +1,5 @@
 import { GetResult, UserDbModel, UserInputModel } from "../app/";
-import { userCollection } from "../app/db";
+import {userCollection} from "../app/db";
 class userDbHandlerClass {
     async getAllUsers({
                           sortBy = "createdAt",
@@ -58,7 +58,8 @@ class userDbHandlerClass {
             { projection: { _id: 0 } }
         );
         return result;
-    }
+    };
+
     async getUserByEmailLogin(login: string, email: string): Promise<UserDbModel | null> {
         const result = await userCollection.findOne(
             {
@@ -106,6 +107,10 @@ class userDbHandlerClass {
 
     async checkAndConfirmEmail(code: string): Promise<boolean>{
         return (await userCollection.updateOne({confirmationCode: code, isActivated: false}, {$set: {isActivated: true}})).matchedCount !== 0
+    }
+
+    async updateUserConfirmationCode(code:string, email: string){
+        return (await userCollection.findOneAndUpdate({email: email, isActivated: false}, {$set: {confirmationCode: code}}))
     }
 
 }

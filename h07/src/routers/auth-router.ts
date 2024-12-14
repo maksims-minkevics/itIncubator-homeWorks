@@ -6,12 +6,11 @@ import {
     emailValidation,
     registrationValidation
 } from "../midlewares/validations/authorization-data-validation";
-import {jwttokenService} from "./jwttoken-service";
+import {jwttokenService} from "../app/jwttoken-service";
 import {userHelper} from "../business-logic/user-business-logic";
-import {mailService} from "./email-service";
-import {registrationEmailTemplate} from "./email-templates";
+import {mailService} from "../app/email-service";
+import {registrationEmailTemplate} from "../app/email-templates";
 import dotenv from "dotenv";
-import {getRegCode} from "../midlewares/extanders/req-query-extanders";
 dotenv.config()
 
 export const authRouter = Router({});
@@ -44,10 +43,8 @@ authRouter.get("/me",
     })
 
 authRouter.post("/registration-confirmation",
-    getRegCode,
     async (req: Request, resp: Response) =>{
     const confirmationCode = req.body.code as string;
-
     if(!confirmationCode){
         return resp
             .sendStatus(400);
@@ -55,7 +52,7 @@ authRouter.post("/registration-confirmation",
     const confirmationResult = await userHelper.confirmRegistration(confirmationCode);
     if(confirmationResult._isValidationFailed){
         return resp
-            .status(204)
+            .status(400)
             .json(confirmationResult.data);
 
     }
