@@ -11,7 +11,6 @@ const customValidator: ResultFactory<any> = validationResult.withDefaults({
 
 export const validationParser = (req: Request, resp: Response, next: NextFunction) =>{
     const errors = customValidator(req);
-    console.log(errors)
     if (!errors.isEmpty()){
         resp
             .status(400)
