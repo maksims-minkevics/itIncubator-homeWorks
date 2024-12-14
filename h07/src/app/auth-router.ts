@@ -78,7 +78,8 @@ authRouter.post("/registration",
         }
         const createdUser = await userHelper.dbHandler.getUserByField("email", req.body.email);
         console.log(createdUser);
-        await mailService.sendEmail(req.body.email,registrationEmailTemplate(createdUser!.confirmationCode), "Test Email");
+        const smtpresp = await mailService.sendEmail(req.body.email,registrationEmailTemplate(createdUser!.confirmationCode), "Test Email");
+        console.log("smtpresp", smtpresp);
         return resp
             .sendStatus(204)
     })
