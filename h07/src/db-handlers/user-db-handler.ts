@@ -110,7 +110,8 @@ class userDbHandlerClass {
     }
 
     async updateUserConfirmationCode(code:string, email: string){
-        return (await userCollection.findOneAndUpdate({email: email, isActivated: false}, {$set: {confirmationCode: code}}))
+
+        return (await userCollection.findOneAndUpdate({email: email, isActivated: false}, {$set: {confirmationCode: code}}, {returnDocument: "after"}))
     }
 
 }

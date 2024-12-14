@@ -114,7 +114,6 @@ export const userHelper = {
                 _isValidationFailed: true, data: {errorsMessages: [{message: 'User has already been confirmed',  field: 'email'}]}
             }
         }
-
         const updatedUser = await userHelper.dbHandler.updateUserConfirmationCode(await userHelper.generateConfirmationCode(), email);
         return {
             _isValidationFailed: false, data: {}, user: updatedUser as UserDbModel

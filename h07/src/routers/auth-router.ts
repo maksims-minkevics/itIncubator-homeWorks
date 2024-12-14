@@ -70,7 +70,8 @@ authRouter.post("/registration",
                 .status(400)
                 .json(confirmationData.data)
         }
-        await mailService.sendEmail(req.body.email,registrationEmailTemplate(confirmationData.user!.confirmationCode), "Test Email");
+        const template = registrationEmailTemplate(confirmationData.user!.confirmationCode);
+        await mailService.sendEmail(req.body.email, template, "Test Email");
         return resp
             .sendStatus(204)
     })
@@ -85,7 +86,7 @@ authRouter.post("/registration-email-resending",
                 .status(400)
                 .json(confirmationData.data)
         }
-
+        const template = registrationEmailTemplate(confirmationData.user!.confirmationCode);
         await mailService.sendEmail(req.body.email, registrationEmailTemplate(confirmationData.user!.confirmationCode), "Test Email");
         return resp
             .sendStatus(204);
