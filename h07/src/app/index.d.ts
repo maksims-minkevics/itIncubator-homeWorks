@@ -1,5 +1,3 @@
-import "express-validator";
-
 export type BlogViewModel = {
     id: string,
     name: string,
@@ -128,8 +126,4 @@ export type userDataValidationResult = {
     _isValidationFailed: boolean,
     data: ErrorResult | {},
     user?: UserDbModel
-}
-
-export type emailResendingDataInputModel = {
-    email: string
 }

@@ -60,7 +60,7 @@ export const userHelper = {
 
         const hashedPassword = await userHelper.hashPwrd(user.password);
         user.password = hashedPassword;
-        const newUser = await userHelper.dbHandler.create(user, false);
+        const newUser = await userHelper.dbHandler.create(user, true);
         return {
             _isValidationFailed: false, data: {}, user: newUser
         };
