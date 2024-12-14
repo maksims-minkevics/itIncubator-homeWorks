@@ -24,6 +24,7 @@ export const mailService= (() => {
                 subject: subject,
                 html: content
             }
+            console.log("sendEmail called")
             await transport.sendMail(mail, (error, info) => {
                 if (error) {
                     console.error("Error sending email: ", error);
