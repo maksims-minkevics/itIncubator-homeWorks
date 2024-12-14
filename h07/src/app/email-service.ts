@@ -1,0 +1,38 @@
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+import {consts} from "./global-consts";
+
+dotenv.config()
+export const mailService= (() => {
+    const transport =  nodemailer.createTransport({
+        service: process.env.SMTP_SERVICE,
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        secure: false, // use false for STARTTLS; true for SSL on port 465
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PSWRD,
+        }
+    });
+
+    return {
+
+        async sendEmail(to: string, content: string, subject: string = "", from: string = consts.DEFAULT_FROM_EMAIL):Promise<boolean>{
+            const mail = {
+                from: from,
+                to: to,
+                subject: subject,
+                html: content
+            }
+            await transport.sendMail(mail, (error, info) => {
+                if (error) {
+                    console.error("Error sending email: ", error);
+                    return false
+                }
+                console.log("Email sent: ", info.response);
+                return true
+            });
+            return true
+        }
+    };
+})();

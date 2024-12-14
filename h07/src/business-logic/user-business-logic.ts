@@ -1,8 +1,7 @@
 import {userDbHandlerClass} from "../db-handlers/user-db-handler";
-import {errorResult, UserInputModel, UserViewModel} from "../object-types";
+import {ErrorResult, userDataValidationResult, UserInputModel, UserViewModel} from "../app/";
+import bcrypt from "bcrypt";
 
-const bcrypt = require('bcrypt');
-const userDbHandler = new userDbHandlerClass();
 export const userHelper = {
     dbHandler: new userDbHandlerClass(),
 
@@ -27,30 +26,64 @@ export const userHelper = {
 
     isUserEmailUnique: async (email: string): Promise<boolean> => {
         const user = await userHelper.dbHandler.getUserByField('email', email);
-        return !user;
+        console.log("isUserEmailUnique",user !== null)
+        return user === null;
     },
 
     isUserLoginUnique: async (login: string): Promise<boolean> => {
         const user = await userHelper.dbHandler.getUserByField('login', login);
-        return !user;
+        console.log("isUserLoginUnique",user !== null)
+        return user === null;
     },
 
-    createNewUser: async (user: UserInputModel): Promise<UserViewModel | errorResult> => {
+
+    dataValidation: async (user: UserInputModel): Promise<userDataValidationResult> =>{
         if (!await userHelper.isUserLoginUnique(user.login)) {
             return {
-                errorsMessages: [{message: 'login should be unique',  field: 'login'}]
+                _isValidationFailed: true, data: {errorsMessages: [{message: 'login should be unique',  field: 'login'}]}
             };
         }
 
         if (!await userHelper.isUserEmailUnique(user.email)) {
             return {
-                errorsMessages: [{message: 'email should be unique', field: 'email'}]
+                _isValidationFailed: true, data: {errorsMessages: [{message: 'email should be unique', field: 'email'}]}
             };
+        }
+        return {_isValidationFailed: false, data: {}}
+    },
+
+    createNewUser: async (user: UserInputModel): Promise<UserViewModel | ErrorResult | {}> => {
+        const validationResult = await userHelper.dataValidation(user);
+        if (validationResult._isValidationFailed === true){
+            return validationResult.data
         }
 
         const hashedPassword = await userHelper.hashPwrd(user.password);
         user.password = hashedPassword;
-        const newUser = await userHelper.dbHandler.create(user);
+        const newUser = await userHelper.dbHandler.create(user, false);
         return newUser;
+    },
+
+    newUserRegistration: async (user: UserInputModel): Promise<UserViewModel | ErrorResult | {}> => {
+        const validationResult = await userHelper.dataValidation(user);
+        if (validationResult._isValidationFailed === true){
+            return validationResult.data
+        }
+
+        const hashedPassword = await userHelper.hashPwrd(user.password);
+        user.password = hashedPassword;
+        const code = await userHelper.generateConfirmationCode();
+        console.log(code)
+        const newUser = await userHelper.dbHandler.create(user, false,code);
+        return newUser;
+    },
+    //TODO
+    //Change to more secure method (with less collision)
+    generateConfirmationCode: async () => {
+        return Date.now().toString() + Math.random().toString(36).substring(2, 8);
+    },
+
+    confirmRegistration: async (code: string): Promise<boolean> => {
+        return await userHelper.dbHandler.checkAndConfirmEmail(code);
     },
 };

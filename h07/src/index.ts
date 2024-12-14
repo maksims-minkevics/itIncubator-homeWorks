@@ -1,8 +1,7 @@
 import {app} from "./app";
 import dotenv from "dotenv";
-import {dbRun} from "./db-handlers/db";
+import {dbRun} from "./app/db";
 dotenv.config();
-
 const startApp = async () => {
     console.log("app started...")
     await dbRun();

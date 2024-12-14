@@ -1,4 +1,4 @@
-import {BlogViewModel, GetResult, PostViewModel} from "../object-types";
+import {BlogViewModel, GetResult, PostViewModel} from "../app/";
 
 class GetResultClass implements GetResult {
     pagesCount = 0;

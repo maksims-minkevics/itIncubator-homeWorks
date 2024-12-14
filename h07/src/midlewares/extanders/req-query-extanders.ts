@@ -1,7 +1,7 @@
 import {NextFunction, Request, Response} from "express";
 
 
-export const getBlogParamExtander = (req: Request, resp: Response, next: NextFunction) =>{
+export const getBlogQueryExtander = (req: Request, resp: Response, next: NextFunction) =>{
     req.query.searchNameTerm = req.query.searchNameTerm || "";
     req.query.sortBy = req.query.sortBy || "createdAt";
     req.query.sortDirection = req.query.sortDirection && req.query.sortDirection == "asc"? "1" : "-1";
@@ -10,7 +10,7 @@ export const getBlogParamExtander = (req: Request, resp: Response, next: NextFun
     next();
 }
 
-export const getUserParamExtander = (req: Request, resp: Response, next: NextFunction) =>{
+export const getUserQueryExtander = (req: Request, resp: Response, next: NextFunction) =>{
     req.query.searchNameTerm = req.query.searchNameTerm || "";
     req.query.sortBy = req.query.sortBy || "createdAt";
     req.query.sortDirection = req.query.sortDirection && req.query.sortDirection == "asc"? "1" : "-1";
@@ -20,3 +20,9 @@ export const getUserParamExtander = (req: Request, resp: Response, next: NextFun
     req.query.searchEmailTerm = req.query.searchEmailTerm || "";
     next();
 }
+
+export const getRegCode = (req: Request, resp: Response, next: NextFunction) =>{
+    req.query.code = req.query.code || "";
+    next();
+}
+

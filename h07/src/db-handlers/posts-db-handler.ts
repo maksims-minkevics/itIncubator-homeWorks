@@ -1,12 +1,12 @@
-import {PostViewModel, PostInputModel, GetResult} from "../object-types";
+import {PostViewModel, PostInputModel, GetResult} from "../app/";
 import {blogDbHandlerClass} from "./blogs-db-handler";
-import {postsCollection} from "./db";
+import {postsCollection} from "../app/db";
 const blogDbHandler = new blogDbHandlerClass();
 class postDbHandlerClass {
-    async findPostbyId(id: string): Promise<PostViewModel | null> {
+    async findPostById(id: string): Promise<PostViewModel | null> {
         return await postsCollection.findOne({id: id}, {projection: { _id: 0 } })
     };
-    async findPostsbyBlogId(
+    async findPostsByBlogId(
         id: string,
         sortBy: string = "createdAt",
         sortDirection: number = -1,
@@ -86,7 +86,7 @@ class postDbHandlerClass {
             createdAt: createdAt
         }
         await postsCollection.insertOne(newPost);
-        const result : PostViewModel = {
+        return {
             id: newId,
             title: post.title,
             shortDescription: post.shortDescription,
@@ -94,8 +94,7 @@ class postDbHandlerClass {
             blogId: post.blogId,
             blogName: blogName,
             createdAt: createdAt
-        }
-        return result;
+        };
     };
 
     async updatePost(id: string, fieldsToUpdate: PostInputModel): Promise<boolean>{
@@ -105,6 +104,7 @@ class postDbHandlerClass {
     async deletePost(id: string): Promise<boolean> {
         return (await postsCollection.deleteOne({id: id})).deletedCount === 1;
     }
+    
     async dropDb(){
         postsCollection.drop();
     }

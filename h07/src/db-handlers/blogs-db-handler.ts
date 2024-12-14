@@ -1,5 +1,5 @@
-import {BlogViewModel, BlogInputModel, GetResult} from "../object-types";
-import {blogCollection} from "./db";
+import {BlogViewModel, BlogInputModel, GetResult, BlogDbModel} from "../app/";
+import {blogCollection} from "../app/db";
 class blogDbHandlerClass {
 
     async findBlogbyId(id?: string): Promise<BlogViewModel | null> {
@@ -15,7 +15,6 @@ class blogDbHandlerClass {
         const matchStage = searchNameTerm
             ? { name: { $regex: searchNameTerm, $options: "i" } }
             : {};
-        console.log(matchStage)
         const DbResult = await blogCollection.aggregate([
             { $match: matchStage },
             {
@@ -33,7 +32,6 @@ class blogDbHandlerClass {
             }
         ]).toArray();
         const totalDocuments = DbResult[0].totalCount[0]?.count || 0;
-        console.log(DbResult[0])
         return {
             pagesCount: Math.ceil(totalDocuments / pageSize),
             page: pageNumber,
@@ -45,7 +43,7 @@ class blogDbHandlerClass {
     async createBlog(blog: BlogInputModel): Promise<BlogViewModel> {
         const createdAt = new Date().toISOString();
         const newId = (await blogCollection.countDocuments() + 1).toString()
-        const newBlog:BlogViewModel = {
+        const newBlog:BlogDbModel = {
             id: newId,
             name: blog.name,
             description: blog.description,
@@ -54,7 +52,7 @@ class blogDbHandlerClass {
             createdAt: createdAt
         };
         await blogCollection.insertOne(newBlog);
-        const result:BlogViewModel = {
+        return {
             id: newId,
             name: blog.name,
             description: blog.description,
@@ -62,7 +60,6 @@ class blogDbHandlerClass {
             isMembership: false,
             createdAt: createdAt
         };
-        return result;
     };
     async updateBlog(id: string, fieldsToUpdate: BlogViewModel): Promise<boolean | null>{
         const updatedBlog = await blogCollection.updateOne(

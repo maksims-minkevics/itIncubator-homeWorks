@@ -4,13 +4,14 @@ const customValidator: ResultFactory<any> = validationResult.withDefaults({
     formatter: (error) => {
         return {
             message: error.msg as string,
-            field: error?.path as string,
+            field: error.path as string,
         };
     }
 });
 
 export const validationParser = (req: Request, resp: Response, next: NextFunction) =>{
     const errors = customValidator(req);
+    console.log(errors)
     if (!errors.isEmpty()){
         resp
             .status(400)
