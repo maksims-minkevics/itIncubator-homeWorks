@@ -1,3 +1,5 @@
+import "express-validator";
+
 export type BlogViewModel = {
     id: string,
     name: string,

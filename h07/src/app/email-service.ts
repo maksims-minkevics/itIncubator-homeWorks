@@ -5,9 +5,7 @@ import {consts} from "./global-consts";
 dotenv.config()
 export const mailService= (() => {
     const transport =  nodemailer.createTransport({
-        service: process.env.SMTP_SERVICE,
         host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
         secure: false, // use false for STARTTLS; true for SSL on port 465
         auth: {
             user: process.env.SMTP_USER,
