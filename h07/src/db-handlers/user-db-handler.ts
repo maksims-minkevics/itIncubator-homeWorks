@@ -1,6 +1,5 @@
-import { GetResult, UserDbModel, UserInputModel, UserViewModel } from "../app/";
+import { GetResult, UserDbModel, UserInputModel } from "../app/";
 import { userCollection } from "../app/db";
-import { ObjectId } from "mongodb";
 class userDbHandlerClass {
     async getAllUsers({
                           sortBy = "createdAt",
@@ -80,7 +79,7 @@ class userDbHandlerClass {
         user: UserInputModel,
         isActivated: boolean = false,
         confirmationCode: string = ""
-    ): Promise<UserViewModel> {
+    ): Promise<UserDbModel> {
         const createdAt = new Date().toISOString();
         const newId = ((await userCollection.countDocuments()) + 1).toString();
         const newrecord: UserDbModel = {
@@ -94,13 +93,7 @@ class userDbHandlerClass {
         };
 
         await userCollection.insertOne(newrecord);
-        const result: UserViewModel = {
-            id: newId,
-            createdAt: createdAt,
-            login: user.login,
-            email: user.email,
-        };
-        return result;
+        return newrecord;
     }
 
     async deleteUser(id: string): Promise<boolean> {
@@ -114,5 +107,6 @@ class userDbHandlerClass {
     async checkAndConfirmEmail(code: string): Promise<boolean>{
         return (await userCollection.updateOne({confirmationCode: code, isActivated: false}, {$set: {isActivated: true}})).matchedCount !== 0
     }
+
 }
 export { userDbHandlerClass };

@@ -126,7 +126,8 @@ declare global {
 
 export type userDataValidationResult = {
     _isValidationFailed: boolean,
-    data: {} | ErrorResult
+    data: ErrorResult | {},
+    user?: UserDbModel
 }
 
 export type emailResendingDataInputModel = {

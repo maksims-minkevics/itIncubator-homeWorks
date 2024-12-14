@@ -4,6 +4,7 @@ import {userHelper} from "../business-logic/user-business-logic";
 import {validationParser} from "../midlewares/validations/validation-parser";
 import {getUserQueryExtander} from "../midlewares/extanders/req-query-extanders";
 import {superAdminAuthorization, authorization1} from "../midlewares/validations/authorization";
+import {UserDbModel} from "../app/index";
 export const userRouter = Router({});
 
 userRouter.get("/",
@@ -31,15 +32,17 @@ userRouter.post("/",
     userValidation,
     validationParser,
     async (req: Request, resp: Response) =>{
-    const result = await userHelper.createNewUser(req.body);
-    if('errorsMessages' in result){
+    const userCreationData = await userHelper.createNewUser(req.body);
+    if(userCreationData._isValidationFailed){
         return resp
             .status(400)
-            .json(result);
+            .json(userCreationData.data);
     }
     return resp
         .status(201)
-        .json(result);
+        .json(
+            await userHelper.getUserViewModel(userCreationData.user as UserDbModel)
+        );
 })
 
 userRouter.delete("/:id",

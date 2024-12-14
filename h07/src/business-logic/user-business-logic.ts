@@ -1,5 +1,5 @@
 import {userDbHandlerClass} from "../db-handlers/user-db-handler";
-import {ErrorResult, userDataValidationResult, UserInputModel, UserViewModel} from "../app/";
+import {ErrorResult, userDataValidationResult, UserDbModel, UserInputModel, UserViewModel} from "../app/";
 import bcrypt from "bcrypt";
 
 export const userHelper = {
@@ -26,13 +26,11 @@ export const userHelper = {
 
     isUserEmailUnique: async (email: string): Promise<boolean> => {
         const user = await userHelper.dbHandler.getUserByField('email', email);
-        console.log("isUserEmailUnique",user !== null)
         return user === null;
     },
 
     isUserLoginUnique: async (login: string): Promise<boolean> => {
         const user = await userHelper.dbHandler.getUserByField('login', login);
-        console.log("isUserLoginUnique",user !== null)
         return user === null;
     },
 
@@ -52,30 +50,37 @@ export const userHelper = {
         return {_isValidationFailed: false, data: {}}
     },
 
-    createNewUser: async (user: UserInputModel): Promise<UserViewModel | ErrorResult | {}> => {
+    createNewUser: async (user: UserInputModel): Promise<userDataValidationResult> => {
         const validationResult = await userHelper.dataValidation(user);
         if (validationResult._isValidationFailed === true){
-            return validationResult.data
+            return {
+                _isValidationFailed: true, data: validationResult.data
+            };
         }
 
         const hashedPassword = await userHelper.hashPwrd(user.password);
         user.password = hashedPassword;
         const newUser = await userHelper.dbHandler.create(user, false);
-        return newUser;
+        return {
+            _isValidationFailed: false, data: {}, user: newUser
+        };
     },
 
-    newUserRegistration: async (user: UserInputModel): Promise<UserViewModel | ErrorResult | {}> => {
+    newUserRegistration: async (user: UserInputModel): Promise<userDataValidationResult> => {
         const validationResult = await userHelper.dataValidation(user);
         if (validationResult._isValidationFailed === true){
-            return validationResult.data
+            return {
+                _isValidationFailed: true, data: validationResult.data
+            }
         }
 
         const hashedPassword = await userHelper.hashPwrd(user.password);
         user.password = hashedPassword;
         const code = await userHelper.generateConfirmationCode();
-        console.log(code)
-        const newUser = await userHelper.dbHandler.create(user, false,code);
-        return newUser;
+        const newUser = await userHelper.dbHandler.create(user, false, code);
+        return {
+            _isValidationFailed: false, data: {}, user: newUser
+        };
     },
     //TODO
     //Change to more secure method (with less collision)
@@ -83,7 +88,38 @@ export const userHelper = {
         return Date.now().toString() + Math.random().toString(36).substring(2, 8);
     },
 
-    confirmRegistration: async (code: string): Promise<boolean> => {
-        return await userHelper.dbHandler.checkAndConfirmEmail(code);
+    confirmRegistration: async (code: string): Promise<userDataValidationResult> => {
+        const isActivated =  await userHelper.dbHandler.checkAndConfirmEmail(code);
+        if (!isActivated){
+            return {
+                _isValidationFailed: true, data: {errorsMessages: [{message: 'incorrect code',  field: 'code'}]}
+            }
+        }
+        return {
+            _isValidationFailed: false, data: {}
+        }
+
     },
+
+    getUseForReConfirmation: async (email: string): Promise<userDataValidationResult> => {
+        const user = await userHelper.dbHandler.getUserByField("email", email)
+        if (!user){
+            return {
+                _isValidationFailed: true, data: {errorsMessages: [{message: 'incorrect email',  field: 'email'}]}
+            }
+        }
+        return {
+            _isValidationFailed: false, data: {}, user: user
+        }
+
+    },
+
+    getUserViewModel: async (userDbObject: UserDbModel): Promise<UserViewModel> => {
+        return {
+            id: userDbObject.id,
+            createdAt: userDbObject.createdAt,
+            login: userDbObject.login,
+            email: userDbObject.email,
+        } as UserViewModel;
+    }
 };
