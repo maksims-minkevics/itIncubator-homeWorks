@@ -90,7 +90,6 @@ export const userHelper = {
 
     confirmRegistration: async (code: string): Promise<userDataValidationResult> => {
         const isActivated =  await userHelper.dbHandler.checkAndConfirmEmail(code);
-        console.log(isActivated)
         if (!isActivated){
             return {
                 _isValidationFailed: true, data: {errorsMessages: [{message: 'incorrect code',  field: 'code'}]}
