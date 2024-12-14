@@ -108,7 +108,7 @@ class userDbHandlerClass {
     }
 
     async dropDb() {
-        userCollection.drop();
+        await userCollection.drop();
     }
 
     async checkAndConfirmEmail(code: string): Promise<boolean>{

@@ -104,7 +104,7 @@ class commentDbHandlerClass {
 
 
     async dropDb(){
-        commentCollection.drop();
+        await commentCollection.drop();
     }
 
 }

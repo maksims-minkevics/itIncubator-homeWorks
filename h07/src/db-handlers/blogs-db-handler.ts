@@ -72,7 +72,7 @@ class blogDbHandlerClass {
     };
 
     async dropDb(){
-        blogCollection.drop();
+        await blogCollection.drop();
     }
 }
 export {blogDbHandlerClass}

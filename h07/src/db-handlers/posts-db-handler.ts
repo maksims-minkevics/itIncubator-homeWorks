@@ -106,7 +106,7 @@ class postDbHandlerClass {
     }
     
     async dropDb(){
-        postsCollection.drop();
+        await postsCollection.drop();
     }
     async checkId(blogId: string){
         const blog = await blogDbHandler.findBlogbyId(blogId)
