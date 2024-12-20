@@ -66,7 +66,8 @@ export type UserDbModel = {
     email: string,
     createdAt: string
     confirmationCode: string,
-    isActivated: boolean
+    isActivated: boolean,
+    refreshToken: string
 };
 
 export type GetResult = {
@@ -114,10 +115,21 @@ export type JwtTokenData = {
     userLogin: string
 }
 
+export type RefreshJwtTokenData = {
+    token: string
+    user: JwtTokenData
+}
+
+export type UpdatedRefreshJwtTokenData = {
+    token: string
+    refreshToken: string
+}
+
 declare global {
     namespace Express {
         export interface Request {
-            user: JwtTokenData
+            user: JwtTokenData,
+            refreshToken: string,
         }
     }
 }

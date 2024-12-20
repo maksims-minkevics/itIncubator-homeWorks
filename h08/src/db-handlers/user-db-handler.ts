@@ -32,7 +32,7 @@ class userDbHandlerClass {
                             { $sort: { [sortBy]: sortDirection } },
                             { $skip: (pageNumber - 1) * pageSize },
                             { $limit: pageSize },
-                            { $project: { _id: 0, password: 0 } },
+                            { $project: { _id: 0, password: 0, refreshToken: 0 } },
                         ],
                         totalCount: [{ $count: "count" }],
                     },
@@ -55,7 +55,7 @@ class userDbHandlerClass {
     ): Promise<UserDbModel | null> {
         const result = await userCollection.findOne(
             { [fieldName]: value },
-            { projection: { _id: 0 } }
+            { projection: { _id: 0, refreshToken: 0} }
         );
         return result;
     };
@@ -71,7 +71,7 @@ class userDbHandlerClass {
                 ],
             },
             {
-                projection: { _id: 0 },
+                projection: { _id: 0, refreshToken: 0 },
             }
         );
         return result;
@@ -91,6 +91,7 @@ class userDbHandlerClass {
             email: user.email,
             confirmationCode: confirmationCode,
             isActivated: isActivated,
+            refreshToken: ""
         };
 
         await userCollection.insertOne(newrecord);
@@ -112,6 +113,14 @@ class userDbHandlerClass {
     async updateUserConfirmationCode(code:string, email: string){
 
         return (await userCollection.findOneAndUpdate({email: email, isActivated: false}, {$set: {confirmationCode: code}}, {returnDocument: "after"}))
+    }
+
+    async updateUserRefreshToken(token:string, id: string){
+        return (await userCollection.updateOne({id: id}, {$set: {refreshToken: token}})).matchedCount !== 0
+
+    }
+    async getUser(filter: Partial<UserDbModel>): Promise<UserDbModel | null> {
+        return await userCollection.findOne(filter);
     }
 
 }

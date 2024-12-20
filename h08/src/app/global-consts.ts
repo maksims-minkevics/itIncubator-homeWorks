@@ -1,6 +1,7 @@
 export const consts = {
     POSTS_COLLECTION: "Posts",
     BLOGS_COLLECTION: "Blogs",
+    EXP_REFRESH_TOKEN_COLLECTION: "ExpiredRefreshTokens",
     USER_COLLECTION: "Users",
     COMMENTS_COLLECTION: "Cooments",
     DB_NAME: "BlogerPlatform",

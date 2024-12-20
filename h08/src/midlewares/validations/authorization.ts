@@ -4,6 +4,7 @@ import {userHelper} from "../../business-logic/user-business-logic";
 import {checkSchema} from "express-validator";
 import jwt from "jsonwebtoken";
 import {jwttokenService} from "../../app/jwttoken-service";
+import {JwtTokenData, RefreshJwtTokenData} from "../../app/index";
 dotenv.config();
 
 
@@ -33,7 +34,7 @@ export const authorization1 = (req: Request, resp: Response, next: NextFunction)
     next();
 }
 
-export const jwtTokenAuthorization = async (req: Request, resp: Response, next: NextFunction) => {
+export const jwtTokenAuth = async (req: Request, resp: Response, next: NextFunction) => {
     if (!req.headers.authorization && !req.headers.authorization?.includes("Bearer"))
     {
         resp
@@ -48,7 +49,7 @@ export const jwtTokenAuthorization = async (req: Request, resp: Response, next: 
             .sendStatus(401)
         return;
     }
-    const user = await jwttokenService.verify(authorization[1]);
+    const user = await jwttokenService.verify(authorization[1]) as JwtTokenData;
     if (!user){
         resp
             .sendStatus(401)
@@ -58,7 +59,39 @@ export const jwtTokenAuthorization = async (req: Request, resp: Response, next: 
     next();
 }
 
-export const basicAuthorization =
+
+export const jwtRefreshTokenAuth= async (req: Request, resp: Response, next: NextFunction) => {
+    if (!req.cookies && Object.keys(req.cookies).includes("refreshToken"))
+    {
+        resp
+            .sendStatus(401);
+        return;
+    }
+
+    const inputToken = req.cookies["refreshToken"];
+    if(!inputToken){
+        resp
+            .sendStatus(401);
+        return;
+    }
+    const token = await jwttokenService.verifyRefreshToken(inputToken) as RefreshJwtTokenData;
+    if (!token){
+        resp
+            .sendStatus(401);
+        return;
+    }
+    const isValidRefreshToken = await userHelper.isActiveRtoken(inputToken, token.user);
+    if (!isValidRefreshToken){
+        resp
+            .sendStatus(401);
+        return;
+    }
+    req.user = {userId: token.user!.userId, userLogin: token.user!.userLogin};
+    req.refreshToken = inputToken;
+    next();
+}
+
+export const basicAuth =
     async (req: Request, res: Response, next: NextFunction) => {
         const authHeader = req.body;
         if (!authHeader) {

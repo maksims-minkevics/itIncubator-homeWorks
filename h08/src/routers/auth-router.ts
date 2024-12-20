@@ -1,6 +1,6 @@
 import {validationParser} from "../midlewares/validations/validation-parser";
 import {Request, Response, Router} from "express";
-import {basicAuthorization, jwtTokenAuthorization} from "../midlewares/validations/authorization";
+import {basicAuth, jwtRefreshTokenAuth, jwtTokenAuth} from "../midlewares/validations/authorization";
 import {
     authValidation,
     emailValidation,
@@ -11,15 +11,19 @@ import {userHelper} from "../business-logic/user-business-logic";
 import {mailService} from "../app/email-service";
 import {registrationEmailTemplate} from "../app/email-templates";
 import dotenv from "dotenv";
+import {settings} from "../settings";
 dotenv.config()
+
 
 export const authRouter = Router({});
 authRouter.post("/login",
     authValidation,
     validationParser,
-    basicAuthorization,
+    basicAuth,
     async (req: Request, resp: Response) =>{
         const token = await jwttokenService.generate(req.user);
+        const refreshToken = await jwttokenService.generateNewRefreshToken(token, req.user);
+        resp.cookie("refreshToken", refreshToken, settings.REFRESH_TOKEN_PARAMETERS);
         return resp
             .status(200)
             .json({
@@ -27,7 +31,7 @@ authRouter.post("/login",
             })
     })
 authRouter.get("/me",
-    jwtTokenAuthorization,
+    jwtTokenAuth,
     async (req: Request, resp: Response) =>{
         const user = await userHelper.dbHandler.getUserByEmailLogin(
             req.user.userLogin,
@@ -95,15 +99,27 @@ authRouter.post("/registration-email-resending",
 //TODO
 
 authRouter.post("/refresh-token",
-    emailValidation,
+    jwtRefreshTokenAuth,
     validationParser,
     async (req: Request, resp: Response) =>{
+    const result = await jwttokenService.updateRefreshToken(req.refreshToken, req.user);
+    resp.cookie("refreshToken", result.refreshToken, settings.REFRESH_TOKEN_PARAMETERS);
+    return resp
+        .status(200)
+        .json({
+            accessToken: result.token
+        })
 
     });
 
 authRouter.post("/logout",
-    emailValidation,
+    jwtRefreshTokenAuth,
     validationParser,
     async (req: Request, resp: Response) =>{
+        await jwttokenService.cancelRefreshToken(req.user);
+        resp
+            .sendStatus(204)
+        return;
+
 
     });
