@@ -1,5 +1,5 @@
 import {userDbHandlerClass} from "../db-handlers/user-db-handler";
-import {ErrorResult, userDataValidationResult, UserDbModel, UserInputModel, UserViewModel} from "../app/";
+import {ErrorResult, JwtTokenData, userDataValidationResult, UserDbModel, UserInputModel, UserViewModel} from "../app/";
 import bcrypt from "bcrypt";
 
 export const userHelper = {
@@ -128,5 +128,9 @@ export const userHelper = {
             login: userDbObject.login,
             email: userDbObject.email,
         } as UserViewModel;
+    },
+
+    isActiveRtoken: async (rToken: string, user: JwtTokenData): Promise<boolean> => {
+        return (await userHelper.dbHandler.getUser({refreshToken: rToken, id: user.userId})) !== null
     }
 };

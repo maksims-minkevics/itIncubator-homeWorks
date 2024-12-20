@@ -2,7 +2,7 @@ import {postDbHandlerClass} from "../db-handlers/posts-db-handler";
 import {Request, Response, Router} from "express";
 import {postValidation} from "../midlewares/validations/post-validation";
 import {validationParser} from "../midlewares/validations/validation-parser";
-import {authorization1, jwtTokenAuthorization} from "../midlewares/validations/authorization";
+import {authorization1, jwtTokenAuth} from "../midlewares/validations/authorization";
 import {getBlogQueryExtander} from "../midlewares/extanders/req-query-extanders";
 import {commentDbHandlerClass} from "../db-handlers/comment-db-handler";
 import {queryIdValidator} from "../midlewares/validations/req-query-id-check";
@@ -94,7 +94,7 @@ postRouter.post("/",
 })
 
 postRouter.post("/:id/comments",
-    jwtTokenAuthorization,
+    jwtTokenAuth,
     commentValidation,
     validationParser,
     async (req: Request, resp: Response) =>{

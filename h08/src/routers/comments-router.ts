@@ -1,6 +1,6 @@
 import {Request, Response, Router} from "express";
 import {validationParser} from "../midlewares/validations/validation-parser";
-import {jwtTokenAuthorization} from "../midlewares/validations/authorization";
+import {jwtTokenAuth} from "../midlewares/validations/authorization";
 import {commentValidation} from "../midlewares/validations/comment-validation";
 import {queryIdValidator} from "../midlewares/validations/req-query-id-check";
 import {commentDbHandlerClass} from "../db-handlers/comment-db-handler";
@@ -22,7 +22,7 @@ commentRouter.get("/:id",
     })
 
 commentRouter.put("/:id",
-    jwtTokenAuthorization,
+    jwtTokenAuth,
     queryIdValidator,
     commentValidation,
     validationParser,
@@ -47,7 +47,7 @@ commentRouter.put("/:id",
     })
 
 commentRouter.delete("/:id",
-    jwtTokenAuthorization,
+    jwtTokenAuth,
     queryIdValidator,
     validationParser,
     async (req: Request, resp: Response) =>{

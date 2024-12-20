@@ -11,6 +11,8 @@ export const postsCollection = blogerPlatform.collection<PostViewModel>(consts.P
 export const blogCollection = blogerPlatform.collection<BlogViewModel>(consts.BLOGS_COLLECTION);
 export const userCollection = blogerPlatform.collection<UserDbModel>(consts.USER_COLLECTION);
 export const commentCollection = blogerPlatform.collection<CommentDbModel>(consts.COMMENTS_COLLECTION);
+export const expiredRefreshTokenCollection = blogerPlatform.collection<CommentDbModel>(consts
+    .EXP_REFRESH_TOKEN_COLLECTION);
 
 export async function dbRun(){
     try {
