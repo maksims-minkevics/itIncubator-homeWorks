@@ -1,14 +1,12 @@
 import {NextFunction, Request, Response} from "express";
 import dotenv from "dotenv";
 import {userHelper} from "../../business-logic/user-business-logic";
-import {checkSchema} from "express-validator";
-import jwt from "jsonwebtoken";
 import {jwttokenService} from "../../app/jwttoken-service";
-import {JwtTokenData, RefreshJwtTokenData} from "../../app";
+import {JwtTokenData, RefreshJwtTokenData} from "../../app/index";
 dotenv.config();
 
 
-export const superAdminAuthorization = (req: Request, resp: Response, next: NextFunction) =>{
+export const superAdminAuthorization = async (req: Request, resp: Response, next: NextFunction) =>{
     const authorizationBase64 = req.headers.authorization;
     if (!req.headers.authorization)
     {
@@ -24,7 +22,7 @@ export const superAdminAuthorization = (req: Request, resp: Response, next: Next
     }
     next();
 }
-export const authorization1 = (req: Request, resp: Response, next: NextFunction) =>{
+export const authorization1 = async (req: Request, resp: Response, next: NextFunction) =>{
     const authorizationBase64 = req.headers.authorization;
     if (("Basic "+ btoa(process.env.SUPER_SECRET_NAME + ":" + process.env.SUPER_SECRET_PSWRD)) !== authorizationBase64){
         resp
@@ -50,7 +48,9 @@ export const jwtTokenAuth = async (req: Request, resp: Response, next: NextFunct
         return;
     }
     const user = await jwttokenService.verify(authorization[1]) as JwtTokenData;
+    console.log(user)
     if (!user){
+        console.log('failed here')
         resp
             .sendStatus(401)
         return;
@@ -80,14 +80,9 @@ export const jwtRefreshTokenAuth= async (req: Request, resp: Response, next: Nex
             .sendStatus(401);
         return;
     }
-    const isValidRefreshToken = await userHelper.isActiveRtoken(inputToken, token.user);
-    if (!isValidRefreshToken){
-        resp
-            .sendStatus(401);
-        return;
-    }
     req.user = {userId: token.user!.userId, userLogin: token.user!.userLogin};
     req.refreshToken = inputToken;
+    req.deviceId = token.deviceId;
     next();
 }
 
