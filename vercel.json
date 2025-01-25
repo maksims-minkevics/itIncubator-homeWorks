@@ -1,6 +1,6 @@
 {
   "version": 2,
   "name": "itIncubator-homeWorks",
-  "builds": [{"src": "h07/src/index.ts", "use" : "@vercel/node"}],
-  "routes": [{"src": "/(.*)", "dest" : "h07/src/index.ts"}]
+  "builds": [{"src": "h09/src/index.ts", "use" : "@vercel/node"}],
+  "routes": [{"src": "/(.*)", "dest" : "h09/src/index.ts"}]
 }
