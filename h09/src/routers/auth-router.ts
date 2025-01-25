@@ -18,10 +18,10 @@ dotenv.config()
 
 export const authRouter = Router({});
 authRouter.post("/login",
+    requestCounter,
     authValidation,
     validationParser,
     basicAuth,
-    requestCounter,
     async (req: Request, resp: Response) =>{
         const token = await jwttokenService.generate(req.user);
         const refreshToken = await jwttokenService.generateRtoken(req);
@@ -69,9 +69,9 @@ authRouter.post(
     })
 
 authRouter.post("/registration",
+    requestCounter,
     registrationValidation,
     validationParser,
-    requestCounter,
     async (req: Request, resp: Response) =>{
         const confirmationData = await userHelper.newUserRegistration(req.body);
         if(confirmationData._isValidationFailed){
@@ -86,9 +86,9 @@ authRouter.post("/registration",
     })
 
 authRouter.post("/registration-email-resending",
+    requestCounter,
     emailValidation,
     validationParser,
-    requestCounter,
     async (req: Request, resp: Response) =>{
         const confirmationData = await userHelper.getUseForReConfirmation(req.body.email);
         if (confirmationData._isValidationFailed){
