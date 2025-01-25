@@ -66,8 +66,8 @@ class activityAuditDbHandler {
             )).modifiedCount !== 0;
     };
 
-    async delete(){
-
+    async dropDb(){
+        await activityAuditCollection.drop();
     }
 
 }

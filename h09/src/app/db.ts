@@ -18,8 +18,6 @@ export const postsCollection = blogerPlatform.collection<PostViewModel>(consts.P
 export const blogCollection = blogerPlatform.collection<BlogViewModel>(consts.BLOGS_COLLECTION);
 export const userCollection = blogerPlatform.collection<UserDbModel>(consts.USER_COLLECTION);
 export const commentCollection = blogerPlatform.collection<CommentDbModel>(consts.COMMENTS_COLLECTION);
-export const expiredRefreshTokenCollection = blogerPlatform.collection<CommentDbModel>(consts
-    .EXP_REFRESH_TOKEN_COLLECTION);
 export const refreshTokenMetaDataCollection = blogerPlatform.collection<RefreshTokenMetaDataDbModel>(consts.SESSIONS_COLLECTION);
 
 export const activityAuditCollection = blogerPlatform.collection<ActivityAuditDbModel >(consts.ACTIVITY_AUDIT_COLLECTION);

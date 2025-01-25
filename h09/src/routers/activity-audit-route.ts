@@ -6,7 +6,7 @@ export const activityAuditRouter = Router();
 const auditActivityDbHandler = new activityAuditDbHandler();
 
 activityAuditRouter.get("/", jwtRefreshTokenAuth, async (req: Request, resp: Response) =>{
-    const result = await auditActivityDbHandler.get(req.deviceId, req.user.userId);
+    const result = await auditActivityDbHandler.get(req.ip||"");
     return resp
         .status(200)
         .json(result);
