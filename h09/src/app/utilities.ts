@@ -18,42 +18,25 @@ export const getFormattedDate = async (
     now.setMinutes(now.getMinutes() + minutes);
     now.setSeconds(now.getSeconds() + seconds);
 
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, '0'); // Месяцы начинаются с 0
-    const dd = String(now.getDate()).padStart(2, '0');
-    const hh = String(now.getHours()).padStart(2, '0');
-    const min = String(now.getMinutes()).padStart(2, '0');
-    const ss = String(now.getSeconds()).padStart(2, '0');
-
-    return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+    return now.toISOString();
 };
 
 
-export const parseFormattedDate = async (dateString: string): Promise<Date> =>{
-    console.log(dateString)
-    const dateFormat = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+export const parseFormattedDate = async (dateString: string): Promise<Date> => {
+    const dateFormat = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/;
 
     if (!dateFormat.test(dateString)) {
-        throw new Error("Invalid date format. Expected format: yyyy-mm-dd hh:mm:ss");
+        throw new Error("Invalid date format. Expected format: ISO 8601 with milliseconds.");
     }
 
-    const [datePart, timePart] = dateString.split(' ');
-    const [year, month, day] = datePart.split('-').map(Number);
-    const [hours, minutes, seconds] = timePart.split(':').map(Number);
+    const date = new Date(dateString);
 
-    if (
-        year < 0 ||
-        month < 1 || month > 12 ||
-        day < 1 || day > 31 ||
-        hours < 0 || hours > 23 ||
-        minutes < 0 || minutes > 59 ||
-        seconds < 0 || seconds > 59
-    ) {
-        throw new Error("Invalid date or time values");
+    if (isNaN(date.getTime())) {
+        throw new Error("Invalid date. Unable to parse the provided date string.");
     }
 
-    return new Date(year, month - 1, day, hours, minutes, seconds);
-}
+    return date;
+};
 
 export const mongoDbDate = {
     getCurrentServerDate: async (): Promise<Date> =>{
