@@ -98,7 +98,14 @@ class RefreshTokenMetaDataDbHandler{
         return( await refreshTokenMetaDataCollection.deleteOne({deviceId:deviceId})).deletedCount === 1
     }
 
-    async updateAllExceptCurrent(deviceId: string, userId: string,{issuedAt = "", expireAt = "", lastActiveDate = "" } = {}):Promise<boolean>{
+    async updateAllExceptCurrent(
+        deviceId: string,
+        userId: string,
+        {
+            issuedAt = "",
+            expireAt = "",
+            lastActiveDate = ""
+        } = {}):Promise<boolean>{
         const updateFields: Record<string, any> = {};
 
         if (issuedAt) updateFields.issuedAt = issuedAt;

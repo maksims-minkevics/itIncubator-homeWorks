@@ -26,7 +26,11 @@ sessionRouter.delete("/",
     jwtRefreshTokenAuth,
     validationParser,
     async (req:Request, resp: Response)=>{
-        const areAllSesstionsDeactivated = await sessionDbHandler.updateAllExceptCurrent(req.deviceId, req.user.userId, {expireAt: await getFormattedDate()});
+        const areAllSesstionsDeactivated = await sessionDbHandler.updateAllExceptCurrent(
+            req.deviceId,
+            req.user.userId,
+            {expireAt: await getFormattedDate()}
+        );
         if(!areAllSesstionsDeactivated){
             return resp.sendStatus(404);
         }
