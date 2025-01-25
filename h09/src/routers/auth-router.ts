@@ -12,11 +12,13 @@ import {mailService} from "../app/email-service";
 import {registrationEmailTemplate} from "../app/email-templates";
 import dotenv from "dotenv";
 import {settings} from "../settings";
+import {requestCounter} from "../midlewares/audit";
 dotenv.config()
 
 
 export const authRouter = Router({});
 authRouter.post("/login",
+    requestCounter,
     authValidation,
     validationParser,
     basicAuth,
@@ -46,7 +48,7 @@ authRouter.get("/me",
             })
     })
 
-authRouter.post("/registration-confirmation",
+authRouter.post("/registration-confirmation",requestCounter,
     async (req: Request, resp: Response) =>{
     const confirmationCode = req.body.code as string;
     if(!confirmationCode){
@@ -65,6 +67,7 @@ authRouter.post("/registration-confirmation",
     })
 
 authRouter.post("/registration",
+    requestCounter,
     registrationValidation,
     validationParser,
     async (req: Request, resp: Response) =>{
@@ -81,6 +84,7 @@ authRouter.post("/registration",
     })
 
 authRouter.post("/registration-email-resending",
+    requestCounter,
     emailValidation,
     validationParser,
     async (req: Request, resp: Response) =>{

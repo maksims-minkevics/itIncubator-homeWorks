@@ -17,7 +17,6 @@ app.set('trust proxy', true);
 const jsonBodyMiddleWare = express.json();
 app.use(jsonBodyMiddleWare);
 app.use(cookieParser());
-app.use(requestCounter);
 app.use(process.env.BASE_URL + "testing", testingRouter);
 app.use(process.env.BASE_URL + "posts", postRouter);
 app.use(process.env.BASE_URL + "blogs", blogRouter);
