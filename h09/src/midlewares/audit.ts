@@ -11,7 +11,8 @@ export const requestCounter = async (req: Request, resp: Response, next: NextFun
     const tenSecondsAgo = new Date(new Date().getTime() - 10 * 1000);
     const result: ActivityAuditDbModel[] | [] = await auditActivityDbHandler.getByDate(
         req.ip || "",
-        tenSecondsAgo
+        tenSecondsAgo,
+        req.originalUrl
     );
     if (result && result.length > 5){
         return resp

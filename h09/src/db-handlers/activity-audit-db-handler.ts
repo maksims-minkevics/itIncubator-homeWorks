@@ -33,7 +33,8 @@ class activityAuditDbHandler {
 
     async getByDate(
         ip: string,
-        date: Date
+        date: Date,
+        url: string
     ): Promise<ActivityAuditDbModel[] | []> {
         const getFields: Record<string, any> = {};
 
@@ -41,7 +42,7 @@ class activityAuditDbHandler {
         const results = await activityAuditCollection
             .find(
                 {
-                    ip: ip, date: {$gte: date}
+                    ip: ip, date: {$gte: date}, url: url
                 },
                 { projection: { _id: 0 } }
             )
