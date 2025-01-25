@@ -11,6 +11,7 @@ class RefreshTokenMetaDataDbHandler{
 
     async getAllActiveSessions(userId: string): Promise<RefreshTokenMetaDataDbModel[]> {
         console.log( await mongoDbDate.getCurrentServerDate())
+        console.log(userId)
         const sessions = await refreshTokenMetaDataCollection
             .aggregate([
                 {
@@ -39,7 +40,6 @@ class RefreshTokenMetaDataDbHandler{
                 }
             ])
             .toArray();
-
         return sessions as RefreshTokenMetaDataDbModel[];
     }
 
