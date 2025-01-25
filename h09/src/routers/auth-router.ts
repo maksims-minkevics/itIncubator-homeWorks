@@ -22,7 +22,7 @@ authRouter.post("/login",
     basicAuth,
     async (req: Request, resp: Response) =>{
         const token = await jwttokenService.generate(req.user);
-        const refreshToken = await jwttokenService.generateNewRefreshToken(req.user, req);
+        const refreshToken = await jwttokenService.generateRtoken(req);
         resp.cookie("refreshToken", refreshToken, settings.REFRESH_TOKEN_PARAMETERS);
         return resp
             .status(200)
@@ -102,12 +102,14 @@ authRouter.post("/refresh-token",
     jwtRefreshTokenAuth,
     validationParser,
     async (req: Request, resp: Response) =>{
-    const result = await jwttokenService.updateRefreshToken(req.user, req);
-    resp.cookie("refreshToken", result.refreshToken, settings.REFRESH_TOKEN_PARAMETERS);
+    const result = await jwttokenService.generateRtoken(
+        req
+    );
+    resp.cookie("refreshToken", result, settings.REFRESH_TOKEN_PARAMETERS);
     return resp
         .status(200)
         .json({
-            accessToken: result.token
+            accessToken: result
         })
 
     });

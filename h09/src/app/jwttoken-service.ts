@@ -45,61 +45,98 @@ export const jwttokenService = (() => {
             const decoded = jwt.verify(token, jwtTokenSalt);
             return decoded as JwtTokenData;
         },
+        async generateRefreshJwtToken(user: JwtTokenData, deviceId: string){
+            const expireAt = await getFormattedDate({
+                seconds: settings.REFRESH_TOKEN_EXP_TIME
+            });
+            const newToken = jwt.sign(
+                {
+                    user: {
+                        userId: user.userId,
+                        userLogin: user.userLogin
+                    },
+                    deviceId: deviceId,
+                    expireAt: expireAt
+                },
+                rJwtTokenSalt,
+                {
+                    expiresIn: settings.REFRESH_TOKEN_EXP_TIME
+                }
+            )
+            return {expireAt: expireAt, token: newToken}
+        },
 
-        async generateRtoken(user: JwtTokenData, req: Request, eDeviceId: string = ""): Promise<GeneratedRefreshJwtTokenData> {
-
+        async updateSession (req: Request, deviceId: string, token: {token: string, expireAt: string}){
             const issuedAt = await getFormattedDate();
-            const expireAt = await getFormattedDate({seconds:settings.REFRESH_TOKEN_EXP_TIME});
             const userAgent = req.headers["user-agent"];
             const userIp = req.ip;
-            const deviceId = eDeviceId || uuidv4();
-            const isDeviceAdded = await rTokenDbHandler.get({userId: req.user.userId, ip: userIp, deviceName: userAgent})
-            const tokenData: RefreshTokenMetaDataDbModel = {
-                issuedAt: issuedAt,
-                deviceId: deviceId,
-                deviceName: userAgent || "",
-                expireAt: expireAt,
-                ip: userIp || "",
-                userId: user.userId,
-                lastActiveDate: issuedAt
-            }
-            if (!(isDeviceAdded?.length || eDeviceId)){
-                await rTokenDbHandler.create(tokenData);
+            await  rTokenDbHandler.updateSession(
+                deviceId,
+                {
+                    issuedAt: issuedAt,
+                    expireAt: token.expireAt,
+                    lastActiveDate: issuedAt
+                }
+
+            );
+        },
+
+        async createNewSession (req: Request, deviceId: string, token: {token: string, expireAt: string}){
+            const issuedAt = await getFormattedDate();
+            const userAgent = req.headers["user-agent"];
+            const userIp = req.ip || "";
+            await rTokenDbHandler.create(
+                {
+                    deviceId: deviceId,
+                    userId: req.user.userId,
+                    deviceName: userAgent,
+                    ip: userIp,
+                    lastActiveDate: issuedAt,
+                    issuedAt: issuedAt,
+                    expireAt: token.expireAt
+                }
+
+            );
+        },
+
+        async generateRtoken(
+            req: Request,
+        ): Promise<string> {
+            const isDeviceAdded = await rTokenDbHandler.get(
+                {
+                    userId: req.user.userId,
+                    ip: req.ip || "",
+                    deviceName: req.headers["user-agent"]
+                }
+            )
+
+            if (isDeviceAdded?.length){
+                const newTokenData = await this.generateRefreshJwtToken(
+                    req.user,
+                    isDeviceAdded[0].deviceId
+                )
+                const deviceId = isDeviceAdded[0].deviceId;
+                await this.updateSession(
+                    req,
+                    deviceId,
+                    newTokenData
+                );
+                return newTokenData.token
             }
             else{
-                await rTokenDbHandler.updateSession(deviceId, {expireAt:expireAt, lastActiveDate: issuedAt})
+                const deviceId = uuidv4();
+                const newTokenData = await this.generateRefreshJwtToken(
+                    req.user,
+                    deviceId
+                )
+                await this.createNewSession(
+                    req,
+                    deviceId,
+                    newTokenData
+                );
+                return newTokenData.token
+
             }
-
-            const newToken = jwt.sign(
-                {user: {userId: user.userId, userLogin: user.userLogin}, deviceId: deviceId, expireAt: expireAt},
-                rJwtTokenSalt,
-                {expiresIn: settings.REFRESH_TOKEN_EXP_TIME}
-            );
-            return {token: newToken, data: tokenData}
-        },
-
-        async generateNewRefreshToken(user: JwtTokenData, req: Request):Promise<string | undefined>{
-            const newToken = await this.generateRtoken(user, req);
-            await rTokenDbHandler.updateSession(newToken.data.deviceId, {
-                issuedAt: newToken.data.issuedAt,
-                expireAt: newToken.data.expireAt,
-                lastActiveDate: newToken.data.lastActiveDate
-            });
-            return newToken.token;
-        },
-        async updateRefreshToken(user: JwtTokenData, req: Request): Promise<UpdatedRefreshJwtTokenData>{
-            const newToken = await this.generate(user);
-            const refreshToken = await this.generateRtoken(
-                user,
-                req,
-                req.deviceId
-            );
-            await rTokenDbHandler.updateSession(refreshToken.data.deviceId, {
-                issuedAt: refreshToken.data.issuedAt,
-                expireAt: refreshToken.data.expireAt,
-                lastActiveDate: refreshToken.data.lastActiveDate
-            });
-            return {token: newToken, refreshToken: refreshToken.token}
         },
 
         async cancelRefreshToken(token: string):Promise<boolean>{
