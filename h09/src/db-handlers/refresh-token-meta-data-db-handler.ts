@@ -26,7 +26,7 @@ class RefreshTokenMetaDataDbHandler{
                 },
                 {
                     $match: {
-                        expireDate: { $gte: await mongoDbDate.getCurrentServerDate() }
+                        expireDate: { $gte: new Date() }
                     }
                 },
                 {
@@ -40,6 +40,7 @@ class RefreshTokenMetaDataDbHandler{
                 }
             ])
             .toArray();
+        console.log(sessions)
         return sessions as RefreshTokenMetaDataDbModel[];
     }
 
