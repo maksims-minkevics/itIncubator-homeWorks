@@ -9,7 +9,6 @@ import {Request} from "express";
 import jwt from 'jsonwebtoken';
 import dotenv from "dotenv";
 import {consts} from "./global-consts";
-import {userHelper} from "../business-logic/user-business-logic";
 import {settings} from "../settings";
 import {getFormattedDate, parseFormattedDate} from "./utilities";
 import { v4 as uuidv4 } from 'uuid';
@@ -27,7 +26,10 @@ export const jwttokenService = (() => {
 
     return {
         async generate(user: JwtTokenData): Promise<string> {
-            const token = jwt.sign(user, jwtTokenSalt,{expiresIn: settings.AUTH_TOKEN_EXP_TIME});
+            const token = jwt.sign(
+                user,
+                jwtTokenSalt,
+                {expiresIn: settings.AUTH_TOKEN_EXP_TIME});
             return token;
         },
 
@@ -87,7 +89,11 @@ export const jwttokenService = (() => {
         },
         async updateRefreshToken(user: JwtTokenData, req: Request): Promise<UpdatedRefreshJwtTokenData>{
             const newToken = await this.generate(user);
-            const refreshToken = await this.generateRtoken(user, req, req.deviceId);
+            const refreshToken = await this.generateRtoken(
+                user,
+                req,
+                req.deviceId
+            );
             await rTokenDbHandler.updateSession(refreshToken.data.deviceId, {
                 issuedAt: refreshToken.data.issuedAt,
                 expireAt: refreshToken.data.expireAt,

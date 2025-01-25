@@ -150,9 +150,7 @@ export type userDataValidationResult = {
 export type ActivityAuditDbModel = {
     ip: string,
     url: string,
-    date: Date,
-    userId: string,
-    deviceId: string
+    date: Date
 }
 
 export type RefreshTokenMetaDataDbModel = {

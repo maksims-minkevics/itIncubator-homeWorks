@@ -4,10 +4,8 @@ import {activityAuditCollection, refreshTokenMetaDataCollection} from "../app/db
 
 class activityAuditDbHandler {
 
-    async create(url: string, date: Date, ip: string, deviceId: string, userId: string):Promise<string|undefined>{
+    async create(url: string, date: Date, ip: string):Promise<string|undefined>{
         return (await  activityAuditCollection.insertOne({
-            userId: userId,
-            deviceId: deviceId,
             date: date,
             ip: ip,
             url: url
@@ -15,22 +13,14 @@ class activityAuditDbHandler {
     };
 
     async get(
-        deviceId: string,
-        userId: string,
-        { url = "", date = undefined, ip = "" } = {}
+        ip: string,
+        { url = "", date = undefined} = {}
     ): Promise<ActivityAuditDbModel[] | undefined> {
         const getFields: Record<string, any> = {};
 
         if (url) getFields.url = url;
         if (date) getFields.date = date;
-        if (ip) getFields.ip = ip;
-        getFields.deviceId = deviceId;
-        getFields.userId = userId;
-
-        if (Object.keys(getFields).length === 0) {
-            return undefined;
-        }
-
+        getFields.ip = ip;
         const results = await activityAuditCollection
             .find(
                 getFields,
@@ -42,8 +32,7 @@ class activityAuditDbHandler {
     };
 
     async getByDate(
-        deviceId: string,
-        userId: string,
+        ip: string,
         date: Date
     ): Promise<ActivityAuditDbModel[] | []> {
         const getFields: Record<string, any> = {};
@@ -52,7 +41,7 @@ class activityAuditDbHandler {
         const results = await activityAuditCollection
             .find(
                 {
-                    deviceId: deviceId, userId: userId, date: {$gte: date}
+                    ip: ip, date: {$gte: date}
                 },
                 { projection: { _id: 0 } }
             )
@@ -62,19 +51,17 @@ class activityAuditDbHandler {
     };
 
     async update(
-        deviceId: string,
-        userId: string,
-        { url = "", date = "", ip = "" }: { url?: string; date?: string; ip?: string }
+        ip: string,
+        { url = "", date = ""}: { url?: string; date?: string}
         ): Promise<boolean> {
         const updateFields: Record<string, any> = {};
 
         if (url) updateFields.url = url;
         if (date) updateFields.date = date;
-        if (ip) updateFields.ip = ip;
 
         return (await activityAuditCollection
             .updateOne(
-                {deviceId: deviceId, userId: userId},
+                {ip: ip},
                 {$set : updateFields}
             )).modifiedCount !== 0;
     };
