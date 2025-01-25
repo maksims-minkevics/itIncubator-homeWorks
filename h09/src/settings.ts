@@ -9,7 +9,7 @@ export const settings = {
         BAD_REQUEST: 400
     },
     REFRESH_TOKEN_PARAMETERS: {httpOnly: true, secure: true},
-    REFRESH_TOKEN_EXP_TIME: 20,
-    AUTH_TOKEN_EXP_TIME: 10
+    REFRESH_TOKEN_EXP_TIME: 240,
+    AUTH_TOKEN_EXP_TIME: 120
 };
 
