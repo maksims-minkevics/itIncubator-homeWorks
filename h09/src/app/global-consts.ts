@@ -58,9 +58,9 @@ export const consts = {
         AUTH: {
             LOGIN: "/login",
             GET_DATA_ABOUT_CURRENT_ACTIVE_USER: "/me",
-            REG_CONFIRMATION: "registration-confirmation",
-            REGISTRATION: "registration",
-            RESEND_REG_CONF_EMAIL: "registration-email-resending",
+            REG_CONFIRMATION: "/registration-confirmation",
+            REGISTRATION: "/registration",
+            RESEND_REG_CONF_EMAIL: "/registration-email-resending",
             REFRESH_TOKEN: "/refresh-token",
             LOGOUT: "/logout"
 
