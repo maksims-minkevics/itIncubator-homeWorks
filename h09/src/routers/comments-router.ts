@@ -4,10 +4,12 @@ import {jwtTokenAuth} from "../midlewares/validations/authorization";
 import {commentValidation} from "../midlewares/validations/comment-validation";
 import {queryIdValidator} from "../midlewares/validations/req-query-id-check";
 import {commentDbHandlerClass} from "../db-handlers/comment-db-handler";
+import {consts} from "../app/global-consts";
 export const commentRouter = Router({});
 
 const commentDbHandler = new commentDbHandlerClass();
-commentRouter.get("/:id",
+commentRouter.get(
+    consts.END_POINTS.COMMENTS.GET,
     queryIdValidator,
     validationParser,
     async (req: Request, resp: Response) =>{
@@ -21,7 +23,8 @@ commentRouter.get("/:id",
             .json(comment);
     })
 
-commentRouter.put("/:id",
+commentRouter.put(
+    consts.END_POINTS.COMMENTS.UPDATE_BY_ID,
     jwtTokenAuth,
     queryIdValidator,
     commentValidation,
@@ -46,7 +49,8 @@ commentRouter.put("/:id",
             .sendStatus(204);
     })
 
-commentRouter.delete("/:id",
+commentRouter.delete(
+    consts.END_POINTS.COMMENTS.DELETE_BY_ID,
     jwtTokenAuth,
     queryIdValidator,
     validationParser,

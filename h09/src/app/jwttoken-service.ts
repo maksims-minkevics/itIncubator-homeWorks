@@ -1,9 +1,6 @@
 import {
-    GeneratedRefreshJwtTokenData,
     JwtTokenData,
     RefreshJwtTokenData,
-    RefreshTokenMetaDataDbModel,
-    UpdatedRefreshJwtTokenData
 } from "./index";
 import {Request} from "express";
 import jwt from 'jsonwebtoken';
@@ -26,11 +23,10 @@ export const jwttokenService = (() => {
 
     return {
         async generate(user: JwtTokenData): Promise<string> {
-            const token = jwt.sign(
+            return jwt.sign(
                 user,
                 jwtTokenSalt,
                 {expiresIn: settings.AUTH_TOKEN_EXP_TIME});
-            return token;
         },
 
         async verify(token: string): Promise<JwtTokenData | RefreshJwtTokenData | undefined> {
@@ -45,7 +41,7 @@ export const jwttokenService = (() => {
             const decoded = jwt.verify(token, jwtTokenSalt);
             return decoded as JwtTokenData;
         },
-        async generateRefreshJwtToken(user: JwtTokenData, deviceId: string){
+        async generateRefreshJwtToken(user: JwtTokenData, deviceId: string, issuedAt: string){
             const expireAt = await getFormattedDate({
                 seconds: settings.REFRESH_TOKEN_EXP_TIME
             });
@@ -56,7 +52,8 @@ export const jwttokenService = (() => {
                         userLogin: user.userLogin
                     },
                     deviceId: deviceId,
-                    expireAt: expireAt
+                    expireAt: expireAt,
+                    issuedAt: issuedAt
                 },
                 rJwtTokenSalt,
                 {
@@ -66,10 +63,7 @@ export const jwttokenService = (() => {
             return {expireAt: expireAt, token: newToken}
         },
 
-        async updateSession (req: Request, deviceId: string, token: {token: string, expireAt: string}){
-            const issuedAt = await getFormattedDate();
-            const userAgent = req.headers["user-agent"];
-            const userIp = req.ip;
+        async updateSession (req: Request, deviceId: string, token: {token: string, expireAt: string}, issuedAt: string){
             await  rTokenDbHandler.updateSession(
                 deviceId,
                 {
@@ -81,8 +75,7 @@ export const jwttokenService = (() => {
             );
         },
 
-        async createNewSession (req: Request, deviceId: string, token: {token: string, expireAt: string}){
-            const issuedAt = await getFormattedDate();
+        async createNewSession (req: Request, deviceId: string, token: {token: string, expireAt: string}, issuedAt: string){
             const userAgent = req.headers["user-agent"];
             const userIp = req.ip || "";
             await rTokenDbHandler.create(
@@ -106,20 +99,24 @@ export const jwttokenService = (() => {
                 {
                     userId: req.user.userId,
                     ip: req.ip || "",
-                    deviceName: req.headers["user-agent"]
+                    deviceName: req.headers["user-agent"],
+                    deviceId: req.deviceId || undefined
                 }
             )
 
+            const issuedAt = await getFormattedDate();
             if (isDeviceAdded?.length){
                 const newTokenData = await this.generateRefreshJwtToken(
                     req.user,
-                    isDeviceAdded[0].deviceId
+                    isDeviceAdded[0].deviceId,
+                    issuedAt
                 )
                 const deviceId = isDeviceAdded[0].deviceId;
                 await this.updateSession(
                     req,
                     deviceId,
-                    newTokenData
+                    newTokenData,
+                    issuedAt
                 );
                 return newTokenData.token
             }
@@ -127,12 +124,14 @@ export const jwttokenService = (() => {
                 const deviceId = uuidv4();
                 const newTokenData = await this.generateRefreshJwtToken(
                     req.user,
-                    deviceId
+                    deviceId,
+                    issuedAt
                 )
                 await this.createNewSession(
                     req,
                     deviceId,
-                    newTokenData
+                    newTokenData,
+                    issuedAt
                 );
                 return newTokenData.token
 
@@ -149,6 +148,7 @@ export const jwttokenService = (() => {
         },
 
         async verifyRefreshToken(token: string): Promise<RefreshJwtTokenData | undefined> {
+            console.log('verifyRefreshToken')
             try {
                 const tokenData = jwt.verify(token, rJwtTokenSalt) as RefreshJwtTokenData;
                 const tokenMetaData = await rTokenDbHandler.getActiveSession(tokenData.deviceId);
@@ -162,8 +162,10 @@ export const jwttokenService = (() => {
                 if (expireDate.getTime() < new Date().getTime()) {
                     throw new Error("Token has expired");
                 }
-
-                if (tokenMetaData.expireAt !== tokenData.expireAt) {
+                console.log('tokenMetaData', tokenMetaData.issuedAt);
+                console.log('tokenData', tokenData.issuedAt);
+                if (tokenMetaData.issuedAt !== tokenData.issuedAt) {
+                    console.log("Token metadata mismatch")
                     throw new Error("Token metadata mismatch");
                 }
 

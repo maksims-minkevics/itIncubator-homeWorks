@@ -43,3 +43,11 @@ export const mongoDbDate = {
         return new Date(new Date().getTime() + 2 * 60 * 60 * 1000);
     }
 }
+
+export const encodeToBase64ForBasicAuth = async (username: string, password: string): Promise<string> => {
+    const credentials = `${username}:${password}`;
+
+    const encodedCredentials = Buffer.from(credentials).toString('base64');
+
+    return `${encodedCredentials}`;
+}

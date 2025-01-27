@@ -5,23 +5,25 @@ import {userDbHandlerClass} from "../db-handlers/user-db-handler";
 import {commentDbHandlerClass} from "../db-handlers/comment-db-handler";
 import {RefreshTokenMetaDataDbHandler} from "../db-handlers/refresh-token-meta-data-db-handler";
 import {activityAuditDbHandler} from "../db-handlers/activity-audit-db-handler";
+import {consts} from "../app/global-consts";
 
 
 export const testingRouter = Router({});
 
-testingRouter.delete("/all-data", (req, resp) =>{
+testingRouter.delete(consts.END_POINTS.TESTING.DELETE_ALL_DATA, async (req, resp) =>{
+    console.log('db cleared')
     const blogDbHandler = new blogDbHandlerClass();
     const postDbHandler = new postDbHandlerClass();
     const userDbHandler = new userDbHandlerClass();
     const commentDbHandler = new commentDbHandlerClass();
     const refreshTokenDbHandler = new RefreshTokenMetaDataDbHandler();
     const auditDbHandler = new activityAuditDbHandler();
-    blogDbHandler.dropDb();
-    postDbHandler.dropDb();
-    userDbHandler.dropDb();
-    commentDbHandler.dropDb();
-    refreshTokenDbHandler.dropDb();
-    auditDbHandler.dropDb();
+    await blogDbHandler.dropDb();
+    await postDbHandler.dropDb();
+    await userDbHandler.dropDb();
+    await commentDbHandler.dropDb();
+    await refreshTokenDbHandler.dropDb();
+    await auditDbHandler.dropDb();
     return resp
         .sendStatus(204);
 

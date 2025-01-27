@@ -5,9 +5,10 @@ import {validationParser} from "../midlewares/validations/validation-parser";
 import {getUserQueryExtander} from "../midlewares/extanders/req-query-extanders";
 import {authorization1} from "../midlewares/validations/authorization";
 import {UserDbModel} from "../app/index";
+import {consts} from "../app/global-consts";
 export const userRouter = Router({});
 
-userRouter.get("/",
+userRouter.get(consts.END_POINTS.USER.GET,
     authorization1,
     getUserQueryExtander,
     async (req: Request, resp: Response) =>{
@@ -27,7 +28,7 @@ userRouter.get("/",
         );
 })
 
-userRouter.post("/",
+userRouter.post(consts.END_POINTS.USER.CREATE,
     authorization1,
     userValidation,
     validationParser,
@@ -45,7 +46,7 @@ userRouter.post("/",
         );
 })
 
-userRouter.delete("/:id",
+userRouter.delete(consts.END_POINTS.USER.DELETE_BY_ID,
     authorization1,
     async (req: Request, resp: Response) =>{
     const usertId = req.params.id;

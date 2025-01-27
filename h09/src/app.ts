@@ -9,7 +9,7 @@ import {commentRouter} from "./routers/comments-router";
 import cookieParser from 'cookie-parser'
 import {sessionRouter} from "./routers/session-route";
 import {activityAuditRouter} from "./routers/activity-audit-route";
-import {requestCounter} from "./midlewares/audit";
+import {consts} from "./app/global-consts";
 dotenv.config();
 export const app = express()
 app.set('trust proxy', true);
@@ -17,11 +17,11 @@ app.set('trust proxy', true);
 const jsonBodyMiddleWare = express.json();
 app.use(jsonBodyMiddleWare);
 app.use(cookieParser());
-app.use(process.env.BASE_URL + "testing", testingRouter);
-app.use(process.env.BASE_URL + "posts", postRouter);
-app.use(process.env.BASE_URL + "blogs", blogRouter);
-app.use(process.env.BASE_URL + "users", userRouter);
-app.use(process.env.BASE_URL + "auth", authRouter);
-app.use(process.env.BASE_URL + "comments", commentRouter);
-app.use(process.env.BASE_URL + "security/devices", sessionRouter);
-app.use(process.env.BASE_URL + "audit", activityAuditRouter);
+app.use(process.env.BASE_URL + consts.TESTING_BASE_END_POINT, testingRouter);
+app.use(process.env.BASE_URL + consts.POSTS_BASE_END_POINT, postRouter);
+app.use(process.env.BASE_URL + consts.BLOGS_BASE_END_POINT, blogRouter);
+app.use(process.env.BASE_URL + consts.USERS_BASE_END_POINT, userRouter);
+app.use(process.env.BASE_URL + consts.AUTH_BASE_END_POINT, authRouter);
+app.use(process.env.BASE_URL + consts.COMMENTS_BASE_END_POINT, commentRouter);
+app.use(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT, sessionRouter);
+app.use(process.env.BASE_URL + consts.ACTIVITY_AUDIT_COLLECTION, activityAuditRouter);

@@ -5,10 +5,11 @@ import {jwtRefreshTokenAuth} from "../midlewares/validations/authorization";
 import {validationParser} from "../midlewares/validations/validation-parser";
 import {getFormattedDate} from "../app/utilities";
 import {sessionValidation} from "../midlewares/validations/session-validation";
+import {consts} from "../app/global-consts";
 dotenv.config()
 export const sessionRouter = Router({});
 const sessionDbHandler = new RefreshTokenMetaDataDbHandler();
-sessionRouter.get("/",
+sessionRouter.get(consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES,
     jwtRefreshTokenAuth,
     validationParser,
     async (req:Request, resp: Response)=>{
@@ -22,7 +23,7 @@ sessionRouter.get("/",
 
 });
 
-sessionRouter.delete("/",
+sessionRouter.delete(consts.END_POINTS.SESSION.DELETE,
     jwtRefreshTokenAuth,
     validationParser,
     async (req:Request, resp: Response)=>{
@@ -38,7 +39,7 @@ sessionRouter.delete("/",
             .sendStatus(204)
 });
 
-sessionRouter.delete("/:deviceId",
+sessionRouter.delete(consts.END_POINTS.SESSION.DELETE_BY_ID,
     jwtRefreshTokenAuth,
     sessionValidation,
     validationParser,

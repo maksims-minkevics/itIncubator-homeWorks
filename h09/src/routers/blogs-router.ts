@@ -8,12 +8,14 @@ import {postValidation, queryIdValidation} from "../midlewares/validations/post-
 import { blogIdExtander } from "../midlewares/extanders/blog-id-extander";
 import {getBlogQueryExtander} from "../midlewares/extanders/req-query-extanders";
 import {queryIdValidator} from "../midlewares/validations/req-query-id-check";
+import {consts} from "../app/global-consts";
 
 export const blogRouter = Router({});
 const blogDbHandler = new blogDbHandlerClass();
 const postDbHandler = new postDbHandlerClass();
 
-blogRouter.get("/",
+blogRouter.get(
+    consts.END_POINTS.BLOGS.GET,
     getBlogQueryExtander,
     async (req, resp) => {
         return resp
@@ -29,7 +31,8 @@ blogRouter.get("/",
 
 });
 
-blogRouter.get("/:id",
+blogRouter.get(
+    consts.END_POINTS.BLOGS.GET_BY_ID,
     queryIdValidator,
     async (req, resp) => {
         const blogId = req.params.id;
@@ -45,7 +48,8 @@ blogRouter.get("/:id",
             .json(blog);
 });
 
-blogRouter.delete("/:id",
+blogRouter.delete(
+    consts.END_POINTS.BLOGS.DELETE_BY_ID,
     authorization1,
     queryIdValidator,
     async (req: Request, resp: Response) => {
@@ -59,7 +63,8 @@ blogRouter.delete("/:id",
 
 });
 
-blogRouter.put("/:id",
+blogRouter.put(
+    consts.END_POINTS.BLOGS.UPDATE_BY_ID,
     authorization1,
     queryIdValidator,
     blogValidation,
@@ -75,7 +80,8 @@ blogRouter.put("/:id",
             .sendStatus(204);
 });
 
-blogRouter.post("/",
+blogRouter.post(
+    consts.END_POINTS.BLOGS.CREATE,
     authorization1,
     blogValidation,
     validationParser,
@@ -88,7 +94,7 @@ blogRouter.post("/",
 
 
 blogRouter.post(
-    "/:id/posts",
+    consts.END_POINTS.BLOGS.CREATE_POST_FOR_BLOG,
     authorization1,
     queryIdValidator,
     queryIdValidation,
@@ -104,7 +110,8 @@ blogRouter.post(
     }
 );
 
-blogRouter.get("/:id/posts",
+blogRouter.get(
+    consts.END_POINTS.BLOGS.GET_POSTS_FOR_BLOG,
     queryIdValidator,
     getBlogQueryExtander,
     async (req: Request, resp: Response) => {

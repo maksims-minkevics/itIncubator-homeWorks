@@ -13,11 +13,13 @@ import {registrationEmailTemplate} from "../app/email-templates";
 import dotenv from "dotenv";
 import {settings} from "../settings";
 import {requestCounter} from "../midlewares/audit";
+import {consts} from "../app/global-consts";
 dotenv.config()
 
 
 export const authRouter = Router({});
-authRouter.post("/login",
+authRouter.post(
+    consts.END_POINTS.AUTH.LOGIN,
     requestCounter,
     authValidation,
     validationParser,
@@ -32,7 +34,8 @@ authRouter.post("/login",
                 accessToken: token
             })
     })
-authRouter.get("/me",
+authRouter.get(
+    consts.END_POINTS.AUTH.GET_DATA_ABOUT_CURRENT_ACTIVE_USER,
     jwtTokenAuth,
     async (req: Request, resp: Response) =>{
         const user = await userHelper.dbHandler.getUserByEmailLogin(
@@ -49,7 +52,7 @@ authRouter.get("/me",
     })
 
 authRouter.post(
-    "/registration-confirmation",
+    consts.END_POINTS.AUTH.REG_CONFIRMATION,
     requestCounter,
     async (req: Request, resp: Response) =>{
     const confirmationCode = req.body.code as string;
@@ -68,7 +71,8 @@ authRouter.post(
         .sendStatus(204);
     })
 
-authRouter.post("/registration",
+authRouter.post(
+    consts.END_POINTS.AUTH.REGISTRATION,
     requestCounter,
     registrationValidation,
     validationParser,
@@ -85,7 +89,8 @@ authRouter.post("/registration",
             .sendStatus(204)
     })
 
-authRouter.post("/registration-email-resending",
+authRouter.post(
+    consts.END_POINTS.AUTH.RESEND_REG_CONF_EMAIL,
     requestCounter,
     emailValidation,
     validationParser,
@@ -104,7 +109,8 @@ authRouter.post("/registration-email-resending",
 
 //TODO
 
-authRouter.post("/refresh-token",
+authRouter.post(
+    consts.END_POINTS.AUTH.REFRESH_TOKEN,
     jwtRefreshTokenAuth,
     validationParser,
     async (req: Request, resp: Response) =>{
@@ -120,7 +126,8 @@ authRouter.post("/refresh-token",
 
     });
 
-authRouter.post("/logout",
+authRouter.post(
+    consts.END_POINTS.AUTH.LOGOUT,
     jwtRefreshTokenAuth,
     validationParser,
     async (req: Request, resp: Response) =>{

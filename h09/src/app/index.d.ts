@@ -118,7 +118,8 @@ export type RefreshJwtTokenData = {
     token: string,
     deviceId: string,
     user: JwtTokenData,
-    expireAt: string
+    expireAt: string,
+    issuedAt: string
 }
 
 export type GeneratedRefreshJwtTokenData = {

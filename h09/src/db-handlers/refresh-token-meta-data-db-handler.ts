@@ -1,5 +1,5 @@
 import {refreshTokenMetaDataCollection} from "../app/db";
-import {RefreshTokenMetaDataDbModel} from "../app/index";
+import {RefreshTokenMetaDataDbModel, SessionViewModel} from "../app/index";
 import {mongoDbDate} from "../app/utilities";
 
 
@@ -9,7 +9,7 @@ class RefreshTokenMetaDataDbHandler{
         await refreshTokenMetaDataCollection.insertOne(metaData);
     };
 
-    async getAllActiveSessions(userId: string): Promise<RefreshTokenMetaDataDbModel[]> {
+    async getAllActiveSessions(userId: string): Promise<SessionViewModel[]> {
         const sessions = await refreshTokenMetaDataCollection
             .aggregate([
                 {
@@ -38,8 +38,7 @@ class RefreshTokenMetaDataDbHandler{
                 }
             ])
             .toArray();
-        console.log(sessions)
-        return sessions as RefreshTokenMetaDataDbModel[];
+        return sessions as SessionViewModel[];
     }
 
     async getActiveSession(deviceId: string): Promise<RefreshTokenMetaDataDbModel|null>{
@@ -122,8 +121,8 @@ class RefreshTokenMetaDataDbHandler{
 
         return result.modifiedCount > 0
     };
-    dropDb(){
-        refreshTokenMetaDataCollection.drop();
+    async dropDb(){
+        await refreshTokenMetaDataCollection.drop();
     }
 }
 
