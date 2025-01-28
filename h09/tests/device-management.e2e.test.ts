@@ -150,12 +150,10 @@ describe('Device Management Tests', () => {
     });
 
     it("the 'refresh' token should become invalid after '/auth/refresh-token' request", async () => {
-        console.log('-------------------------------------------------------------------')
         const refreshResponse = await request(app)
             .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.REFRESH_TOKEN)
             .set('Cookie', refreshToken1);
         expect(refreshResponse.status).toBe(settings.RESP_CODES.OK);
-        console.log('"the \'refresh\' token should become invalid after \'/auth/refresh-token\' request"')
         const logoutResponse = await request(app)
             .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.LOGOUT)
             .set('Cookie', refreshToken1);
