@@ -10,11 +10,8 @@ let accessToken1: string;
 let refreshToken1: string;
 let refreshToken2: string;
 let refreshToken3: string;
-let userId: string;
-let deviceId1: string;
-let deviceId2: string;
-let deviceId3: string;
-let deviceId4: string;
+let refreshToken4: string;
+
 
 // Создание пользователя
 beforeAll(async () => {
@@ -24,9 +21,15 @@ beforeAll(async () => {
 });
 
 
+
+
 describe('Device Management Tests', () => {
 
-    beforeAll(async () => {
+    beforeEach(async () => {
+        await request(app)
+            .delete(process.env.BASE_URL + consts.TESTING_BASE_END_POINT + consts.END_POINTS.TESTING.DELETE_ALL_DATA)
+            .expect(settings.RESP_CODES.NO_CONTENT);
+
         const basicAuth = await encodeToBase64ForBasicAuth(
             process.env.SUPER_SECRET_NAME || "",
             process.env.SUPER_SECRET_PSWRD || ""
@@ -38,11 +41,9 @@ describe('Device Management Tests', () => {
                 login: "itiincub12",
                 password: "string1234556",
                 email: "exampl1234@example.com"
-        })
-        .expect(settings.RESP_CODES.CREATED);
-    });
+            })
+            .expect(settings.RESP_CODES.CREATED);
 
-    it('should login user 4 times with different user-agents', async () => {
         const userAgents = ['Device-1', 'Device-2', 'Device-3', 'Device-4'];
 
         for (const agent of userAgents) {
@@ -62,9 +63,13 @@ describe('Device Management Tests', () => {
                 refreshToken2 = res.headers['set-cookie'];
             } else if (agent === 'Device-3') {
                 refreshToken3 = res.headers['set-cookie'];
+            } else if (agent === 'Device-4') {
+                refreshToken4 = res.headers['set-cookie'];
             }
         }
-    });
+
+    })
+
     it('should update refreshToken of device 1 and verify device list', async () => {
         const initialResponse = await request(app)
             .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
@@ -118,7 +123,14 @@ describe('Device Management Tests', () => {
         expect(
             devicesResponse.body.find((device: any) => device.title === 'Device-2')
         ).toBeUndefined();
+
+        const devicesResponse2 = await request(app)
+            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .set('Cookie', refreshToken2);
+
+        expect(devicesResponse2.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
     });
+
     it('should logout device 3 and verify it is removed from the list', async () => {
         const logoutResponse = await request(app)
             .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.LOGOUT)
@@ -133,6 +145,30 @@ describe('Device Management Tests', () => {
         expect(
             devicesResponse.body.find((device: any) => device.title === 'Device-3')
         ).toBeUndefined();
+
+        const devicesResponse3 = await request(app)
+            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .set('Cookie', refreshToken3);
+
+        expect(devicesResponse3.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
+
+        const devicesResponse1 = await request(app)
+            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .set('Cookie', refreshToken1);
+
+        expect(devicesResponse1.status).toBe(settings.RESP_CODES.OK);
+
+        const devicesResponse2 = await request(app)
+            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .set('Cookie', refreshToken2);
+
+        expect(devicesResponse2.status).toBe(settings.RESP_CODES.OK);
+
+        const devicesResponse4 = await request(app)
+            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .set('Cookie', refreshToken4);
+
+        expect(devicesResponse4.status).toBe(settings.RESP_CODES.OK);
     });
 
     it('should delete all devices except the current one', async () => {
@@ -147,17 +183,114 @@ describe('Device Management Tests', () => {
 
         expect(devicesResponse.status).toBe(settings.RESP_CODES.OK);
         expect(devicesResponse.body).toHaveLength(1);
+
+        const devicesResponse2 = await request(app)
+            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .set('Cookie', refreshToken2);
+
+        expect(devicesResponse2.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
+
+        const devicesResponse3 = await request(app)
+            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .set('Cookie', refreshToken2);
+
+        expect(devicesResponse3.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
+
+        const devicesResponse4 = await request(app)
+            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .set('Cookie', refreshToken4);
+
+        expect(devicesResponse4.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
+
     });
 
     it("the 'refresh' token should become invalid after '/auth/refresh-token' request", async () => {
-        const refreshResponse = await request(app)
+        const refreshResponse: any = await request(app)
             .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.REFRESH_TOKEN)
             .set('Cookie', refreshToken1);
         expect(refreshResponse.status).toBe(settings.RESP_CODES.OK);
+
         const logoutResponse = await request(app)
             .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.LOGOUT)
             .set('Cookie', refreshToken1);
+
+        expect(refreshResponse.body.accessToken === refreshToken1).toBe(false);
         expect(logoutResponse.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
+    });
+
+    it("the 'refresh' token should become invalid after POST: /auth/logout request", async () => {
+        const devicesResponse1 = await request(app)
+            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .set('Cookie', refreshToken1);
+
+        expect(devicesResponse1.status).toBe(settings.RESP_CODES.OK);
+
+        const devicesResponse1AfterLogOut = await request(app)
+            .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.LOGOUT)
+            .set('Cookie', refreshToken1);
+
+        expect(devicesResponse1AfterLogOut.status).toBe(settings.RESP_CODES.NO_CONTENT);
+
+        const getDevicesResponse1AfterLogOut = await request(app)
+            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .set('Cookie', refreshToken1);
+
+        expect(getDevicesResponse1AfterLogOut.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
+
+        const devicesResponse2 = await request(app)
+            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .set('Cookie', refreshToken2);
+
+        expect(devicesResponse2.status).toBe(settings.RESP_CODES.OK);
+
+        const devicesResponse3 = await request(app)
+            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .set('Cookie', refreshToken3);
+
+        expect(devicesResponse3.status).toBe(settings.RESP_CODES.OK);
+
+        const devicesResponse4 = await request(app)
+            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .set('Cookie', refreshToken4);
+
+        expect(devicesResponse4.status).toBe(settings.RESP_CODES.OK);
+    });
+
+    it("/security/devices: should not change device id after call /auth/refresh-token. LastActiveDate should be changed; status 200; content: device list;", async () => {
+        const devicesBeforeRefreshToken: any = await request(app)
+            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .set('Cookie', refreshToken1);
+        expect(devicesBeforeRefreshToken.status).toBe(settings.RESP_CODES.OK);
+        expect(devicesBeforeRefreshToken.body).toHaveLength(4);
+
+        const refreshResponse: any = await request(app)
+            .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.REFRESH_TOKEN)
+            .set('Cookie', refreshToken1);
+        expect(refreshResponse.status).toBe(settings.RESP_CODES.OK);
+
+        const devicesAfterRefreshToken: any = await request(app)
+            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .set('Cookie', refreshResponse.headers['set-cookie']);
+        expect(devicesAfterRefreshToken.status).toBe(settings.RESP_CODES.OK);
+        expect(devicesAfterRefreshToken.body).toHaveLength(4);
+        for (const beforeDevice of devicesBeforeRefreshToken.body) {
+            const afterDevice = devicesAfterRefreshToken.body.find(
+                (device: any) => device.title === beforeDevice.title
+            );
+            expect(afterDevice).toBeDefined();
+            expect(afterDevice.deviceId).toBe(beforeDevice.deviceId);
+            if (beforeDevice.title === 'Device-1'){
+                expect(new Date(afterDevice.lastActiveDate).getTime()).toBeGreaterThan(
+                    new Date(beforeDevice.lastActiveDate).getTime()
+                );
+            }
+            else {
+                expect(new Date(afterDevice.lastActiveDate).getTime()).toEqual(
+                    new Date(beforeDevice.lastActiveDate).getTime()
+                );
+            }
+        }
+
     });
 
 });

@@ -11,7 +11,6 @@ import {consts} from "../app/global-consts";
 export const testingRouter = Router({});
 
 testingRouter.delete(consts.END_POINTS.TESTING.DELETE_ALL_DATA, async (req, resp) =>{
-    console.log('db cleared')
     const blogDbHandler = new blogDbHandlerClass();
     const postDbHandler = new postDbHandlerClass();
     const userDbHandler = new userDbHandlerClass();
