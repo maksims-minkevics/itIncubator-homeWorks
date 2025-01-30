@@ -61,7 +61,7 @@ export const jwtTokenAuth = async (req: Request, resp: Response, next: NextFunct
 
 
 export const jwtRefreshTokenAuth= async (req: Request, resp: Response, next: NextFunction) => {
-    if (!req.cookies && Object.keys(req.cookies).includes("refreshToken"))
+    if (!req.cookies || !(req.cookies && Object.keys(req.cookies).includes("refreshToken")))
     {
         resp
             .sendStatus(401);
@@ -118,6 +118,6 @@ export const basicAuth =
         }
         //TODO
         //MOVE TO SEPARATE METHOD
-        req.user = {userId: user!.id, userLogin: user!.login}
+        req.user = {userId: user.id, userLogin: user.login}
         next();
     };

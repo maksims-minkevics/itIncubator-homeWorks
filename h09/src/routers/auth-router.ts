@@ -14,6 +14,7 @@ import dotenv from "dotenv";
 import {settings} from "../settings";
 import {requestCounter} from "../midlewares/audit";
 import {consts} from "../app/global-consts";
+
 dotenv.config()
 
 
@@ -24,7 +25,7 @@ authRouter.post(
     authValidation,
     validationParser,
     basicAuth,
-    async (req: Request, resp: Response) =>{
+    async (req: Request, resp: Response) => {
         const token = await jwttokenService.generate(req.user);
         const refreshToken = await jwttokenService.generateRtoken(req);
         resp.cookie("refreshToken", refreshToken, settings.REFRESH_TOKEN_PARAMETERS);
@@ -37,7 +38,7 @@ authRouter.post(
 authRouter.get(
     consts.END_POINTS.AUTH.GET_DATA_ABOUT_CURRENT_ACTIVE_USER,
     jwtTokenAuth,
-    async (req: Request, resp: Response) =>{
+    async (req: Request, resp: Response) => {
         const user = await userHelper.dbHandler.getUserByEmailLogin(
             req.user.userLogin,
             req.user.userLogin
@@ -54,21 +55,21 @@ authRouter.get(
 authRouter.post(
     consts.END_POINTS.AUTH.REG_CONFIRMATION,
     requestCounter,
-    async (req: Request, resp: Response) =>{
-    const confirmationCode = req.body.code as string;
-    if(!confirmationCode){
-        return resp
-            .sendStatus(400);
-    }
-    const confirmationResult = await userHelper.confirmRegistration(confirmationCode);
-    if(confirmationResult._isValidationFailed){
-        return resp
-            .status(400)
-            .json(confirmationResult.data);
+    async (req: Request, resp: Response) => {
+        const confirmationCode = req.body.code as string;
+        if (!confirmationCode) {
+            return resp
+                .sendStatus(400);
+        }
+        const confirmationResult = await userHelper.confirmRegistration(confirmationCode);
+        if (confirmationResult._isValidationFailed) {
+            return resp
+                .status(400)
+                .json(confirmationResult.data);
 
-    }
-    return resp
-        .sendStatus(204);
+        }
+        return resp
+            .sendStatus(204);
     })
 
 authRouter.post(
@@ -76,9 +77,9 @@ authRouter.post(
     requestCounter,
     registrationValidation,
     validationParser,
-    async (req: Request, resp: Response) =>{
+    async (req: Request, resp: Response) => {
         const confirmationData = await userHelper.newUserRegistration(req.body);
-        if(confirmationData._isValidationFailed){
+        if (confirmationData._isValidationFailed) {
             return resp
                 .status(400)
                 .json(confirmationData.data)
@@ -94,9 +95,9 @@ authRouter.post(
     requestCounter,
     emailValidation,
     validationParser,
-    async (req: Request, resp: Response) =>{
+    async (req: Request, resp: Response) => {
         const confirmationData = await userHelper.getUseForReConfirmation(req.body.email);
-        if (confirmationData._isValidationFailed){
+        if (confirmationData._isValidationFailed) {
             return resp
                 .status(400)
                 .json(confirmationData.data)
@@ -105,24 +106,25 @@ authRouter.post(
         await mailService.sendEmail(req.body.email, registrationEmailTemplate(confirmationData.user!.confirmationCode), "Test Email");
         return resp
             .sendStatus(204);
-});
+    });
 
 //TODO
 
 authRouter.post(
     consts.END_POINTS.AUTH.REFRESH_TOKEN,
     jwtRefreshTokenAuth,
-    validationParser,
-    async (req: Request, resp: Response) =>{
-    const result = await jwttokenService.generateRtoken(
-        req
-    );
-    resp.cookie("refreshToken", result, settings.REFRESH_TOKEN_PARAMETERS);
-    return resp
-        .status(200)
-        .json({
-            accessToken: result
-        })
+    async (req: Request, resp: Response) => {
+
+        const token = await jwttokenService.generate(req.user)
+        const result = await jwttokenService.generateRtoken(
+            req
+        );
+        resp.cookie("refreshToken", result, settings.REFRESH_TOKEN_PARAMETERS);
+        return resp
+            .status(200)
+            .json({
+                accessToken: token
+            })
 
     });
 
@@ -130,8 +132,9 @@ authRouter.post(
     consts.END_POINTS.AUTH.LOGOUT,
     jwtRefreshTokenAuth,
     validationParser,
-    async (req: Request, resp: Response) =>{
+    async (req: Request, resp: Response) => {
         await jwttokenService.cancelRefreshToken(req.refreshToken);
+        resp.clearCookie("refreshToken");
         resp
             .sendStatus(204)
         return;

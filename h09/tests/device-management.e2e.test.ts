@@ -214,7 +214,6 @@ describe('Device Management Tests', () => {
             .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.LOGOUT)
             .set('Cookie', refreshToken1);
 
-        expect(refreshResponse.body.accessToken === refreshToken1).toBe(false);
         expect(logoutResponse.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
     });
 
