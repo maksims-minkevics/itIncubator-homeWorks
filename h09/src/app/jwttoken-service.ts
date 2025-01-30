@@ -73,6 +73,7 @@ export const jwttokenService = (() => {
                 }
 
             );
+
         },
 
         async createNewSession (req: Request, deviceId: string, token: {token: string, expireAt: string}, issuedAt: string){
@@ -95,13 +96,15 @@ export const jwttokenService = (() => {
         async generateRtoken(
             req: Request,
         ): Promise<string> {
+
+            const getFields: Record<string, any> = {};
+            if (req.ip) getFields.ip = req.ip;
+            if (req.deviceId) getFields.deviceId = req.deviceId;
+            if (req.headers["user-agent"]) getFields.deviceName = req.headers["user-agent"];
+            getFields.userId = req.user.userId;
+
             const isDeviceAdded = await rTokenDbHandler.get(
-                {
-                    userId: req.user.userId,
-                    ip: req.ip || "",
-                    deviceName: req.headers["user-agent"],
-                    deviceId: req.deviceId || undefined
-                }
+                getFields
             )
 
             const issuedAt = await getFormattedDate();
@@ -148,7 +151,6 @@ export const jwttokenService = (() => {
         },
 
         async verifyRefreshToken(token: string): Promise<RefreshJwtTokenData | undefined> {
-            console.log('verifyRefreshToken')
             try {
                 const tokenData = jwt.verify(token, rJwtTokenSalt) as RefreshJwtTokenData;
                 const tokenMetaData = await rTokenDbHandler.getActiveSession(tokenData.deviceId);
@@ -162,10 +164,11 @@ export const jwttokenService = (() => {
                 if (expireDate.getTime() < new Date().getTime()) {
                     throw new Error("Token has expired");
                 }
-                console.log('tokenMetaData', tokenMetaData.issuedAt);
-                console.log('tokenData', tokenData.issuedAt);
                 if (tokenMetaData.issuedAt !== tokenData.issuedAt) {
-                    console.log("Token metadata mismatch")
+                    throw new Error("Token metadata mismatch");
+                }
+
+                if (tokenMetaData.expireAt !== tokenData.expireAt) {
                     throw new Error("Token metadata mismatch");
                 }
 

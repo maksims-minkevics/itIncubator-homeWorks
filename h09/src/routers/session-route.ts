@@ -47,7 +47,7 @@ sessionRouter.delete(consts.END_POINTS.SESSION.DELETE_BY_ID,
         const isSesstionDeactivated = await sessionDbHandler.updateSession(
             req.params.deviceId,
             {expireAt: await getFormattedDate()},
-            false);
+            );
         if(!isSesstionDeactivated){
             return resp.sendStatus(404);
         }

@@ -76,7 +76,7 @@ class RefreshTokenMetaDataDbHandler{
         ).toArray();
     }
 
-    async updateSession(deviceId = "", {issuedAt = "", expireAt = "", lastActiveDate = "" }, upsert = true) {
+    async updateSession(deviceId = "", {issuedAt = "", expireAt = "", lastActiveDate = "" }) {
         const updateFields: Record<string, any> = {};
 
         if (issuedAt) updateFields.issuedAt = issuedAt;
@@ -87,9 +87,7 @@ class RefreshTokenMetaDataDbHandler{
         const result = await refreshTokenMetaDataCollection.updateOne(
             { deviceId: deviceId },
             { $set: updateFields },
-            { upsert: upsert }
         );
-
         return result.modifiedCount > 0;
     }
 
@@ -104,12 +102,14 @@ class RefreshTokenMetaDataDbHandler{
             issuedAt = "",
             expireAt = "",
             lastActiveDate = ""
-        } = {}):Promise<boolean>{
+        }
+    ):Promise<boolean>{
         const updateFields: Record<string, any> = {};
 
         if (issuedAt) updateFields.issuedAt = issuedAt;
         if (expireAt) updateFields.expireAt = expireAt;
         if (lastActiveDate) updateFields.lastActiveDate = lastActiveDate;
+        console.log(updateFields)
 
         const result = await refreshTokenMetaDataCollection.updateMany(
             {
