@@ -1,6 +1,6 @@
 import {validationParser} from "../midlewares/validations/validation-parser";
 import {Request, Response, Router} from "express";
-import {basicAuth, jwtRefreshTokenAuth, jwtTokenAuth} from "../midlewares/validations/authorization";
+import {customBasicAuth, jwtRefreshTokenAuth, jwtTokenAuth} from "../midlewares/validations/authorization";
 import {
     authValidation,
     emailValidation,
@@ -24,7 +24,7 @@ authRouter.post(
     requestCounter,
     authValidation,
     validationParser,
-    basicAuth,
+    customBasicAuth,
     async (req: Request, resp: Response) => {
         const token = await jwttokenService.generate(req.user);
         const refreshToken = await jwttokenService.generateRtoken(req);
@@ -114,7 +114,6 @@ authRouter.post(
     consts.END_POINTS.AUTH.REFRESH_TOKEN,
     jwtRefreshTokenAuth,
     async (req: Request, resp: Response) => {
-
         const token = await jwttokenService.generate(req.user)
         const result = await jwttokenService.generateRtoken(
             req
