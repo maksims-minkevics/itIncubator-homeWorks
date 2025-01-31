@@ -11,6 +11,7 @@ let refreshToken1: string;
 let refreshToken2: string;
 let refreshToken3: string;
 let refreshToken4: string;
+let deviceId1: string;
 
 
 // Создание пользователя
@@ -71,6 +72,7 @@ describe('Device Management Tests', () => {
     })
 
     it('should update refreshToken of device 1 and verify device list', async () => {
+        console.log(refreshToken1)
         const initialResponse = await request(app)
             .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
             .set('Cookie', refreshToken1);
@@ -205,10 +207,22 @@ describe('Device Management Tests', () => {
     });
 
     it("the 'refresh' token should become invalid after '/auth/refresh-token' request", async () => {
+
+        const allActiveDevices = await request(app)
+            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .set('Cookie', refreshToken1);
+        const device1 = allActiveDevices.body.find((device: any) => device.title === 'Device-1')
+
+        const deleteResponse = await request(app)
+            .delete(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + `/${device1.deviceId}`)
+            .set('Cookie', refreshToken1);
+
+        expect(deleteResponse.status).toBe(settings.RESP_CODES.NO_CONTENT);
+
         const refreshResponse: any = await request(app)
             .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.REFRESH_TOKEN)
             .set('Cookie', refreshToken1);
-        expect(refreshResponse.status).toBe(settings.RESP_CODES.OK);
+        expect(refreshResponse.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
 
         const logoutResponse = await request(app)
             .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.LOGOUT)

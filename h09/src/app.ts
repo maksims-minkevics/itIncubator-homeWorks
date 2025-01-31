@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser'
 import {sessionRouter} from "./routers/session-route";
 import {activityAuditRouter} from "./routers/activity-audit-route";
 import {consts} from "./app/global-consts";
+import {saveHwData} from "./midlewares/hw-data";
 dotenv.config();
 export const app = express()
 app.set('trust proxy', true);
@@ -17,6 +18,7 @@ app.set('trust proxy', true);
 const jsonBodyMiddleWare = express.json();
 app.use(jsonBodyMiddleWare);
 app.use(cookieParser());
+app.use(saveHwData);
 app.use(process.env.BASE_URL + consts.TESTING_BASE_END_POINT, testingRouter);
 app.use(process.env.BASE_URL + consts.POSTS_BASE_END_POINT, postRouter);
 app.use(process.env.BASE_URL + consts.BLOGS_BASE_END_POINT, blogRouter);

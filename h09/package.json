@@ -17,7 +17,7 @@
     "dev": "yarn nodemon --inspect dist/index.js",
     "watch": "tsc -w",
     "jest": "jest -i",
-    "test": "jest --forceExit"
+    "test": "jest --detectOpenHandles --forceExit "
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

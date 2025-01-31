@@ -103,18 +103,18 @@ export const jwttokenService = (() => {
             if (req.headers["user-agent"]) getFields.deviceName = req.headers["user-agent"];
             getFields.userId = req.user.userId;
 
-            const isDeviceAdded = await rTokenDbHandler.get(
+            const isDeviceAdded = await rTokenDbHandler.getOne(
                 getFields
             )
 
             const issuedAt = await getFormattedDate();
-            if (isDeviceAdded?.length){
+            if (isDeviceAdded){
                 const newTokenData = await this.generateRefreshJwtToken(
                     req.user,
-                    isDeviceAdded[0].deviceId,
+                    isDeviceAdded.deviceId,
                     issuedAt
                 )
-                const deviceId = isDeviceAdded[0].deviceId;
+                const deviceId = isDeviceAdded.deviceId;
                 await this.updateSession(
                     req,
                     deviceId,

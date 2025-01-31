@@ -86,7 +86,7 @@ export const jwtRefreshTokenAuth= async (req: Request, resp: Response, next: Nex
     next();
 }
 
-export const basicAuth =
+export const customBasicAuth =
     async (req: Request, res: Response, next: NextFunction) => {
         const authHeader = req.body;
         if (!authHeader) {

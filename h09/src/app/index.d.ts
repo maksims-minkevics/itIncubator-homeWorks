@@ -170,3 +170,13 @@ export type SessionViewModel = {
     lastActiveDate: string,
     deviceId: string
 }
+
+export type HomeWorkData = {
+    reqBody: any,
+    reqUrl: string
+    reqHeaders: any
+    reqMethod: string
+    time: Date,
+    refreshToken: string | string[],
+    parsedRefteshToken: any
+}

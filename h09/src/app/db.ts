@@ -3,7 +3,7 @@ import {MongoClient} from 'mongodb'
 import {
     ActivityAuditDbModel,
     BlogViewModel,
-    CommentDbModel,
+    CommentDbModel, HomeWorkData,
     PostViewModel,
     RefreshTokenMetaDataDbModel,
     UserDbModel
@@ -21,6 +21,7 @@ export const commentCollection = blogerPlatform.collection<CommentDbModel>(const
 export const refreshTokenMetaDataCollection = blogerPlatform.collection<RefreshTokenMetaDataDbModel>(consts.SESSIONS_COLLECTION);
 
 export const activityAuditCollection = blogerPlatform.collection<ActivityAuditDbModel >(consts.ACTIVITY_AUDIT_COLLECTION);
+export const hwDataCollection = blogerPlatform.collection<HomeWorkData >(consts.HOME_WORK_DATA_COLLECTION);
 
 
 export async function dbRun(){

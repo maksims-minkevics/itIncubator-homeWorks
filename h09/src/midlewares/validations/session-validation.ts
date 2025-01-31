@@ -9,16 +9,16 @@ export const sessionValidation= async (req: Request, resp: Response, next: NextF
             .sendStatus(401);
     }
 
-    const isValidUser = await sessionDbHandler.get(
+    const isValidUser = await sessionDbHandler.getOne(
         {
             deviceId: req.params.deviceId
         }
     )
-    if (!isValidUser?.length){
+    if (!isValidUser){
         return resp
             .sendStatus(404);
     }
-    if (isValidUser[0].userId !== req.user.userId){
+    if (isValidUser.userId !== req.user.userId){
         return resp
             .sendStatus(403);
     }

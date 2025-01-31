@@ -45,7 +45,7 @@ class RefreshTokenMetaDataDbHandler{
         return (await refreshTokenMetaDataCollection.findOne({deviceId: deviceId}, { projection: { _id: 0} }));
     };
 
-    async get({
+    async getOne({
         deviceId = "",
         userId = "",
         issuedAt = "",
@@ -53,7 +53,7 @@ class RefreshTokenMetaDataDbHandler{
         lastActiveDate = "",
         ip = "",
         deviceName = ""
-    }): Promise<RefreshTokenMetaDataDbModel[] | null> {
+    }): Promise<RefreshTokenMetaDataDbModel | null> {
         const getFields: Record<string, any> = {};
 
         if (deviceId) getFields.deviceId = deviceId;
@@ -69,11 +69,11 @@ class RefreshTokenMetaDataDbHandler{
         }
 
         return (
-            refreshTokenMetaDataCollection.find(
+            refreshTokenMetaDataCollection.findOne(
                 getFields,
                 { projection: { _id: 0 } }
             )
-        ).toArray();
+        )
     }
 
     async updateSession(deviceId = "", {issuedAt = "", expireAt = "", lastActiveDate = "" }) {
