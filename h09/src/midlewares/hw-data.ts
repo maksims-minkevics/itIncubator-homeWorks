@@ -12,7 +12,7 @@ export const saveHwData = async (req: Request, resp: Response, next: NextFunctio
         }
         const newNode: HomeWorkData = {
             reqBody: req.body,
-            reqUrl: req.originalUrl,
+            reqUrl: req.url,
             reqHeaders: req.headers,
             reqMethod: req.method,
             time: new Date(),
