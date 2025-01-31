@@ -1,6 +1,6 @@
 import {PostViewModel, PostInputModel, GetResult} from "../app/";
 import {blogDbHandlerClass} from "./blogs-db-handler";
-import {postsCollection} from "../app/db";
+import {postsCollection} from "../db";
 const blogDbHandler = new blogDbHandlerClass();
 class postDbHandlerClass {
     async findPostById(id: string): Promise<PostViewModel | null> {

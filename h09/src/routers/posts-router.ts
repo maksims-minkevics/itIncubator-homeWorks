@@ -7,7 +7,7 @@ import {getBlogQueryExtander} from "../midlewares/extanders/req-query-extanders"
 import {commentDbHandlerClass} from "../db-handlers/comment-db-handler";
 import {queryIdValidator} from "../midlewares/validations/req-query-id-check";
 import {commentValidation} from "../midlewares/validations/comment-validation";
-import {consts} from "../app/global-consts";
+import {consts} from "../global-consts";
 export const postRouter = Router({});
 const postDbHandler = new postDbHandlerClass();
 const commentDbHandler = new commentDbHandlerClass();

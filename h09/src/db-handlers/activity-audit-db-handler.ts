@@ -1,5 +1,5 @@
-import {ActivityAuditDbModel} from "../app/index";
-import {activityAuditCollection, refreshTokenMetaDataCollection} from "../app/db";
+import {ActivityAuditDbModel} from "../index";
+import {activityAuditCollection, refreshTokenMetaDataCollection} from "../db";
 
 
 class activityAuditDbHandler {

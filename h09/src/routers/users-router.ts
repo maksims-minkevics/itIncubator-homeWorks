@@ -4,8 +4,8 @@ import {userHelper} from "../business-logic/user-business-logic";
 import {validationParser} from "../midlewares/validations/validation-parser";
 import {getUserQueryExtander} from "../midlewares/extanders/req-query-extanders";
 import {authorization1} from "../midlewares/validations/authorization";
-import {UserDbModel} from "../app/index";
-import {consts} from "../app/global-consts";
+import {UserDbModel} from "../index";
+import {consts} from "../global-consts";
 export const userRouter = Router({});
 
 userRouter.get(consts.END_POINTS.USER.GET,

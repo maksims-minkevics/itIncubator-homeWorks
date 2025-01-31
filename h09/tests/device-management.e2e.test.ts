@@ -1,10 +1,10 @@
 import request from 'supertest';
 import {app} from '../src/app';
-import {SessionViewModel} from '../src/app/index';
+import {SessionViewModel} from '../src';
 import {settings} from "../src/settings";
 import dotenv from "dotenv";
-import {encodeToBase64ForBasicAuth} from "../src/app/utilities";
-import {consts} from "../src/app/global-consts";
+import {encodeToBase64ForBasicAuth} from "../src/utilities";
+import {consts} from "../src/global-consts";
 dotenv.config();
 let accessToken1: string;
 let refreshToken1: string;

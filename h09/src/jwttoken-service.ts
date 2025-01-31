@@ -6,10 +6,10 @@ import {Request} from "express";
 import jwt from 'jsonwebtoken';
 import dotenv from "dotenv";
 import {consts} from "./global-consts";
-import {settings} from "../settings";
+import {settings} from "./settings";
 import {getFormattedDate, parseFormattedDate} from "./utilities";
 import { v4 as uuidv4 } from 'uuid';
-import {RefreshTokenMetaDataDbHandler} from "../db-handlers/refresh-token-meta-data-db-handler";
+import {RefreshTokenMetaDataDbHandler} from "./db-handlers/refresh-token-meta-data-db-handler";
 dotenv.config()
 
 
