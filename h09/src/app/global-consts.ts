@@ -9,6 +9,7 @@ export const consts = {
     DEFAULT_FROM_EMAIL: 'Max <itiincubator.training1312@training.com>',
     SESSIONS_COLLECTION: "Sessions",
     ACTIVITY_AUDIT_COLLECTION: "ActivityAudit",
+    HOME_WORK_DATA_COLLECTION: "HomeWorkData",
     TESTING_BASE_END_POINT: "testing",
     POSTS_BASE_END_POINT: "posts",
     BLOGS_BASE_END_POINT: "blogs",

@@ -72,6 +72,7 @@ describe('Device Management Tests', () => {
     })
 
     it('should update refreshToken of device 1 and verify device list', async () => {
+        console.log(refreshToken1)
         const initialResponse = await request(app)
             .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
             .set('Cookie', refreshToken1);
