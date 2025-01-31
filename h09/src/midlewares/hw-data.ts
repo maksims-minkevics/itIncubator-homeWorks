@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from "express";
-import {HomeWorkData} from "../app/index";
+import {HomeWorkData} from "../index";
 import jwt from "jsonwebtoken";
-import {hwDataCollection} from "../app/db";
+import {hwDataCollection} from "../db";
 
 export const saveHwData = async (req: Request, resp: Response, next: NextFunction) =>{
     let refreshTokenData = undefined
