@@ -1,4 +1,4 @@
-import {hwDataCollection} from "../app/db";
+import {hwDataCollection} from "../db";
 
 
 class hwDataDbHandler{

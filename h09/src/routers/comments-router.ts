@@ -4,7 +4,7 @@ import {jwtTokenAuth} from "../midlewares/validations/authorization";
 import {commentValidation} from "../midlewares/validations/comment-validation";
 import {queryIdValidator} from "../midlewares/validations/req-query-id-check";
 import {commentDbHandlerClass} from "../db-handlers/comment-db-handler";
-import {consts} from "../app/global-consts";
+import {consts} from "../global-consts";
 export const commentRouter = Router({});
 
 const commentDbHandler = new commentDbHandlerClass();

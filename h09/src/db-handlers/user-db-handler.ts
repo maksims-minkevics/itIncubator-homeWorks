@@ -1,5 +1,5 @@
 import { GetResult, UserDbModel, UserInputModel } from "../app/";
-import {userCollection} from "../app/db";
+import {userCollection} from "../db";
 class userDbHandlerClass {
     async getAllUsers({
                           sortBy = "createdAt",

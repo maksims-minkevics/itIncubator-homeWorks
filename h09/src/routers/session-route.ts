@@ -3,9 +3,9 @@ import dotenv from "dotenv";
 import {RefreshTokenMetaDataDbHandler} from "../db-handlers/refresh-token-meta-data-db-handler";
 import {jwtRefreshTokenAuth} from "../midlewares/validations/authorization";
 import {validationParser} from "../midlewares/validations/validation-parser";
-import {getFormattedDate} from "../app/utilities";
+import {getFormattedDate} from "../utilities";
 import {sessionValidation} from "../midlewares/validations/session-validation";
-import {consts} from "../app/global-consts";
+import {consts} from "../global-consts";
 dotenv.config()
 export const sessionRouter = Router({});
 const sessionDbHandler = new RefreshTokenMetaDataDbHandler();

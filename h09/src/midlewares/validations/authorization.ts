@@ -1,8 +1,8 @@
 import {NextFunction, Request, Response} from "express";
 import dotenv from "dotenv";
 import {userHelper} from "../../business-logic/user-business-logic";
-import {jwttokenService} from "../../app/jwttoken-service";
-import {JwtTokenData, RefreshJwtTokenData} from "../../app/index";
+import {jwttokenService} from "../../jwttoken-service";
+import {JwtTokenData, RefreshJwtTokenData} from "../../index";
 dotenv.config();
 
 
