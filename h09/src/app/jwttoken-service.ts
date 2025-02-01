@@ -114,7 +114,8 @@ export const jwttokenService = (() => {
                 const newTokenData = await this.generateRefreshJwtToken(
                     req.user,
                     isDeviceAdded.deviceId,
-                    issuedAt
+                    issuedAt,
+                    req
                 )
                 const deviceId = isDeviceAdded.deviceId;
                 await this.updateSession(
@@ -130,7 +131,8 @@ export const jwttokenService = (() => {
                 const newTokenData = await this.generateRefreshJwtToken(
                     req.user,
                     deviceId,
-                    issuedAt
+                    issuedAt,
+                    req
                 )
                 await this.createNewSession(
                     req,
