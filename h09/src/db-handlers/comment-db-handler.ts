@@ -4,7 +4,7 @@ import {
     CommentInputModel,
     CommentViewModel, GetResult,
 } from "../app/";
-import {commentCollection} from "../app/db";
+import {commentCollection} from "../db";
 import {postDbHandlerClass} from "./posts-db-handler";
 
 const postDbHandler = new postDbHandlerClass();

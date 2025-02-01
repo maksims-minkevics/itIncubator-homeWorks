@@ -1,6 +1,6 @@
 import {Request, Response, NextFunction} from "express";
 import {activityAuditDbHandler} from "../db-handlers/activity-audit-db-handler";
-import {ActivityAuditDbModel} from "../app/index";
+import {ActivityAuditDbModel} from "../index";
 const auditActivityDbHandler = new activityAuditDbHandler();
 export const requestCounter = async (req: Request, resp: Response, next: NextFunction)=> {
     const a = await auditActivityDbHandler.create(

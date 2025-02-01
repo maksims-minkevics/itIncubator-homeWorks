@@ -5,7 +5,7 @@ import {userDbHandlerClass} from "../db-handlers/user-db-handler";
 import {commentDbHandlerClass} from "../db-handlers/comment-db-handler";
 import {RefreshTokenMetaDataDbHandler} from "../db-handlers/refresh-token-meta-data-db-handler";
 import {activityAuditDbHandler} from "../db-handlers/activity-audit-db-handler";
-import {consts} from "../app/global-consts";
+import {consts} from "../global-consts";
 
 
 export const testingRouter = Router({});
