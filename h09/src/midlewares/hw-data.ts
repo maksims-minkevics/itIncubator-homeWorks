@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from "express";
-import {HomeWorkData} from "../app/index";
+import {HomeWorkData} from "../index";
 import jwt from "jsonwebtoken";
-import {hwDataCollection} from "../app/db";
+import {hwDataCollection} from "../db";
 
 export const saveHwData = async (req: Request, resp: Response, next: NextFunction) =>{
     let refreshTokenData = undefined
@@ -12,7 +12,7 @@ export const saveHwData = async (req: Request, resp: Response, next: NextFunctio
         }
         const newNode: HomeWorkData = {
             reqBody: req.body,
-            reqUrl: req.originalUrl,
+            reqUrl: req.url,
             reqHeaders: req.headers,
             reqMethod: req.method,
             time: new Date(),

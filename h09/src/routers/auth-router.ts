@@ -6,14 +6,14 @@ import {
     emailValidation,
     registrationValidation
 } from "../midlewares/validations/authorization-data-validation";
-import {jwttokenService} from "../app/jwttoken-service";
+import {jwttokenService} from "../jwttoken-service";
 import {userHelper} from "../business-logic/user-business-logic";
-import {mailService} from "../app/email-service";
-import {registrationEmailTemplate} from "../app/email-templates";
+import {mailService} from "../email-service";
+import {registrationEmailTemplate} from "../email-templates";
 import dotenv from "dotenv";
 import {settings} from "../settings";
 import {requestCounter} from "../midlewares/audit";
-import {consts} from "../app/global-consts";
+import {consts} from "../global-consts";
 
 dotenv.config()
 

@@ -1,5 +1,5 @@
 import {BlogViewModel, BlogInputModel, GetResult, BlogDbModel} from "../app/";
-import {blogCollection} from "../app/db";
+import {blogCollection} from "../db";
 class blogDbHandlerClass {
 
     async findBlogbyId(id?: string): Promise<BlogViewModel | null> {

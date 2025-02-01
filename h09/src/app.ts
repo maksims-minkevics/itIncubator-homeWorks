@@ -9,7 +9,7 @@ import {commentRouter} from "./routers/comments-router";
 import cookieParser from 'cookie-parser'
 import {sessionRouter} from "./routers/session-route";
 import {activityAuditRouter} from "./routers/activity-audit-route";
-import {consts} from "./app/global-consts";
+import {consts} from "./global-consts";
 import {saveHwData} from "./midlewares/hw-data";
 dotenv.config();
 export const app = express()

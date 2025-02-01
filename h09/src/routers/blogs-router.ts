@@ -8,7 +8,7 @@ import {postValidation, queryIdValidation} from "../midlewares/validations/post-
 import { blogIdExtander } from "../midlewares/extanders/blog-id-extander";
 import {getBlogQueryExtander} from "../midlewares/extanders/req-query-extanders";
 import {queryIdValidator} from "../midlewares/validations/req-query-id-check";
-import {consts} from "../app/global-consts";
+import {consts} from "../global-consts";
 
 export const blogRouter = Router({});
 const blogDbHandler = new blogDbHandlerClass();

@@ -1,6 +1,6 @@
-import {refreshTokenMetaDataCollection} from "../app/db";
-import {RefreshTokenMetaDataDbModel, SessionViewModel} from "../app/index";
-import {mongoDbDate} from "../app/utilities";
+import {refreshTokenMetaDataCollection} from "../db";
+import {RefreshTokenMetaDataDbModel, SessionViewModel} from "../index";
+import {mongoDbDate} from "../utilities";
 
 
 class RefreshTokenMetaDataDbHandler{
