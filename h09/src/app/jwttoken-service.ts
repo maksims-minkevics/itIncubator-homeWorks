@@ -41,7 +41,7 @@ export const jwttokenService = (() => {
             const decoded = jwt.verify(token, jwtTokenSalt);
             return decoded as JwtTokenData;
         },
-        async generateRefreshJwtToken(user: JwtTokenData, deviceId: string, issuedAt: string){
+        async generateRefreshJwtToken(user: JwtTokenData, deviceId: string, issuedAt: string, req: Request){
             const expireAt = await getFormattedDate({
                 seconds: settings.REFRESH_TOKEN_EXP_TIME
             });
@@ -53,7 +53,9 @@ export const jwttokenService = (() => {
                     },
                     deviceId: deviceId,
                     expireAt: expireAt,
-                    issuedAt: issuedAt
+                    issuedAt: issuedAt,
+                    agent: req.headers['user-agent'] || "",
+                    ip: req.ip || ""
                 },
                 rJwtTokenSalt,
                 {

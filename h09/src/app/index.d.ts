@@ -179,4 +179,5 @@ export type HomeWorkData = {
     time: Date,
     refreshToken: string | string[],
     parsedRefteshToken: any
+    status: number | undefined
 }
