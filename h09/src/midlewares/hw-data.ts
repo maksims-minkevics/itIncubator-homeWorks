@@ -7,7 +7,7 @@ export const saveHwData = async (req: Request, resp: Response, next: NextFunctio
     let refreshTokenData = undefined
         if (req.headers['cookie']){
             refreshTokenData = jwt.decode(
-                req.headers['cookie'].split('=')[1]
+                req.headers['cookie'].split('=')[1].replace(';','')
             )
         }
         const newNode: HomeWorkData = {
