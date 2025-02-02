@@ -97,12 +97,13 @@ export const jwttokenService = (() => {
 
         async generateRtoken(
             req: Request,
+            isLogin
         ): Promise<string> {
 
             const getFields: Record<string, any> = {};
             if (req.ip) getFields.ip = req.ip;
             if (req.deviceId) getFields.deviceId = req.deviceId;
-            if (req.headers["user-agent"]) getFields.deviceName = req.headers["user-agent"];
+            if (req.headers["user-agent"] && isLogin) getFields.deviceName = req.headers["user-agent"];
             getFields.userId = req.user.userId;
 
             const isDeviceAdded = await rTokenDbHandler.getOne(
@@ -156,9 +157,11 @@ export const jwttokenService = (() => {
 
         async verifyRefreshToken(token: string): Promise<RefreshJwtTokenData | undefined> {
             try {
+                console.log("---------------------------- verifyRefreshToken START----------------------------------")
                 const tokenData = jwt.verify(token, rJwtTokenSalt) as RefreshJwtTokenData;
                 const tokenMetaData = await rTokenDbHandler.getActiveSession(tokenData.deviceId);
-
+                console.log('tokenData',tokenData);
+                console.log('tokenMetaData',tokenMetaData);
                 if (!tokenMetaData) {
                     throw new Error("Invalid Device Id");
                 }
@@ -166,18 +169,24 @@ export const jwttokenService = (() => {
                 const expireDate = await parseFormattedDate(tokenData.expireAt);
 
                 if (expireDate.getTime() < new Date().getTime()) {
+                    console.log()
                     throw new Error("Token has expired");
                 }
                 if (tokenMetaData.issuedAt !== tokenData.issuedAt) {
+                    console.log("Token metadata mismatch")
                     throw new Error("Token metadata mismatch");
                 }
 
                 if (tokenMetaData.expireAt !== tokenData.expireAt) {
+                    console.log("Token metadata mismatch")
                     throw new Error("Token metadata mismatch");
                 }
-
+                console.log("return", 'tokenData')
+                console.log("---------------------------- verifyRefreshToken END----------------------------------")
                 return tokenData;
             } catch (error) {
+                console.log("return", undefined)
+                console.log("---------------------------- verifyRefreshToken END----------------------------------")
                 return undefined;
             }
         },
