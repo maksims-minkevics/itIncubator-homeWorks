@@ -38,7 +38,6 @@ authRouter.post(
         console.log("auth token from header", req.refreshToken)
         console.log("deviceId", req.deviceId)
         console.log("user", req.user)
-        console.log("----------------------------TECH DATA----------------------------------")
         console.log("----------------------------RESP----------------------------------")
         console.log("new auth token", refreshToken)
         console.log("parsed new auth token", jwt.decode(refreshToken))
@@ -147,9 +146,8 @@ authRouter.post(
         console.log("parsed auth token", jwt.decode(req.refreshToken))
         console.log("deviceId", req.deviceId)
         console.log("user", req.user)
-        console.log("----------------------------TECH DATA----------------------------------")
         console.log("----------------------------RESP----------------------------------")
-        console.log("new auth token", jwt.decode(refreshToken))
+        console.log("new auth token", refreshToken)
         console.log("parsed new token", jwt.decode(refreshToken))
         console.log("resp", {
                 accessToken: token
