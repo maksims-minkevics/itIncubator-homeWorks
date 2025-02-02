@@ -14,9 +14,14 @@ sessionRouter.get(consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES,
     validationParser,
     async (req:Request, resp: Response)=>{
         const allActiveSessions = await sessionDbHandler.getAllActiveSessions(req.user.userId);
+        console.log("URL", req.originalUrl)
+        console.log("deviceId", req.deviceId)
+        console.log("user", req.user)
         if(!allActiveSessions){
+            console.log("status code", 404)
             return resp.sendStatus(404);
         }
+        console.log("status code", 200)
         return resp
             .status(200)
             .json(allActiveSessions);
@@ -27,14 +32,20 @@ sessionRouter.delete(consts.END_POINTS.SESSION.DELETE,
     jwtRefreshTokenAuth,
     validationParser,
     async (req:Request, resp: Response)=>{
-        const areAllSesstionsDeactivated = await sessionDbHandler.updateAllExceptCurrent(
+        const areAllSesstionsDeactivated = await sessionDbHandler.deleteAllExceptCurrent(
             req.deviceId,
             req.user.userId,
-            {expireAt: await getFormattedDate()}
         );
+        console.log("URL", req.originalUrl)
+        console.log("deviceId", req.deviceId)
+        console.log("user", req.user)
         if(!areAllSesstionsDeactivated){
+            console.log("status code", 404)
+
             return resp.sendStatus(404);
         }
+        console.log("status code", 204)
+
         return resp
             .sendStatus(204)
 });
@@ -44,13 +55,18 @@ sessionRouter.delete(consts.END_POINTS.SESSION.DELETE_BY_ID,
     sessionValidation,
     validationParser,
     async (req:Request, resp: Response)=>{
-        const isSesstionDeactivated = await sessionDbHandler.updateSession(
+        const isSesstionDeactivated = await sessionDbHandler.delete(
             req.params.deviceId,
-            {expireAt: await getFormattedDate()},
+            req.user.userId
             );
+        console.log("URL", req.originalUrl)
+        console.log("deviceId", req.deviceId)
+        console.log("user", req.user)
         if(!isSesstionDeactivated){
+            console.log("status code", 404)
             return resp.sendStatus(404);
         }
+        console.log("status code", 204)
         return resp
             .sendStatus(204)
 
