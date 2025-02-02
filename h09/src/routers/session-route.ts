@@ -6,6 +6,7 @@ import {validationParser} from "../midlewares/validations/validation-parser";
 import {getFormattedDate} from "../app/utilities";
 import {sessionValidation} from "../midlewares/validations/session-validation";
 import {consts} from "../app/global-consts";
+import jwt from "jsonwebtoken";
 dotenv.config()
 export const sessionRouter = Router({});
 const sessionDbHandler = new RefreshTokenMetaDataDbHandler();
@@ -19,7 +20,8 @@ sessionRouter.get(consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES,
         console.log("method", req.method)
         console.log("ip", req.ip)
         console.log("user-agent", req.headers['user-agent'])
-        console.log("parsed token", req.refreshToken)
+        console.log("auth token", req.refreshToken)
+        console.log("parsed token", jwt.decode(req.refreshToken))
         console.log("deviceId", req.deviceId)
         console.log("user", req.user)
         console.log("----------------------------RESP----------------------------------")
@@ -51,7 +53,8 @@ sessionRouter.delete(consts.END_POINTS.SESSION.DELETE,
         console.log("method", req.method)
         console.log("ip", req.ip)
         console.log("user-agent", req.headers['user-agent'])
-        console.log("parsed token", req.refreshToken)
+        console.log("auth token", req.refreshToken)
+        console.log("parsed token", jwt.decode(req.refreshToken))
         console.log("deviceId", req.deviceId)
         console.log("user", req.user)
         if(!areAllSesstionsDeactivated){
@@ -80,7 +83,8 @@ sessionRouter.delete(consts.END_POINTS.SESSION.DELETE_BY_ID,
         console.log("method", req.method)
         console.log("ip", req.ip)
         console.log("user-agent", req.headers['user-agent'])
-        console.log("parsed token", req.refreshToken)
+        console.log("auth token", req.refreshToken)
+        console.log("parsed token", jwt.decode(req.refreshToken))
         console.log("deviceId", req.deviceId)
         console.log("user", req.user)
         console.log("----------------------------TECH DATA----------------------------------")
