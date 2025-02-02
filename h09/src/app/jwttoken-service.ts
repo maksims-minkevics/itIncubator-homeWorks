@@ -116,7 +116,7 @@ export const jwttokenService = (() => {
                     isDeviceAdded.deviceId,
                     issuedAt,
                     req
-                )
+                );
                 const deviceId = isDeviceAdded.deviceId;
                 await this.updateSession(
                     req,
@@ -133,7 +133,7 @@ export const jwttokenService = (() => {
                     deviceId,
                     issuedAt,
                     req
-                )
+                );
                 await this.createNewSession(
                     req,
                     deviceId,
