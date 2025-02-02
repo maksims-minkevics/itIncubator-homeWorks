@@ -62,8 +62,18 @@ export const jwtTokenAuth = async (req: Request, resp: Response, next: NextFunct
 
 export const jwtRefreshTokenAuth= async (req: Request, resp: Response, next: NextFunction) => {
     console.log("----------------------------jwtRefreshTokenAuth START----------------------------------")
+
     if (!req.cookies || !(req.cookies && Object.keys(req.cookies).includes("refreshToken")))
     {
+        console.log("----------------------------TECH DATA----------------------------------")
+        console.log("URL", req.originalUrl)
+        console.log("method", req.method)
+        console.log("ip", req.ip)
+        console.log("user-agent", req.headers['user-agent'])
+        console.log("parsed token", req.refreshToken)
+        console.log("deviceId", req.deviceId)
+        console.log("user", req.user)
+        console.log("----------------------------TECH DATA----------------------------------")
         console.log("status code", 401)
         console.log("---------------------------- jwtRefreshTokenAuth END----------------------------------")
         resp
@@ -73,6 +83,15 @@ export const jwtRefreshTokenAuth= async (req: Request, resp: Response, next: Nex
 
     const inputToken = req.cookies["refreshToken"];
     if(!inputToken){
+        console.log("----------------------------TECH DATA----------------------------------")
+        console.log("URL", req.originalUrl)
+        console.log("method", req.method)
+        console.log("ip", req.ip)
+        console.log("user-agent", req.headers['user-agent'])
+        console.log("parsed token", req.refreshToken)
+        console.log("deviceId", req.deviceId)
+        console.log("user", req.user)
+        console.log("----------------------------TECH DATA----------------------------------")
         console.log("status code", 401)
         console.log("---------------------------- jwtRefreshTokenAuth END----------------------------------")
         resp
@@ -81,12 +100,22 @@ export const jwtRefreshTokenAuth= async (req: Request, resp: Response, next: Nex
     }
     const token = await jwttokenService.verifyRefreshToken(inputToken) as RefreshJwtTokenData;
     if (!token){
+        console.log("----------------------------TECH DATA----------------------------------")
+        console.log("URL", req.originalUrl)
+        console.log("method", req.method)
+        console.log("ip", req.ip)
+        console.log("user-agent", req.headers['user-agent'])
+        console.log("parsed token", req.refreshToken)
+        console.log("deviceId", req.deviceId)
+        console.log("user", req.user)
+        console.log("----------------------------TECH DATA----------------------------------")
         console.log("status code", 401)
         console.log("---------------------------- jwtRefreshTokenAuth END----------------------------------")
         resp
             .sendStatus(401);
         return;
     }
+    console.log("---------------------------- jwtRefreshTokenAuth END (OK)----------------------------------")
     req.user = {userId: token.user!.userId, userLogin: token.user!.userLogin};
     req.refreshToken = inputToken;
     req.deviceId = token.deviceId;
