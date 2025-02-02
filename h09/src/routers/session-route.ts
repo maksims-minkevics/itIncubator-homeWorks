@@ -23,7 +23,7 @@ sessionRouter.get(consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES,
         console.log("deviceId", req.deviceId)
         console.log("user", req.user)
         console.log("----------------------------RESP----------------------------------")
-        console.log("resp", resp)
+        console.log("resp", allActiveSessions)
         console.log("----------------------------RESP----------------------------------")
         if(!allActiveSessions){
             console.log("status code", 404)
@@ -76,15 +76,13 @@ sessionRouter.delete(consts.END_POINTS.SESSION.DELETE_BY_ID,
             );
         console.log("----------------------------TECH DATA----------------------------------")
         console.log("URL", req.originalUrl)
-        console.log("METHOD", req.method)
+        console.log("method", req.method)
         console.log("ip", req.ip)
         console.log("user-agent", req.headers['user-agent'])
         console.log("parsed token", req.refreshToken)
         console.log("deviceId", req.deviceId)
         console.log("user", req.user)
-        console.log("----------------------------RESP----------------------------------")
-        console.log("resp", resp)
-        console.log("----------------------------RESP----------------------------------")
+        console.log("----------------------------TECH DATA----------------------------------")
         if(!isSesstionDeactivated){
             console.log("status code", 404)
             console.log("----------------------------END----------------------------------")
