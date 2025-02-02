@@ -30,14 +30,20 @@ authRouter.post(
         const token = await jwttokenService.generate(req.user);
         const refreshToken = await jwttokenService.generateRtoken(req);
         resp.cookie("refreshToken", refreshToken, settings.REFRESH_TOKEN_PARAMETERS);
+        console.log("----------------------------TECH DATA----------------------------------")
         console.log("URL", req.originalUrl)
-        console.log("status code", 200)
-        console.log("resp", {token: token, refreshToken: refreshToken})
+        console.log("method", req.method)
         console.log("ip", req.ip)
         console.log("user-agent", req.headers['user-agent'])
         console.log("parsed token", jwt.decode(refreshToken))
         console.log("deviceId", req.deviceId)
         console.log("user", req.user)
+        console.log("----------------------------TECH DATA----------------------------------")
+        console.log("----------------------------RESP----------------------------------")
+        console.log("resp", resp)
+        console.log("----------------------------RESP----------------------------------")
+        console.log("status code", 200)
+        console.log("----------------------------END----------------------------------")
         return resp
             .status(200)
             .json({
@@ -52,11 +58,6 @@ authRouter.get(
             req.user.userLogin,
             req.user.userLogin
         )
-
-        console.log("URL", req.originalUrl)
-        console.log("status code", 200)
-        console.log("deviceId", req.deviceId)
-        console.log("user", req.user)
         return resp
             .status(200)
             .json({
@@ -133,14 +134,21 @@ authRouter.post(
             req
         );
         resp.cookie("refreshToken", refreshToken, settings.REFRESH_TOKEN_PARAMETERS);
+        console.log("----------------------------TECH DATA----------------------------------")
         console.log("URL", req.originalUrl)
-        console.log("status code", 200)
-        console.log("resp", {token: token, refreshToken: refreshToken})
+        console.log("method", req.method)
         console.log("ip", req.ip)
         console.log("user-agent", req.headers['user-agent'])
-        console.log("parsed token", jwt.decode(refreshToken))
+        console.log("parsed auth token", jwt.decode(req.refreshToken))
+        console.log("parsed new token", jwt.decode(refreshToken))
         console.log("deviceId", req.deviceId)
         console.log("user", req.user)
+        console.log("----------------------------TECH DATA----------------------------------")
+        console.log("----------------------------RESP----------------------------------")
+        console.log("resp", resp)
+        console.log("----------------------------RESP----------------------------------")
+        console.log("status code", 200)
+        console.log("----------------------------END----------------------------------")
         return resp
             .status(200)
             .json({
@@ -155,20 +163,17 @@ authRouter.post(
     validationParser,
     async (req: Request, resp: Response) => {
         await jwttokenService.cancelRefreshToken(req.refreshToken);
-        let refreshTokenData = undefined
-        if (req.headers['cookie']){
-            refreshTokenData = jwt.decode(
-                req.headers['cookie'].split('=')[1].replace(';','')
-            )
-        }
-
+        console.log("----------------------------TECH DATA----------------------------------")
         console.log("URL", req.originalUrl)
-        console.log("status code", 204,)
+        console.log("method", req.method)
         console.log("deviceId", req.deviceId)
         console.log("ip", req.ip)
         console.log("user-agent", req.headers['user-agent'])
         console.log("parsed token", req.refreshToken)
         console.log("user", req.user)
+        console.log("----------------------------TECH DATA----------------------------------")
+        console.log("status code", 204,)
+        console.log("----------------------------END----------------------------------")
         resp.clearCookie("refreshToken");
         resp
             .sendStatus(204)
