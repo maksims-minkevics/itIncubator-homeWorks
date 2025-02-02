@@ -57,7 +57,8 @@ sessionRouter.delete(consts.END_POINTS.SESSION.DELETE,
         if(!areAllSesstionsDeactivated){
             console.log("status code", 404)
             console.log("----------------------------END----------------------------------")
-            return resp.sendStatus(404);
+            return resp
+                .sendStatus(404);
         }
         console.log("status code", 204)
         console.log("----------------------------END----------------------------------")
@@ -86,7 +87,8 @@ sessionRouter.delete(consts.END_POINTS.SESSION.DELETE_BY_ID,
         if(!isSesstionDeactivated){
             console.log("status code", 404)
             console.log("----------------------------END----------------------------------")
-            return resp.sendStatus(404);
+            return resp
+                .sendStatus(404);
         }
         console.log("status code", 204)
         console.log("----------------------------END----------------------------------")
