@@ -40,7 +40,9 @@ authRouter.post(
         console.log("user", req.user)
         console.log("----------------------------TECH DATA----------------------------------")
         console.log("----------------------------RESP----------------------------------")
-        console.log("resp", resp)
+        console.log("resp", {
+                accessToken: token
+        })
         console.log("----------------------------RESP----------------------------------")
         console.log("status code", 200)
         console.log("----------------------------END----------------------------------")
@@ -145,7 +147,9 @@ authRouter.post(
         console.log("user", req.user)
         console.log("----------------------------TECH DATA----------------------------------")
         console.log("----------------------------RESP----------------------------------")
-        console.log("resp", resp)
+        console.log("resp", {
+                accessToken: token
+        })
         console.log("----------------------------RESP----------------------------------")
         console.log("status code", 200)
         console.log("----------------------------END----------------------------------")
