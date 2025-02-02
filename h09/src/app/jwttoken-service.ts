@@ -97,7 +97,7 @@ export const jwttokenService = (() => {
 
         async generateRtoken(
             req: Request,
-            isLogin
+            isLogin: boolean
         ): Promise<string> {
 
             const getFields: Record<string, any> = {};
