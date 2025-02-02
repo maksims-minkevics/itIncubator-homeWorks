@@ -23,8 +23,8 @@ testingRouter.delete(consts.END_POINTS.TESTING.DELETE_ALL_DATA, async (req, resp
     await commentDbHandler.dropDb();
     await refreshTokenDbHandler.dropDb();
     await auditDbHandler.dropDb();
-    console.log("status code", 204)
     console.log("URL", req.originalUrl)
+    console.log("status code", 204)
     console.log("deviceId", req.deviceId)
     console.log("user", req.user)
     return resp

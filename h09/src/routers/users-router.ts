@@ -34,11 +34,14 @@ userRouter.post(consts.END_POINTS.USER.CREATE,
     validationParser,
     async (req: Request, resp: Response) =>{
     const userCreationData = await userHelper.createNewUser(req.body);
+        console.log("URL", req.originalUrl)
     if(userCreationData._isValidationFailed){
+        console.log("status code", 400)
         return resp
             .status(400)
             .json(userCreationData.data);
     }
+        console.log("status code", 201)
     return resp
         .status(201)
         .json(
