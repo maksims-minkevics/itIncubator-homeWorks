@@ -8,6 +8,7 @@ export const sessionValidation= async (req: Request, resp: Response, next: NextF
     if(!req.params.deviceId){
         console.log("----------------------------TECH DATA----------------------------------")
         console.log("URL", req.originalUrl)
+        console.log("deviceId", req.params.deviceId)
         console.log("method", req.method)
         console.log("ip", req.ip)
         console.log("user-agent", req.headers['user-agent'])
@@ -29,6 +30,7 @@ export const sessionValidation= async (req: Request, resp: Response, next: NextF
     if (!isValidUser){
         console.log("----------------------------TECH DATA----------------------------------")
         console.log("URL", req.originalUrl)
+        console.log("deviceId", req.params.deviceId)
         console.log("method", req.method)
         console.log("ip", req.ip)
         console.log("user-agent", req.headers['user-agent'])
@@ -44,6 +46,7 @@ export const sessionValidation= async (req: Request, resp: Response, next: NextF
     if (isValidUser.userId !== req.user.userId){
         console.log("----------------------------TECH DATA----------------------------------")
         console.log("URL", req.originalUrl)
+        console.log("deviceId", req.params.deviceId)
         console.log("method", req.method)
         console.log("ip", req.ip)
         console.log("user-agent", req.headers['user-agent'])
