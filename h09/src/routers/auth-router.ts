@@ -14,6 +14,7 @@ import dotenv from "dotenv";
 import {settings} from "../settings";
 import {requestCounter} from "../midlewares/audit";
 import {consts} from "../app/global-consts";
+import jwt from "jsonwebtoken";
 
 dotenv.config()
 
@@ -32,6 +33,9 @@ authRouter.post(
         console.log("URL", req.originalUrl)
         console.log("status code", 200)
         console.log("resp", {token: token, refreshToken: refreshToken})
+        console.log("ip", req.ip)
+        console.log("user-agent", req.headers['user-agent'])
+        console.log("parsed token", jwt.decode(refreshToken))
         console.log("deviceId", req.deviceId)
         console.log("user", req.user)
         return resp
@@ -132,6 +136,9 @@ authRouter.post(
         console.log("URL", req.originalUrl)
         console.log("status code", 200)
         console.log("resp", {token: token, refreshToken: refreshToken})
+        console.log("ip", req.ip)
+        console.log("user-agent", req.headers['user-agent'])
+        console.log("parsed token", jwt.decode(refreshToken))
         console.log("deviceId", req.deviceId)
         console.log("user", req.user)
         return resp
@@ -148,11 +155,21 @@ authRouter.post(
     validationParser,
     async (req: Request, resp: Response) => {
         await jwttokenService.cancelRefreshToken(req.refreshToken);
-        resp.clearCookie("refreshToken");
+        let refreshTokenData = undefined
+        if (req.headers['cookie']){
+            refreshTokenData = jwt.decode(
+                req.headers['cookie'].split('=')[1].replace(';','')
+            )
+        }
+
         console.log("URL", req.originalUrl)
         console.log("status code", 204,)
         console.log("deviceId", req.deviceId)
+        console.log("ip", req.ip)
+        console.log("user-agent", req.headers['user-agent'])
+        console.log("parsed token", req.refreshToken)
         console.log("user", req.user)
+        resp.clearCookie("refreshToken");
         resp
             .sendStatus(204)
         return;
