@@ -15,6 +15,9 @@ sessionRouter.get(consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES,
     async (req:Request, resp: Response)=>{
         const allActiveSessions = await sessionDbHandler.getAllActiveSessions(req.user.userId);
         console.log("URL", req.originalUrl)
+        console.log("ip", req.ip)
+        console.log("user-agent", req.headers['user-agent'])
+        console.log("parsed token", req.refreshToken)
         console.log("deviceId", req.deviceId)
         console.log("user", req.user)
         if(!allActiveSessions){
@@ -37,6 +40,9 @@ sessionRouter.delete(consts.END_POINTS.SESSION.DELETE,
             req.user.userId,
         );
         console.log("URL", req.originalUrl)
+        console.log("ip", req.ip)
+        console.log("user-agent", req.headers['user-agent'])
+        console.log("parsed token", req.refreshToken)
         console.log("deviceId", req.deviceId)
         console.log("user", req.user)
         if(!areAllSesstionsDeactivated){
@@ -60,6 +66,9 @@ sessionRouter.delete(consts.END_POINTS.SESSION.DELETE_BY_ID,
             req.user.userId
             );
         console.log("URL", req.originalUrl)
+        console.log("ip", req.ip)
+        console.log("user-agent", req.headers['user-agent'])
+        console.log("parsed token", req.refreshToken)
         console.log("deviceId", req.deviceId)
         console.log("user", req.user)
         if(!isSesstionDeactivated){
