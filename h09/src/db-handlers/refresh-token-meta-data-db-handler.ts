@@ -91,8 +91,8 @@ class RefreshTokenMetaDataDbHandler{
         return result.modifiedCount > 0;
     }
 
-    async delete(deviceId: string):Promise<boolean>{
-        return( await refreshTokenMetaDataCollection.deleteOne({deviceId:deviceId})).deletedCount === 1
+    async delete(deviceId: string, userId: string):Promise<boolean>{
+        return( await refreshTokenMetaDataCollection.deleteOne({deviceId:deviceId, userId: userId})).deletedCount === 1
     }
 
     async updateAllExceptCurrent(
@@ -121,6 +121,21 @@ class RefreshTokenMetaDataDbHandler{
 
         return result.modifiedCount > 0
     };
+
+    async deleteAllExceptCurrent(
+        deviceId: string,
+        userId: string,
+    ):Promise<boolean>{
+        const result = await refreshTokenMetaDataCollection.deleteMany(
+            {
+                userId: userId,
+                deviceId: { $ne: deviceId },
+            },
+        );
+
+        return result.deletedCount > 0
+    };
+
     async dropDb(){
         await refreshTokenMetaDataCollection.drop();
     }

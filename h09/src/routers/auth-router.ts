@@ -29,6 +29,11 @@ authRouter.post(
         const token = await jwttokenService.generate(req.user);
         const refreshToken = await jwttokenService.generateRtoken(req);
         resp.cookie("refreshToken", refreshToken, settings.REFRESH_TOKEN_PARAMETERS);
+        console.log("status code", 200)
+        console.log("resp", {token: token, refreshToken: refreshToken})
+        console.log("URL", req.originalUrl)
+        console.log("deviceId", req.deviceId)
+        console.log("user", req.user)
         return resp
             .status(200)
             .json({
@@ -43,6 +48,10 @@ authRouter.get(
             req.user.userLogin,
             req.user.userLogin
         )
+        console.log("status code", 200)
+        console.log("URL", req.originalUrl)
+        console.log("deviceId", req.deviceId)
+        console.log("user", req.user)
         return resp
             .status(200)
             .json({
@@ -115,10 +124,15 @@ authRouter.post(
     jwtRefreshTokenAuth,
     async (req: Request, resp: Response) => {
         const token = await jwttokenService.generate(req.user)
-        const result = await jwttokenService.generateRtoken(
+        const refreshToken = await jwttokenService.generateRtoken(
             req
         );
-        resp.cookie("refreshToken", result, settings.REFRESH_TOKEN_PARAMETERS);
+        resp.cookie("refreshToken", refreshToken, settings.REFRESH_TOKEN_PARAMETERS);
+        console.log("status code", 200)
+        console.log("resp", {token: token, refreshToken: refreshToken})
+        console.log("URL", req.originalUrl)
+        console.log("deviceId", req.deviceId)
+        console.log("user", req.user)
         return resp
             .status(200)
             .json({
@@ -134,6 +148,10 @@ authRouter.post(
     async (req: Request, resp: Response) => {
         await jwttokenService.cancelRefreshToken(req.refreshToken);
         resp.clearCookie("refreshToken");
+        console.log("status code", 204,)
+        console.log("URL", req.originalUrl)
+        console.log("deviceId", req.deviceId)
+        console.log("user", req.user)
         resp
             .sendStatus(204)
         return;
