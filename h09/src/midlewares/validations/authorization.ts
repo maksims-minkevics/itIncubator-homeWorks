@@ -39,7 +39,7 @@ export const jwtTokenAuth = async (req: Request, resp: Response, next: NextFunct
             .sendStatus(401)
         return;
     }
-    const authorization = req.headers.authorization?.split(" ")
+    const authorization = req.headers.authorization?.split(" ");
 
     if (!authorization)
     {
