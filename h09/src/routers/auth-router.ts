@@ -28,7 +28,7 @@ authRouter.post(
     customBasicAuth,
     async (req: Request, resp: Response) => {
         const token = await jwttokenService.generate(req.user);
-        const refreshToken = await jwttokenService.generateRtoken(req);
+        const refreshToken = await jwttokenService.generateRtoken(req, true);
         resp.cookie("refreshToken", refreshToken, settings.REFRESH_TOKEN_PARAMETERS);
         console.log("----------------------------TECH DATA----------------------------------")
         console.log("URL", req.originalUrl)
@@ -134,7 +134,8 @@ authRouter.post(
     async (req: Request, resp: Response) => {
         const token = await jwttokenService.generate(req.user)
         const refreshToken = await jwttokenService.generateRtoken(
-            req
+            req,
+            false
         );
         resp.cookie("refreshToken", refreshToken, settings.REFRESH_TOKEN_PARAMETERS);
         console.log("----------------------------TECH DATA----------------------------------")
