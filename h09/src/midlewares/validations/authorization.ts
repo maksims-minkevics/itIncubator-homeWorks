@@ -74,7 +74,8 @@ export const jwtRefreshTokenAuth= async (req: Request, resp: Response, next: Nex
     const inputToken = req.cookies["refreshToken"];
     if(!inputToken){
         console.log("status code", 401)
-        console.log("---------------------------- jwtRefreshTokenAuth END----------------------------------")        resp
+        console.log("---------------------------- jwtRefreshTokenAuth END----------------------------------")
+        resp
             .sendStatus(401);
         return;
     }
