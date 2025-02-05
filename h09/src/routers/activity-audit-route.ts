@@ -5,6 +5,9 @@ import {jwtRefreshTokenAuth} from "../midlewares/validations/authorization";
 =======
 import {hwDataCollection} from "../app/db";
 import jwt from "jsonwebtoken";
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 export const activityAuditRouter = Router();
@@ -23,6 +26,9 @@ activityAuditRouter.get("/:id", async (req: Request, resp: Response) =>{
 activityAuditRouter.get("/homework-data", async (req: Request, resp: Response) =>{
     return resp
         .sendStatus(200)
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 });

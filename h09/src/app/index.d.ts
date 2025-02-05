@@ -145,4 +145,7 @@ export type viewModelResultForPagination = {
     data: BlogViewModel[] | PostViewModel[] | UserViewModel[] | [],
     totalCount: number
 };
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
