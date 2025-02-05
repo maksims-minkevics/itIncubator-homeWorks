@@ -121,6 +121,9 @@ authRouter.post(
 =======
         resp.cookie("refreshToken", refreshToken, settings.REFRESH_TOKEN_PARAMETERS);
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes

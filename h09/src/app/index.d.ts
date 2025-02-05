@@ -146,6 +146,9 @@ export type viewModelResultForPagination = {
     totalCount: number
 };
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes

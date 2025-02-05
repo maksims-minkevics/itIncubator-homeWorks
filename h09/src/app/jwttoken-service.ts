@@ -150,7 +150,11 @@ export const jwttokenService = (() => {
                 const tokenData = jwt.verify(token, rJwtTokenSalt) as RefreshJwtTokenData;
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 const tokenMetaData = await rTokenDbHandler.getActiveSession(tokenData.deviceId);
+=======
+                const tokenMetaData = await sessionRepository.getActiveSession(tokenData.deviceId);
+>>>>>>> Stashed changes
 =======
                 const tokenMetaData = await sessionRepository.getActiveSession(tokenData.deviceId);
 >>>>>>> Stashed changes
@@ -176,7 +180,10 @@ export const jwttokenService = (() => {
                 }
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 =======
