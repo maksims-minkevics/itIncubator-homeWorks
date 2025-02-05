@@ -13,11 +13,12 @@ export const consts = {
     TESTING_BASE_END_POINT: "testing",
     POSTS_BASE_END_POINT: "posts",
     BLOGS_BASE_END_POINT: "blogs",
-    USERS_BASE_END_POINT: "users",
-    AUTH_BASE_END_POINT: "auth",
+    USERS_BASE_END_POINT: "/users",
+    AUTH_BASE_END_POINT: "/auth",
     COMMENTS_BASE_END_POINT: "comments",
     SECURITY_DEVICES_BASE_END_POINT: "security/devices",
     AUDIT_BASE_END_POINT: "audit",
+    SALT_ROUNDS: 10,
     END_POINTS: {
         USER: {
             GET: "/",

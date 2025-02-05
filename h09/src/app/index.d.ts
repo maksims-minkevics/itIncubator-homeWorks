@@ -1,3 +1,6 @@
+import {UserDbModel, UserViewModel} from "../models/user/dataModels";
+import {ObjectId} from "mongodb";
+
 export type BlogViewModel = {
     id: string,
     name: string,
@@ -46,28 +49,7 @@ export type PostInputModel = {
     blogId: string
 };
 
-export type UserViewModel = {
-    id: string,
-    login: string,
-    email: string,
-    createdAt: string
-};
 
-export type UserInputModel = {
-    login: string,
-    password: string,
-    email: string
-};
-
-export type UserDbModel = {
-    id: string,
-    login: string,
-    password: string,
-    email: string,
-    createdAt: string
-    confirmationCode: string,
-    isActivated: boolean,
-};
 
 export type GetResult = {
     pagesCount: number,
@@ -97,7 +79,7 @@ export type CommentViewModel = {
 };
 
 export type CommentatorInfo = {
-    userId: string,
+    userId: ObjectId,
     userLogin: string
 };
 
@@ -110,7 +92,7 @@ export type CommentDbModel = {
 };
 
 export type JwtTokenData = {
-    userId: string,
+    userId: ObjectId,
     userLogin: string
 }
 
@@ -120,16 +102,6 @@ export type RefreshJwtTokenData = {
     user: JwtTokenData,
     expireAt: string,
     issuedAt: string
-}
-
-export type GeneratedRefreshJwtTokenData = {
-    token: string,
-    data: RefreshTokenMetaDataDbModel,
-}
-
-export type UpdatedRefreshJwtTokenData = {
-    token: string,
-    refreshToken: string
 }
 
 declare global {
@@ -142,11 +114,6 @@ declare global {
     }
 }
 
-export type userDataValidationResult = {
-    _isValidationFailed: boolean,
-    data: ErrorResult | {},
-    user?: UserDbModel
-}
 
 export type ActivityAuditDbModel = {
     ip: string,
@@ -154,30 +121,12 @@ export type ActivityAuditDbModel = {
     date: Date
 }
 
-export type RefreshTokenMetaDataDbModel = {
-    ip: string,
-    lastActiveDate: string,
-    deviceId: string,
-    deviceName?: string
-    expireAt: string,
-    issuedAt: string,
-    userId: string
-}
+export type dbQueryResultForPagination = {
+    data: BlogDbModel[] | PostDbModel[] | UserDbModel[] | [],
+    totalCount: number
+};
 
-export type SessionViewModel = {
-    ip: string,
-    title: string,
-    lastActiveDate: string,
-    deviceId: string
-}
-
-export type HomeWorkData = {
-    reqBody: any,
-    reqUrl: string
-    reqHeaders: any
-    reqMethod: string
-    time: Date,
-    refreshToken: string | string[],
-    parsedRefteshToken: any
-    status: number | undefined
-}
+export type viewModelResultForPagination = {
+    data: BlogViewModel[] | PostViewModel[] | UserViewModel[] | [],
+    totalCount: number
+};

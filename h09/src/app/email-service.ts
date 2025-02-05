@@ -1,36 +1,46 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-import {consts} from "./global-consts";
+import { consts } from "../app/global-consts";
 
-dotenv.config()
-export const mailService= (() => {
-    const transport =  nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        secure: false,
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PSWRD,
+dotenv.config();
+
+class EmailService {
+    private transporter;
+
+    constructor() {
+        this.transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            secure: false,
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PSWRD,
+            },
+        });
+    }
+
+
+    async sendEmail(
+        to: string,
+        subject: string = "",
+        content: string,
+        from: string = consts.DEFAULT_FROM_EMAIL
+    ): Promise<boolean> {
+        try {
+            const mailOptions = {
+                from,
+                to,
+                subject,
+                html: content,
+            };
+
+            const info = await this.transporter.sendMail(mailOptions);
+            console.log(`Email sent to ${to}: ${info.response}`);
+            return true;
+        } catch (error) {
+            console.error("Error sending email:", error);
+            return false;
         }
-    });
+    }
+}
 
-    return {
-
-        async sendEmail(to: string, content: string, subject: string = "", from: string = consts.DEFAULT_FROM_EMAIL):Promise<boolean>{
-            const mail = {
-                from: from,
-                to: to,
-                subject: subject,
-                html: content
-            }
-            await transport.sendMail(mail, (error, info) => {
-                if (error) {
-                    console.error("Error sending email: ", error);
-                    return false
-                }
-                console.log("Email sent: ", info.response);
-                return true
-            });
-            return true
-        }
-    };
-})();
+export const emailService = new EmailService();
