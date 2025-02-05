@@ -7,8 +7,8 @@ import {
     registrationValidation
 } from "../midlewares/validations/authorization-data-validation";
 import {jwttokenService} from "../app/jwttoken-service";
-import {userHelper} from "../business-logic/user-business-logic";
-import {mailService} from "../app/email-service";
+import {userHelper} from "../models/user/user-business-logic";
+import {emailService} from "../app/email-service";
 import {registrationEmailTemplate} from "../app/email-templates";
 import dotenv from "dotenv";
 import {settings} from "../settings";
@@ -39,7 +39,7 @@ authRouter.get(
     consts.END_POINTS.AUTH.GET_DATA_ABOUT_CURRENT_ACTIVE_USER,
     jwtTokenAuth,
     async (req: Request, resp: Response) => {
-        const user = await userHelper.dbHandler.getUserByEmailLogin(
+        const user = await userHelper.dbHandler.findByEmailOrLogin(
             req.user.userLogin,
             req.user.userLogin
         )
@@ -48,7 +48,7 @@ authRouter.get(
             .json({
                 email: user?.email,
                 login: user?.login,
-                userId: user?.id
+                userId: user?._id
             })
     })
 
@@ -85,7 +85,7 @@ authRouter.post(
                 .json(confirmationData.data)
         }
         const template = registrationEmailTemplate(confirmationData.user!.confirmationCode);
-        await mailService.sendEmail(req.body.email, template, "Test Email");
+        await emailService.sendEmail(req.body.email, template, "Test Email");
         return resp
             .sendStatus(204)
     })
@@ -103,12 +103,10 @@ authRouter.post(
                 .json(confirmationData.data)
         }
         const template = registrationEmailTemplate(confirmationData.user!.confirmationCode);
-        await mailService.sendEmail(req.body.email, registrationEmailTemplate(confirmationData.user!.confirmationCode), "Test Email");
+        await emailService.sendEmail(req.body.email, registrationEmailTemplate(confirmationData.user!.confirmationCode), "Test Email");
         return resp
             .sendStatus(204);
     });
-
-//TODO
 
 authRouter.post(
     consts.END_POINTS.AUTH.REFRESH_TOKEN,
@@ -118,7 +116,11 @@ authRouter.post(
         const result = await jwttokenService.generateRtoken(
             req
         );
+<<<<<<< Updated upstream
         resp.cookie("refreshToken", result, settings.REFRESH_TOKEN_PARAMETERS);
+=======
+        resp.cookie("refreshToken", refreshToken, settings.REFRESH_TOKEN_PARAMETERS);
+>>>>>>> Stashed changes
         return resp
             .status(200)
             .json({

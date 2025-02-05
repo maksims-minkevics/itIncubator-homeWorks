@@ -4,11 +4,11 @@ import {
     ActivityAuditDbModel,
     BlogViewModel,
     CommentDbModel, HomeWorkData,
-    PostViewModel,
-    RefreshTokenMetaDataDbModel,
-    UserDbModel
+    PostViewModel
 } from "./index";
 import {consts} from "./global-consts";
+import {SessionDbModel} from "../models/session/dataModels";
+import {UserDbModel} from "../models/user/dataModels";
 
 dotenv.config()
 const mongoURI: string = process.env.MONGO_URL || "mongodb://localhost:27017";
@@ -18,7 +18,7 @@ export const postsCollection = blogerPlatform.collection<PostViewModel>(consts.P
 export const blogCollection = blogerPlatform.collection<BlogViewModel>(consts.BLOGS_COLLECTION);
 export const userCollection = blogerPlatform.collection<UserDbModel>(consts.USER_COLLECTION);
 export const commentCollection = blogerPlatform.collection<CommentDbModel>(consts.COMMENTS_COLLECTION);
-export const refreshTokenMetaDataCollection = blogerPlatform.collection<RefreshTokenMetaDataDbModel>(consts.SESSIONS_COLLECTION);
+export const sessionCollection = blogerPlatform.collection<SessionDbModel>(consts.SESSIONS_COLLECTION);
 
 export const activityAuditCollection = blogerPlatform.collection<ActivityAuditDbModel >(consts.ACTIVITY_AUDIT_COLLECTION);
 export const hwDataCollection = blogerPlatform.collection<HomeWorkData >(consts.HOME_WORK_DATA_COLLECTION);

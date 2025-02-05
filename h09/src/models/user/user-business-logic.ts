@@ -1,9 +1,9 @@
-import {userDbHandlerClass} from "../db-handlers/user-db-handler";
-import {ErrorResult, JwtTokenData, userDataValidationResult, UserDbModel, UserInputModel, UserViewModel} from "../app/";
+import {userRepository} from "./repositories";
 import bcrypt from "bcrypt";
+import {UserDataValidationResult, UserDbModel, UserInputModel, UserViewModel} from "./dataModels";
 
 export const userHelper = {
-    dbHandler: new userDbHandlerClass(),
+    dbHandler: userRepository,
 
     hashPwrd: async (pswrd: string): Promise<string> => {
         try {
@@ -25,17 +25,16 @@ export const userHelper = {
     },
 
     isUserEmailUnique: async (email: string): Promise<boolean> => {
-        const user = await userHelper.dbHandler.getUserByField('email', email);
+        const user = await userHelper.dbHandler.findByField('email', email);
         return user === null;
     },
 
     isUserLoginUnique: async (login: string): Promise<boolean> => {
-        const user = await userHelper.dbHandler.getUserByField('login', login);
+        const user = await userHelper.dbHandler.findByField('login', login);
         return user === null;
     },
 
-
-    dataValidation: async (user: UserInputModel): Promise<userDataValidationResult> =>{
+    dataValidation: async (user: UserInputModel): Promise<UserDataValidationResult> =>{
         if (!await userHelper.isUserLoginUnique(user.login)) {
             return {
                 _isValidationFailed: true, data: {errorsMessages: [{message: 'login should be unique',  field: 'login'}]}
@@ -50,7 +49,7 @@ export const userHelper = {
         return {_isValidationFailed: false, data: {}}
     },
 
-    createNewUser: async (user: UserInputModel): Promise<userDataValidationResult> => {
+    createNewUser: async (user: UserInputModel): Promise<UserDataValidationResult> => {
         const validationResult = await userHelper.dataValidation(user);
         if (validationResult._isValidationFailed === true){
             return {
@@ -66,7 +65,7 @@ export const userHelper = {
         };
     },
 
-    newUserRegistration: async (user: UserInputModel): Promise<userDataValidationResult> => {
+    newUserRegistration: async (user: UserInputModel): Promise<UserDataValidationResult> => {
         const validationResult = await userHelper.dataValidation(user);
         if (validationResult._isValidationFailed === true){
             return {
@@ -88,8 +87,8 @@ export const userHelper = {
         return Date.now().toString() + Math.random().toString(36).substring(2, 8);
     },
 
-    confirmRegistration: async (code: string): Promise<userDataValidationResult> => {
-        const isActivated =  await userHelper.dbHandler.checkAndConfirmEmail(code);
+    confirmRegistration: async (code: string): Promise<UserDataValidationResult> => {
+        const isActivated =  await userHelper.dbHandler.confirmEmail(code);
         if (!isActivated){
             return {
                 _isValidationFailed: true, data: {errorsMessages: [{message: 'incorrect code',  field: 'code'}]}
@@ -101,11 +100,10 @@ export const userHelper = {
 
     },
 
-    getUseForReConfirmation: async (email: string): Promise<userDataValidationResult> => {
-        const user = await userHelper.dbHandler.getUserByField("email", email)
+    getUseForReConfirmation: async (email: string): Promise<UserDataValidationResult> => {
+        const user = await userHelper.dbHandler.findByField("email", email)
         if (!user){
-            return {
-                _isValidationFailed: true, data: {errorsMessages: [{message: 'incorrect email',  field: 'email'}]}
+            return {                _isValidationFailed: true, data: {errorsMessages: [{message: 'incorrect email',  field: 'email'}]}
             }
         }
 
@@ -123,7 +121,7 @@ export const userHelper = {
 
     getUserViewModel: async (userDbObject: UserDbModel): Promise<UserViewModel> => {
         return {
-            id: userDbObject.id,
+            id: userDbObject._id,
             createdAt: userDbObject.createdAt,
             login: userDbObject.login,
             email: userDbObject.email,

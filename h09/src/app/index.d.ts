@@ -1,3 +1,6 @@
+import {UserDbModel, UserViewModel} from "../models/user/dataModels";
+import {ObjectId} from "mongodb";
+
 export type BlogViewModel = {
     id: string,
     name: string,
@@ -46,28 +49,7 @@ export type PostInputModel = {
     blogId: string
 };
 
-export type UserViewModel = {
-    id: string,
-    login: string,
-    email: string,
-    createdAt: string
-};
 
-export type UserInputModel = {
-    login: string,
-    password: string,
-    email: string
-};
-
-export type UserDbModel = {
-    id: string,
-    login: string,
-    password: string,
-    email: string,
-    createdAt: string
-    confirmationCode: string,
-    isActivated: boolean,
-};
 
 export type GetResult = {
     pagesCount: number,
@@ -97,7 +79,7 @@ export type CommentViewModel = {
 };
 
 export type CommentatorInfo = {
-    userId: string,
+    userId: ObjectId,
     userLogin: string
 };
 
@@ -110,7 +92,7 @@ export type CommentDbModel = {
 };
 
 export type JwtTokenData = {
-    userId: string,
+    userId: ObjectId,
     userLogin: string
 }
 
@@ -120,16 +102,6 @@ export type RefreshJwtTokenData = {
     user: JwtTokenData,
     expireAt: string,
     issuedAt: string
-}
-
-export type GeneratedRefreshJwtTokenData = {
-    token: string,
-    data: RefreshTokenMetaDataDbModel,
-}
-
-export type UpdatedRefreshJwtTokenData = {
-    token: string,
-    refreshToken: string
 }
 
 declare global {
@@ -142,33 +114,11 @@ declare global {
     }
 }
 
-export type userDataValidationResult = {
-    _isValidationFailed: boolean,
-    data: ErrorResult | {},
-    user?: UserDbModel
-}
 
 export type ActivityAuditDbModel = {
     ip: string,
     url: string,
     date: Date
-}
-
-export type RefreshTokenMetaDataDbModel = {
-    ip: string,
-    lastActiveDate: string,
-    deviceId: string,
-    deviceName?: string
-    expireAt: string,
-    issuedAt: string,
-    userId: string
-}
-
-export type SessionViewModel = {
-    ip: string,
-    title: string,
-    lastActiveDate: string,
-    deviceId: string
 }
 
 export type HomeWorkData = {
@@ -179,4 +129,20 @@ export type HomeWorkData = {
     time: Date,
     refreshToken: string | string[],
     parsedRefteshToken: any
+<<<<<<< Updated upstream
 }
+=======
+    status: number | undefined
+}
+
+
+export type dbQueryResultForPagination = {
+    data: BlogDbModel[] | PostDbModel[] | UserDbModel[] | [],
+    totalCount: number
+};
+
+export type viewModelResultForPagination = {
+    data: BlogViewModel[] | PostViewModel[] | UserViewModel[] | [],
+    totalCount: number
+};
+>>>>>>> Stashed changes

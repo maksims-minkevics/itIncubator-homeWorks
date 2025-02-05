@@ -9,8 +9,7 @@ import {consts} from "./global-consts";
 import {settings} from "../settings";
 import {getFormattedDate, parseFormattedDate} from "./utilities";
 import { v4 as uuidv4 } from 'uuid';
-import {RefreshTokenMetaDataDbHandler} from "../db-handlers/refresh-token-meta-data-db-handler";
-dotenv.config()
+import {sessionRepository} from "../models/session/repositories";
 
 
 if (!process.env.JWTTOKEN_SALT) {
@@ -19,7 +18,6 @@ if (!process.env.JWTTOKEN_SALT) {
 export const jwttokenService = (() => {
     const jwtTokenSalt = process.env.JWTTOKEN_SALT || consts.DEFAULT_JWT_SALT;
     const rJwtTokenSalt = process.env.REFRESH_JWTTOKEN_SALT || consts.DEFAULT_JWT_SALT;
-    const rTokenDbHandler = new RefreshTokenMetaDataDbHandler();
 
     return {
         async generate(user: JwtTokenData): Promise<string> {
@@ -64,7 +62,7 @@ export const jwttokenService = (() => {
         },
 
         async updateSession (req: Request, deviceId: string, token: {token: string, expireAt: string}, issuedAt: string){
-            await  rTokenDbHandler.updateSession(
+            await  sessionRepository.updateSession(
                 deviceId,
                 {
                     issuedAt: issuedAt,
@@ -79,7 +77,7 @@ export const jwttokenService = (() => {
         async createNewSession (req: Request, deviceId: string, token: {token: string, expireAt: string}, issuedAt: string){
             const userAgent = req.headers["user-agent"];
             const userIp = req.ip || "";
-            await rTokenDbHandler.create(
+            await sessionRepository.create(
                 {
                     deviceId: deviceId,
                     userId: req.user.userId,
@@ -96,17 +94,14 @@ export const jwttokenService = (() => {
         async generateRtoken(
             req: Request,
         ): Promise<string> {
-
             const getFields: Record<string, any> = {};
             if (req.ip) getFields.ip = req.ip;
             if (req.deviceId) getFields.deviceId = req.deviceId;
             if (req.headers["user-agent"]) getFields.deviceName = req.headers["user-agent"];
             getFields.userId = req.user.userId;
-
-            const isDeviceAdded = await rTokenDbHandler.getOne(
+            const isDeviceAdded = await sessionRepository.findOne(
                 getFields
             )
-
             const issuedAt = await getFormattedDate();
             if (isDeviceAdded){
                 const newTokenData = await this.generateRefreshJwtToken(
@@ -147,13 +142,17 @@ export const jwttokenService = (() => {
                 return false
             }
 
-            return await rTokenDbHandler.updateSession(rTokenData.deviceId, {expireAt: await getFormattedDate()});
+            return await sessionRepository.updateSession(rTokenData.deviceId, {expireAt: await getFormattedDate()});
         },
 
         async verifyRefreshToken(token: string): Promise<RefreshJwtTokenData | undefined> {
             try {
                 const tokenData = jwt.verify(token, rJwtTokenSalt) as RefreshJwtTokenData;
+<<<<<<< Updated upstream
                 const tokenMetaData = await rTokenDbHandler.getActiveSession(tokenData.deviceId);
+=======
+                const tokenMetaData = await sessionRepository.getActiveSession(tokenData.deviceId);
+>>>>>>> Stashed changes
 
                 if (!tokenMetaData) {
                     throw new Error("Invalid Device Id");
@@ -171,7 +170,10 @@ export const jwttokenService = (() => {
                 if (tokenMetaData.expireAt !== tokenData.expireAt) {
                     throw new Error("Token metadata mismatch");
                 }
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
                 return tokenData;
             } catch (error) {
                 return undefined;

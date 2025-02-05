@@ -1,6 +1,11 @@
 import {Router, Request, Response} from "express";
 import {activityAuditDbHandler} from "../db-handlers/activity-audit-db-handler";
 import {jwtRefreshTokenAuth} from "../midlewares/validations/authorization";
+<<<<<<< Updated upstream
+=======
+import {hwDataCollection} from "../app/db";
+import jwt from "jsonwebtoken";
+>>>>>>> Stashed changes
 
 export const activityAuditRouter = Router();
 const auditActivityDbHandler = new activityAuditDbHandler();
@@ -12,7 +17,13 @@ activityAuditRouter.get("/", jwtRefreshTokenAuth, async (req: Request, resp: Res
         .json(result);
 });
 
+<<<<<<< Updated upstream
 activityAuditRouter.get("/:id", async (req: Request, resp: Response) =>{
+=======
+activityAuditRouter.get("/homework-data", async (req: Request, resp: Response) =>{
+    return resp
+        .sendStatus(200)
+>>>>>>> Stashed changes
 
 });
 

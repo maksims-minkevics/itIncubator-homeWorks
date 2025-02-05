@@ -1,6 +1,6 @@
 import {NextFunction, Request, Response} from "express";
 import dotenv from "dotenv";
-import {userHelper} from "../../business-logic/user-business-logic";
+import {userHelper} from "../../models/user/user-business-logic";
 import {jwttokenService} from "../../app/jwttoken-service";
 import {JwtTokenData, RefreshJwtTokenData} from "../../app/index";
 dotenv.config();
@@ -67,7 +67,6 @@ export const jwtRefreshTokenAuth= async (req: Request, resp: Response, next: Nex
             .sendStatus(401);
         return;
     }
-
     const inputToken = req.cookies["refreshToken"];
     if(!inputToken){
         resp
@@ -99,7 +98,7 @@ export const customBasicAuth =
             return;
         }
 
-        const user = await userHelper.dbHandler.getUserByEmailLogin(
+        const user = await userHelper.dbHandler.findByEmailOrLogin(
             authHeader.loginOrEmail,
             authHeader.loginOrEmail
         );
@@ -118,6 +117,6 @@ export const customBasicAuth =
         }
         //TODO
         //MOVE TO SEPARATE METHOD
-        req.user = {userId: user.id, userLogin: user.login}
+        req.user = {userId: user._id, userLogin: user.login}
         next();
     };
