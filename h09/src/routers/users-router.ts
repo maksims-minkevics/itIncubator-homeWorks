@@ -33,17 +33,20 @@ userRouter.post(consts.END_POINTS.USER.CREATE,
     userValidation,
     validationParser,
     async (req: Request, resp: Response) =>{
-    const userCreationData = await userHelper.createNewUser(req.body);
-    if(userCreationData._isValidationFailed){
+        const userCreationData = await userHelper.createNewUser(req.body);
+        console.log("URL", req.originalUrl)
+        if(userCreationData._isValidationFailed){
+            console.log("status code", 400)
+            return resp
+                .status(400)
+                .json(userCreationData.data);
+        }
+        console.log("status code", 201)
         return resp
-            .status(400)
-            .json(userCreationData.data);
-    }
-    return resp
-        .status(201)
-        .json(
-            await userHelper.getUserViewModel(userCreationData.user as UserDbModel)
-        );
+            .status(201)
+            .json(
+                await userHelper.getUserViewModel(userCreationData.user as UserDbModel)
+            );
 })
 
 userRouter.delete(consts.END_POINTS.USER.DELETE_BY_ID,

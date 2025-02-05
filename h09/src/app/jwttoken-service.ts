@@ -39,7 +39,7 @@ export const jwttokenService = (() => {
             const decoded = jwt.verify(token, jwtTokenSalt);
             return decoded as JwtTokenData;
         },
-        async generateRefreshJwtToken(user: JwtTokenData, deviceId: string, issuedAt: string){
+        async generateRefreshJwtToken(user: JwtTokenData, deviceId: string, issuedAt: string, req: Request){
             const expireAt = await getFormattedDate({
                 seconds: settings.REFRESH_TOKEN_EXP_TIME
             });
@@ -51,7 +51,9 @@ export const jwttokenService = (() => {
                     },
                     deviceId: deviceId,
                     expireAt: expireAt,
-                    issuedAt: issuedAt
+                    issuedAt: issuedAt,
+                    agent: req.headers['user-agent'] || "",
+                    ip: req.ip || ""
                 },
                 rJwtTokenSalt,
                 {
@@ -93,11 +95,12 @@ export const jwttokenService = (() => {
 
         async generateRtoken(
             req: Request,
+            isLogin: boolean
         ): Promise<string> {
             const getFields: Record<string, any> = {};
             if (req.ip) getFields.ip = req.ip;
             if (req.deviceId) getFields.deviceId = req.deviceId;
-            if (req.headers["user-agent"]) getFields.deviceName = req.headers["user-agent"];
+            if (req.headers["user-agent"] && isLogin) getFields.deviceName = req.headers["user-agent"];
             getFields.userId = req.user.userId;
             const isDeviceAdded = await sessionRepository.findOne(
                 getFields
@@ -107,8 +110,9 @@ export const jwttokenService = (() => {
                 const newTokenData = await this.generateRefreshJwtToken(
                     req.user,
                     isDeviceAdded.deviceId,
-                    issuedAt
-                )
+                    issuedAt,
+                    req
+                );
                 const deviceId = isDeviceAdded.deviceId;
                 await this.updateSession(
                     req,
@@ -123,8 +127,9 @@ export const jwttokenService = (() => {
                 const newTokenData = await this.generateRefreshJwtToken(
                     req.user,
                     deviceId,
-                    issuedAt
-                )
+                    issuedAt,
+                    req
+                );
                 await this.createNewSession(
                     req,
                     deviceId,
@@ -148,20 +153,7 @@ export const jwttokenService = (() => {
         async verifyRefreshToken(token: string): Promise<RefreshJwtTokenData | undefined> {
             try {
                 const tokenData = jwt.verify(token, rJwtTokenSalt) as RefreshJwtTokenData;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-                const tokenMetaData = await rTokenDbHandler.getActiveSession(tokenData.deviceId);
-=======
                 const tokenMetaData = await sessionRepository.getActiveSession(tokenData.deviceId);
->>>>>>> Stashed changes
-=======
-                const tokenMetaData = await sessionRepository.getActiveSession(tokenData.deviceId);
->>>>>>> Stashed changes
-=======
-                const tokenMetaData = await sessionRepository.getActiveSession(tokenData.deviceId);
->>>>>>> Stashed changes
-
                 if (!tokenMetaData) {
                     throw new Error("Invalid Device Id");
                 }
@@ -169,25 +161,19 @@ export const jwttokenService = (() => {
                 const expireDate = await parseFormattedDate(tokenData.expireAt);
 
                 if (expireDate.getTime() < new Date().getTime()) {
+                    console.log()
                     throw new Error("Token has expired");
                 }
                 if (tokenMetaData.issuedAt !== tokenData.issuedAt) {
+                    console.log("Token metadata mismatch")
                     throw new Error("Token metadata mismatch");
                 }
 
                 if (tokenMetaData.expireAt !== tokenData.expireAt) {
+                    console.log("Token metadata mismatch")
                     throw new Error("Token metadata mismatch");
                 }
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
                 return tokenData;
             } catch (error) {
                 return undefined;

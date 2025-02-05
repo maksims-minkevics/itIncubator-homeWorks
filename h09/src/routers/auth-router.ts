@@ -14,6 +14,7 @@ import dotenv from "dotenv";
 import {settings} from "../settings";
 import {requestCounter} from "../midlewares/audit";
 import {consts} from "../app/global-consts";
+import jwt from "jsonwebtoken";
 
 dotenv.config()
 
@@ -27,7 +28,7 @@ authRouter.post(
     customBasicAuth,
     async (req: Request, resp: Response) => {
         const token = await jwttokenService.generate(req.user);
-        const refreshToken = await jwttokenService.generateRtoken(req);
+        const refreshToken = await jwttokenService.generateRtoken(req, true);
         resp.cookie("refreshToken", refreshToken, settings.REFRESH_TOKEN_PARAMETERS);
         return resp
             .status(200)
@@ -113,26 +114,16 @@ authRouter.post(
     jwtRefreshTokenAuth,
     async (req: Request, resp: Response) => {
         const token = await jwttokenService.generate(req.user)
-        const result = await jwttokenService.generateRtoken(
-            req
+        const refreshToken = await jwttokenService.generateRtoken(
+            req,
+            false
         );
-<<<<<<< Updated upstream
-        resp.cookie("refreshToken", result, settings.REFRESH_TOKEN_PARAMETERS);
-=======
         resp.cookie("refreshToken", refreshToken, settings.REFRESH_TOKEN_PARAMETERS);
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
         return resp
             .status(200)
             .json({
                 accessToken: token
             })
-
     });
 
 authRouter.post(
@@ -142,9 +133,6 @@ authRouter.post(
     async (req: Request, resp: Response) => {
         await jwttokenService.cancelRefreshToken(req.refreshToken);
         resp.clearCookie("refreshToken");
-        resp
-            .sendStatus(204)
-        return;
-
-
+        return resp
+            .sendStatus(204);
     });

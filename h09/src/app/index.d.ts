@@ -121,21 +121,6 @@ export type ActivityAuditDbModel = {
     date: Date
 }
 
-export type HomeWorkData = {
-    reqBody: any,
-    reqUrl: string
-    reqHeaders: any
-    reqMethod: string
-    time: Date,
-    refreshToken: string | string[],
-    parsedRefteshToken: any
-<<<<<<< Updated upstream
-}
-=======
-    status: number | undefined
-}
-
-
 export type dbQueryResultForPagination = {
     data: BlogDbModel[] | PostDbModel[] | UserDbModel[] | [],
     totalCount: number
@@ -145,10 +130,3 @@ export type viewModelResultForPagination = {
     data: BlogViewModel[] | PostViewModel[] | UserViewModel[] | [],
     totalCount: number
 };
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
