@@ -1,89 +1,80 @@
 import { Request, Response } from "express";
-import { sessionRepository } from "./repositories";
+import { sessionService } from "./services/sessionServices";
+import {HTTP_STATUS, SERVICE_CUSTOM_MSG} from "../../general/global-consts";
 
-export const getActiveSessions = async (req: Request, res: Response) => {
-    try {
-        if (!req.user?.userId) {
+export class SessionController {
+    static async getActiveSessions(req: Request, res: Response) {
+        try {
+            if (!req.user?.userId) {
+                return res
+                    .status(HTTP_STATUS.UNAUTHORIZED)
+                    .end();
+            }
+
+            const activeSessions = await sessionService.getActiveSessions(req.user.userId);
+            if (!activeSessions.status && activeSessions.msg === SERVICE_CUSTOM_MSG.NOT_FOUND) {
+                return res
+                    .status(HTTP_STATUS.NOT_FOUND)
+                    .end();
+            }
+
             return res
-                .status(401)
-                .end();
-        }
-
-        const activeSessions = await sessionRepository.findActiveSessions(req.user.userId);
-
-        if (!activeSessions.length) {
+                .status(HTTP_STATUS.OK)
+                .json(activeSessions.data);
+        } catch (error) {
+            console.error("Error in getActiveSessions:", error);
             return res
-                .status(404)
-                .end();
+                .status(HTTP_STATUS.SERVER_ERROR)
+                .json({ message: "Internal Server Error" });
         }
-
-        return res
-            .status(200)
-            .json(activeSessions);
-
-    } catch (error) {
-        console.error("Error in getActiveSessions:", error);
-        return res
-            .status(500)
-            .json({ message: "Internal Server Error" });
     }
-};
 
-export const deleteAllExceptCurrent = async (req: Request, res: Response) => {
-    try {
-        if (!req.deviceId || !req.user?.userId) {
+    static async deleteAllExceptCurrent(req: Request, res: Response) {
+        try {
+            if (!req.deviceId || !req.user.userId) {
+                return res
+                    .status(HTTP_STATUS.BAD_REQUEST)
+                    .end();
+            }
+
+            const isDeleted = await sessionService.deleteAllExceptCurrent(req.deviceId, req.user.userId);
+            if (!isDeleted.status && isDeleted.msg === SERVICE_CUSTOM_MSG.NOT_FOUND) {
+                return res
+                    .status(HTTP_STATUS.NOT_FOUND)
+                    .end();
+            }
+
             return res
-                .status(400)
+                .status(HTTP_STATUS.NO_CONTENT)
                 .end();
+
+        } catch (error) {
+            console.error("Error in deleteAllExceptCurrent:", error);
+            return res.status(HTTP_STATUS.SERVER_ERROR).json({ message: "Internal Server Error" });
         }
-
-        const areAllSessionsDeactivated = await sessionRepository.deleteAllExceptCurrent(
-            req.deviceId,
-            req.user.userId
-        );
-
-        if (!areAllSessionsDeactivated) {
-            return res
-                .status(404)
-                .end();
-        }
-
-        return res.status(204).end();
-    } catch (error) {
-        console.error("Error in deleteAllExceptCurrent:", error);
-        return res
-            .status(500)
-            .json({ message: "Internal Server Error" });
     }
-};
 
-export const deleteById = async (req: Request, res: Response) => {
-    try {
-        if (!req.params.deviceId || !req.user?.userId) {
+    static async deleteById(req: Request, res: Response) {
+        try {
+            if (!req.params.deviceId || !req.user?.userId) {
+                return res
+                    .status(HTTP_STATUS.BAD_REQUEST)
+                    .end();
+            }
+
+            const isDeleted = await sessionService.deleteById(req.params.deviceId, req.user.userId);
+            if (!isDeleted.status && isDeleted.msg === SERVICE_CUSTOM_MSG.NOT_FOUND) {
+                return res
+                    .status(HTTP_STATUS.NOT_FOUND)
+                    .end();
+            }
+
             return res
-                .status(400)
+                .status(HTTP_STATUS.NO_CONTENT)
                 .end();
+        } catch (error) {
+            console.error("Error in deleteById:", error);
+            return res.status(HTTP_STATUS.SERVER_ERROR).json({ message: "Internal Server Error" });
         }
-
-        const isSessionDeactivated = await sessionRepository.delete(
-            req.params.deviceId,
-            req.user.userId
-        );
-
-        if (!isSessionDeactivated) {
-            return res
-                .status(404)
-                .end();
-        }
-
-        return res
-            .status(204)
-            .end();
-
-    } catch (error) {
-        console.error("Error in deleteById:", error);
-        return res
-            .status(500)
-            .json({ message: "Internal Server Error" });
     }
-};
+}

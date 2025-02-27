@@ -1,6 +1,6 @@
 import {app} from "./app";
 import dotenv from "dotenv";
-import {dbRun} from "./app/db";
+import {dbRun} from "./general/db";
 dotenv.config();
 const startApp = async () => {
     console.log("app started...")

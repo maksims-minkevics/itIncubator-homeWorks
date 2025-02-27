@@ -1,8 +1,8 @@
-import {ErrorResult} from "../../app/index";
+import {ErrorResult} from "../../general/index";
 import {ObjectId} from "mongodb";
 
 export type UserViewModel = {
-    id: ObjectId,
+    id: string,
     login: string,
     email: string,
     createdAt: string
@@ -15,13 +15,12 @@ export type UserInputModel = {
 };
 
 export type UserDataValidationResult = {
-    _isValidationFailed: boolean,
-    data: ErrorResult | {},
-    user?: UserDbModel
+    status: boolean,
+    data: ErrorResult | null
 }
 
 export type UserDbModel = {
-    _id: ObjectId;
+    _id: ObjectId | string;
     login: string,
     password: string,
     email: string,
@@ -31,7 +30,7 @@ export type UserDbModel = {
 };
 
 export type UserDbInsertModel = {
-    _id?: ObjectId;
+    _id?: string;
     login: string,
     password: string,
     email: string,
@@ -40,4 +39,8 @@ export type UserDbInsertModel = {
     isActivated: boolean,
 };
 
+export type UserDbQueryResultForPagination = {
+    data: UserDbModel[] | [],
+    totalCount: number
+};
 

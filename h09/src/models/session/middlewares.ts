@@ -7,7 +7,7 @@ export const checkSessionAccess = async (req: Request, res: Response, next: Next
 
         if (!deviceId) {
             return res
-                .status(404)
+                .status(401)
                 .json({ message: "Device ID is required" });
         }
 

@@ -1,20 +1,8 @@
-import {userCollection} from "../../app/db";
-import {UserDbInsertModel, UserDbModel, UserInputModel} from "./dataModels";
-import {dbQueryResultForPagination} from "../../app/index";
+import {userCollection} from "../../general/db";
+import {UserDbInsertModel, UserDbModel, UserDbQueryResultForPagination, UserInputModel} from "./dataModels";
+import {DeleteResult, ObjectId} from "mongodb";
 
-class UserRepository {
-    private static instance: UserRepository;
-
-    private constructor() {
-    }
-
-    static getInstance(): UserRepository {
-        if (!UserRepository.instance) {
-            UserRepository.instance = new UserRepository();
-        }
-        return UserRepository.instance;
-    }
-
+export const userRepository = {
     async findMany({
                        sortBy = "createdAt",
                        sortDirection = -1,
@@ -22,16 +10,18 @@ class UserRepository {
                        pageSize = 10,
                        searchLoginTerm = "",
                        searchEmailTerm = "",
-                   }): Promise<dbQueryResultForPagination> {
+                   }): Promise<UserDbQueryResultForPagination> {
         try {
             const matchStage = searchLoginTerm || searchEmailTerm
                 ? {
-                    $or: [{login: {$regex: searchLoginTerm, $options: "i"}}, {
-                        email: {
-                            $regex: searchEmailTerm,
-                            $options: "i"
+                    $or: [
+                        {
+                            login: {$regex: searchLoginTerm, $options: "i"}
+                        },
+                        {
+                            email: {$regex: searchEmailTerm,$options: "i"}
                         }
-                    }]
+                    ]
                 }
                 : {};
 
@@ -49,24 +39,24 @@ class UserRepository {
                 },
             ]).toArray();
 
-            const data: UserDbModel[] | [] = result[0].data ?? [];
+            const data: UserDbModel[] | [] = result[0].data || [];
             const totalCount: number = result[0].totalCount?.[0]?.count || 0;
 
-            return { data: data, totalCount: totalCount };
+            return {data: data, totalCount: totalCount};
         } catch (error) {
             console.error("Error in getAllUsers:", error);
             throw new Error("Database error while fetching users");
         }
-    }
+    },
 
-    async findByField(fieldName: string, value: string): Promise<UserDbModel | null> {
+    async findByField(userData: Partial<UserDbModel>): Promise<UserDbModel | null> {
         try {
-            return await userCollection.findOne({[fieldName]: value});
+            return await userCollection.findOne(userData);
         } catch (error) {
-            console.error(`Error in getUserByField(${fieldName}):`, error);
+            console.error(`Error in getUserByField(${userData}):`, error);
             throw new Error("Database error while fetching user");
         }
-    }
+    },
 
     async findByEmailOrLogin(login: string, email: string): Promise<UserDbModel | null> {
         try {
@@ -86,20 +76,19 @@ class UserRepository {
             console.error("Error in getUserByEmailOrLogin:", error);
             throw new Error("Database error while fetching user");
         }
-    }
+    },
 
     async create(user: UserInputModel, isActivated = false, confirmationCode = ""): Promise<UserDbModel> {
         try {
-            const createdAt = new Date().toISOString();
 
             const newUser: UserDbInsertModel = {
                 ...user,
-                createdAt: createdAt,
-                confirmationCode:confirmationCode,
+                createdAt: new Date().toISOString(),
+                confirmationCode: confirmationCode,
                 isActivated: isActivated,
             };
 
-            const newObj= await userCollection.insertOne(newUser as any);
+            const newObj = await userCollection.insertOne(newUser as any);
             return {
                 _id: newObj.insertedId,
                 ...newUser
@@ -108,17 +97,17 @@ class UserRepository {
             console.error("Error in createUser:", error);
             throw new Error("Database error while creating user");
         }
-    }
+    },
 
-    async delete(id: string): Promise<boolean> {
+    async delete(id: string): Promise<DeleteResult> {
         try {
-            const result = await userCollection.deleteOne({id});
-            return result.deletedCount === 1;
+            const result = await userCollection.deleteOne({_id: new ObjectId(id)});
+            return result;
         } catch (error) {
             console.error("Error in deleteUser:", error);
             throw new Error("Database error while deleting user");
         }
-    }
+    },
 
     async dropDb(): Promise<void> {
         try {
@@ -127,7 +116,7 @@ class UserRepository {
             console.error("Error in dropDb:", error);
             throw new Error("Database error while dropping users collection");
         }
-    }
+    },
 
     async confirmEmail(code: string): Promise<boolean> {
         try {
@@ -140,7 +129,7 @@ class UserRepository {
             console.error("Error in confirmEmail:", error);
             throw new Error("Database error while confirming email");
         }
-    }
+    },
 
     async updateUserConfirmationCode(code: string, email: string): Promise<UserDbModel | null> {
         try {
@@ -153,7 +142,7 @@ class UserRepository {
             console.error("Error in updateUserConfirmationCode:", error);
             throw new Error("Database error while updating confirmation code");
         }
-    }
+    },
 
     async findOne(filter: Partial<UserDbModel>): Promise<UserDbModel | null> {
         try {
@@ -163,6 +152,4 @@ class UserRepository {
             throw new Error("Database error while fetching user");
         }
     }
-}
-
-export const userRepository = UserRepository.getInstance();
+};

@@ -1,9 +1,8 @@
-import {ActivityAuditDbModel} from "../app/index";
-import {activityAuditCollection, sessionCollection} from "../app/db";
+import {ActivityAuditDbModel} from "../general/index";
+import {activityAuditCollection, sessionCollection} from "../general/db";
 
 
 class activityAuditDbHandler {
-
     async create(url: string, date: Date, ip: string):Promise<string|undefined>{
         return (await  activityAuditCollection.insertOne({
             date: date,

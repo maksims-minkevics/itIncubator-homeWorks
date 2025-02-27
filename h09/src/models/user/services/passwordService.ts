@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import {consts} from "../../../app/global-consts";
+import {consts} from "../../../general/global-consts";
 
 export const passwordService = {
     async hash(password: string): Promise<string> {
