@@ -1,33 +1,20 @@
-import { sessionCollection } from "../../app/db";
-import { SessionDbModel, SessionViewModel } from "./dataModels";
-import {ObjectId} from "mongodb";
+import { sessionCollection } from "../../general/db";
+import {SessionDbModel, SessionInsertDbModel} from "./dataModels";
+import {DeleteResult, InsertOneResult, UpdateResult} from "mongodb";
 
-class Repositories {
-    private static instance: Repositories;
-
-    private constructor() {}
-
-    static getInstance(): Repositories {
-        if (!Repositories.instance) {
-            Repositories.instance = new Repositories();
-        }
-        return Repositories.instance;
-    }
-
-    private excludeId = { projection: { _id: 0 } };
-
-    async create(metaData: SessionDbModel): Promise<void> {
+export const sessionRepository = {
+        excludeId: { $project: { _id: 0 } },
+      async create(metaData: SessionInsertDbModel): Promise<InsertOneResult<SessionDbModel> | null> {
         try {
-            await sessionCollection.insertOne(metaData);
+            return (await sessionCollection.insertOne(metaData as any));
         } catch (error) {
             console.error("Error creating session:", error);
-            throw new Error("Database error while creating session");
+            return null
         }
-    }
+    },
 
-    /** 📌 Получить все активные сессии пользователя */
-    async findActiveSessions(userId: ObjectId): Promise<SessionViewModel[]> {
-        return await sessionCollection
+    async findActiveSessions(userId: string): Promise<SessionDbModel[]> {
+        const result = await sessionCollection
             .aggregate([
                 { $match: { userId } },
                 {
@@ -35,62 +22,48 @@ class Repositories {
                         expireDate: { $dateFromString: { dateString: "$expireAt" } }
                     }
                 },
-                { $match: { expireDate: { $gte: new Date() } } },
-                {
-                    $project: {
-                        title: "$deviceName",
-                        ip: 1,
-                        lastActiveDate: 1,
-                        deviceId: 1,
-                        _id: 0
-                    }
-                }
+                { $match: { expireDate: { $gte: new Date() } } }
             ])
-            .toArray() as SessionViewModel[];
+            .toArray();
 
+        return result as SessionDbModel[];
     }
+,
 
     async getActiveSession(deviceId: string): Promise<SessionDbModel | null> {
-        return sessionCollection.findOne({ deviceId }, this.excludeId);
-    }
+        return sessionCollection.findOne({ deviceId:deviceId });
+    },
 
     async findOne(query: Partial<SessionDbModel>): Promise<SessionDbModel | null> {
         if (Object.keys(query).length === 0) return null;
-        return sessionCollection.findOne(query, this.excludeId);
-    }
+        return sessionCollection.findOne(query);
+    },
 
-    async updateSession(deviceId: string, updateData: Partial<SessionDbModel>): Promise<boolean> {
-        const result = await sessionCollection.updateOne(
-            { deviceId },
+    async updateSession(deviceId: string, updateData: Partial<SessionDbModel>): Promise<UpdateResult<SessionDbModel>> {
+        return await sessionCollection.updateOne(
+            { deviceId:deviceId },
             { $set: updateData }
         );
-        return result.modifiedCount > 0;
-    }
+    },
 
-    async delete(deviceId: string, userId: ObjectId): Promise<boolean> {
-        const result = await sessionCollection.deleteOne({ deviceId, userId });
-        return result.deletedCount === 1;
-    }
+    async delete(deviceId: string, userId: string): Promise<DeleteResult> {
+        return await sessionCollection.deleteOne({ deviceId:deviceId, userId:userId });
+    },
 
-    async updateMany(deviceId: string, userId: ObjectId, updateData: Partial<SessionDbModel>): Promise<boolean> {
-        const result = await sessionCollection.updateMany(
-            { userId, deviceId: { $ne: deviceId } },
+    async updateMany(deviceId: string, userId: string, updateData: Partial<SessionDbModel>): Promise<UpdateResult<SessionDbModel>> {
+        return await sessionCollection.updateMany(
+            { deviceId:deviceId, userId:userId },
             { $set: updateData }
         );
-        return result.modifiedCount > 0;
-    }
+    },
 
-    async deleteAllExceptCurrent(deviceId: string, userId: ObjectId): Promise<boolean> {
-        const result = await sessionCollection.deleteMany({
-            userId,
-            deviceId: { $ne: deviceId },
-        });
-        return result.deletedCount > 0;
-    }
+    async deleteAllExceptCurrent(deviceId: string, userId: string): Promise<DeleteResult> {
+        return await sessionCollection.deleteMany(
+            { deviceId: { $ne: deviceId }, userId:userId }
+        );
+    },
 
     async dropDb(): Promise<void> {
         await sessionCollection.drop();
     }
-}
-
-export const sessionRepository = Repositories.getInstance();
+};

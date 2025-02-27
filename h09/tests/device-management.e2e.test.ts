@@ -1,61 +1,59 @@
 import request from 'supertest';
 import {app} from '../src/app';
-import {SessionViewModel} from '../src/app/index';
-import {settings} from "../src/settings";
 import dotenv from "dotenv";
-import {encodeToBase64ForBasicAuth} from "../src/app/utilities";
-import {consts} from "../src/app/global-consts";
+import {encodeToBase64ForBasicAuth} from "../src/general/utilities";
+import {HTTP_STATUS} from "../src/general/global-consts";
+import {FULL_TESTING_ENDPOINTS, TESTING_ENDPOINTS} from "../src/models/testing/endpoints";
+import {USER_FULL_URLS} from "../src/models/user/endpoints";
+import {AUTH_FULL_URLS} from "../src/models/auth/endpoints";
+import {SESSION_FULL_URLS} from "../src/models/session/endpoints";
 dotenv.config();
 let accessToken1: string;
 let refreshToken1: string;
 let refreshToken2: string;
 let refreshToken3: string;
 let refreshToken4: string;
-let deviceId1: string;
 
 
 // Создание пользователя
 beforeAll(async () => {
     await request(app)
-        .delete(process.env.BASE_URL + consts.TESTING_BASE_END_POINT + consts.END_POINTS.TESTING.DELETE_ALL_DATA)
-        .expect(settings.RESP_CODES.NO_CONTENT);
+        .delete(FULL_TESTING_ENDPOINTS.DELETE_ALL_DATA)
+        .expect(HTTP_STATUS.NO_CONTENT);
 });
-
-
-
 
 describe('Device Management Tests', () => {
 
     beforeEach(async () => {
         await request(app)
-            .delete(process.env.BASE_URL + consts.TESTING_BASE_END_POINT + consts.END_POINTS.TESTING.DELETE_ALL_DATA)
-            .expect(settings.RESP_CODES.NO_CONTENT);
+            .delete(FULL_TESTING_ENDPOINTS.DELETE_ALL_DATA)
+            .expect(HTTP_STATUS.NO_CONTENT);
 
         const basicAuth = await encodeToBase64ForBasicAuth(
             process.env.SUPER_SECRET_NAME || "",
             process.env.SUPER_SECRET_PSWRD || ""
         )
         const res = await request(app)
-            .post(process.env.BASE_URL + consts.USERS_BASE_END_POINT + consts.END_POINTS.USER.CREATE)
+            .post(USER_FULL_URLS.CREATE)
             .set('Authorization', `Basic ${basicAuth}`)
             .send({
                 login: "itiincub12",
                 password: "string1234556",
                 email: "exampl1234@example.com"
             })
-            .expect(settings.RESP_CODES.CREATED);
-
+            .expect(HTTP_STATUS.CREATED);
+        HTTP_STATUS.CREATED
         const userAgents = ['Device-1', 'Device-2', 'Device-3', 'Device-4'];
 
         for (const agent of userAgents) {
             const res = await request(app)
-                .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.LOGIN)
+                .post(AUTH_FULL_URLS.LOGIN)
                 .set('User-Agent', agent)
                 .send({
                     loginOrEmail: 'itiincub12',
                     password: 'string1234556',
                 });
-            expect(res.status).toBe(settings.RESP_CODES.OK);
+            expect(res.status).toBe(HTTP_STATUS.OK);
             expect(res.headers['set-cookie']).toBeDefined();
             if (agent === 'Device-1') {
                 accessToken1 = res.body.accessToken;
@@ -72,11 +70,10 @@ describe('Device Management Tests', () => {
     })
 
     it('should update refreshToken of device 1 and verify device list', async () => {
-        console.log(refreshToken1)
         const initialResponse = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken1);
-        expect(initialResponse.status).toBe(settings.RESP_CODES.OK);
+        expect(initialResponse.status).toBe(HTTP_STATUS.OK);
 
         const device1Before = initialResponse.body.find(
             (device: any) =>  device.title === 'Device-1'
@@ -86,16 +83,16 @@ describe('Device Management Tests', () => {
         const initialdeviceId = device1Before.deviceId;
 
         const refreshResponse = await request(app)
-            .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.REFRESH_TOKEN)
+            .post(AUTH_FULL_URLS.REFRESH_TOKEN)
             .set('Cookie', refreshToken1);
-        expect(refreshResponse.status).toBe(settings.RESP_CODES.OK);
+        expect(refreshResponse.status).toBe(HTTP_STATUS.OK);
         refreshToken1 = refreshResponse.headers['set-cookie'];
 
         const devicesResponse = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken1);
 
-        expect(devicesResponse.status).toBe(settings.RESP_CODES.OK);
+        expect(devicesResponse.status).toBe(HTTP_STATUS.OK);
 
         const device1After = devicesResponse.body.find(
             (device: any) => device.title === 'Device-1'
@@ -108,183 +105,182 @@ describe('Device Management Tests', () => {
     });
     it('should delete device 2 and verify it is removed from the list', async () => {
         const allActiveDevices = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken1);
         const device2 = allActiveDevices.body.find((device: any) => device.title === 'Device-2')
 
         const deleteResponse = await request(app)
-            .delete(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + `/${device2.deviceId}`)
+            .delete(SESSION_FULL_URLS.DELETE_BY_ID(device2.deviceId))
             .set('Cookie', refreshToken1);
-        expect(deleteResponse.status).toBe(settings.RESP_CODES.NO_CONTENT);
-
+        expect(deleteResponse.status).toBe(HTTP_STATUS.NO_CONTENT);
         const devicesResponse = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken1);
 
-        expect(devicesResponse.status).toBe(settings.RESP_CODES.OK);
+        expect(devicesResponse.status).toBe(HTTP_STATUS.OK);
         expect(
             devicesResponse.body.find((device: any) => device.title === 'Device-2')
         ).toBeUndefined();
 
         const devicesResponse2 = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken2);
 
-        expect(devicesResponse2.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
+        expect(devicesResponse2.status).toBe(HTTP_STATUS.UNAUTHORIZED);
     });
 
     it('should logout device 3 and verify it is removed from the list', async () => {
         const logoutResponse = await request(app)
-            .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.LOGOUT)
+            .post(AUTH_FULL_URLS.LOGOUT)
             .set('Cookie', refreshToken3);
-        expect(logoutResponse.status).toBe(settings.RESP_CODES.NO_CONTENT);
+        expect(logoutResponse.status).toBe(HTTP_STATUS.NO_CONTENT);
 
         const devicesResponse = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken1);
 
-        expect(devicesResponse.status).toBe(settings.RESP_CODES.OK);
+        expect(devicesResponse.status).toBe(HTTP_STATUS.OK);
         expect(
             devicesResponse.body.find((device: any) => device.title === 'Device-3')
         ).toBeUndefined();
 
         const devicesResponse3 = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken3);
 
-        expect(devicesResponse3.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
+        expect(devicesResponse3.status).toBe(HTTP_STATUS.UNAUTHORIZED);
 
         const devicesResponse1 = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken1);
 
-        expect(devicesResponse1.status).toBe(settings.RESP_CODES.OK);
+        expect(devicesResponse1.status).toBe(HTTP_STATUS.OK);
 
         const devicesResponse2 = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken2);
 
-        expect(devicesResponse2.status).toBe(settings.RESP_CODES.OK);
+        expect(devicesResponse2.status).toBe(HTTP_STATUS.OK);
 
         const devicesResponse4 = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken4);
 
-        expect(devicesResponse4.status).toBe(settings.RESP_CODES.OK);
+        expect(devicesResponse4.status).toBe(HTTP_STATUS.OK);
     });
 
     it('should delete all devices except the current one', async () => {
         const deleteResponse = await request(app)
-            .delete(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.DELETE)
+            .delete(SESSION_FULL_URLS.DELETE)
             .set('Cookie', refreshToken1);
-        expect(deleteResponse.status).toBe(settings.RESP_CODES.NO_CONTENT);
+        expect(deleteResponse.status).toBe(HTTP_STATUS.NO_CONTENT);
 
         const devicesResponse = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken1);
 
-        expect(devicesResponse.status).toBe(settings.RESP_CODES.OK);
+        expect(devicesResponse.status).toBe(HTTP_STATUS.OK);
         expect(devicesResponse.body).toHaveLength(1);
 
         const devicesResponse2 = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken2);
 
-        expect(devicesResponse2.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
+        expect(devicesResponse2.status).toBe(HTTP_STATUS.UNAUTHORIZED);
 
         const devicesResponse3 = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken2);
 
-        expect(devicesResponse3.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
+        expect(devicesResponse3.status).toBe(HTTP_STATUS.UNAUTHORIZED);
 
         const devicesResponse4 = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken4);
 
-        expect(devicesResponse4.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
+        expect(devicesResponse4.status).toBe(HTTP_STATUS.UNAUTHORIZED);
 
     });
 
     it("the 'refresh' token should become invalid after '/auth/refresh-token' request", async () => {
 
         const allActiveDevices = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken1);
         const device1 = allActiveDevices.body.find((device: any) => device.title === 'Device-1')
 
         const deleteResponse = await request(app)
-            .delete(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + `/${device1.deviceId}`)
+            .delete(SESSION_FULL_URLS.DELETE_BY_ID(device1.deviceId))
             .set('Cookie', refreshToken1);
 
-        expect(deleteResponse.status).toBe(settings.RESP_CODES.NO_CONTENT);
+        expect(deleteResponse.status).toBe(HTTP_STATUS.NO_CONTENT);
 
         const refreshResponse: any = await request(app)
-            .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.REFRESH_TOKEN)
+            .post(AUTH_FULL_URLS.REFRESH_TOKEN)
             .set('Cookie', refreshToken1);
-        expect(refreshResponse.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
+        expect(refreshResponse.status).toBe(HTTP_STATUS.UNAUTHORIZED);
 
         const logoutResponse = await request(app)
-            .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.LOGOUT)
+            .post(AUTH_FULL_URLS.LOGOUT)
             .set('Cookie', refreshToken1);
 
-        expect(logoutResponse.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
+        expect(logoutResponse.status).toBe(HTTP_STATUS.UNAUTHORIZED);
     });
 
     it("the 'refresh' token should become invalid after POST: /auth/logout request", async () => {
         const devicesResponse1 = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken1);
 
-        expect(devicesResponse1.status).toBe(settings.RESP_CODES.OK);
+        expect(devicesResponse1.status).toBe(HTTP_STATUS.OK);
 
         const devicesResponse1AfterLogOut = await request(app)
-            .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.LOGOUT)
+            .post(AUTH_FULL_URLS.LOGOUT)
             .set('Cookie', refreshToken1);
 
-        expect(devicesResponse1AfterLogOut.status).toBe(settings.RESP_CODES.NO_CONTENT);
-
+        expect(devicesResponse1AfterLogOut.status).toBe(HTTP_STATUS.NO_CONTENT);
+        HTTP_STATUS.NO_CONTENT
         const getDevicesResponse1AfterLogOut = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken1);
 
-        expect(getDevicesResponse1AfterLogOut.status).toBe(settings.RESP_CODES.UNAUTHORIZED);
+        expect(getDevicesResponse1AfterLogOut.status).toBe(HTTP_STATUS.UNAUTHORIZED);
 
         const devicesResponse2 = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken2);
 
-        expect(devicesResponse2.status).toBe(settings.RESP_CODES.OK);
+        expect(devicesResponse2.status).toBe(HTTP_STATUS.OK);
 
         const devicesResponse3 = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken3);
 
-        expect(devicesResponse3.status).toBe(settings.RESP_CODES.OK);
+        expect(devicesResponse3.status).toBe(HTTP_STATUS.OK);
 
         const devicesResponse4 = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken4);
 
-        expect(devicesResponse4.status).toBe(settings.RESP_CODES.OK);
+        expect(devicesResponse4.status).toBe(HTTP_STATUS.OK);
     });
-
+    AUTH_FULL_URLS.REFRESH_TOKEN
     it("/security/devices: should not change device id after call /auth/refresh-token. LastActiveDate should be changed; status 200; content: device list;", async () => {
         const devicesBeforeRefreshToken: any = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshToken1);
-        expect(devicesBeforeRefreshToken.status).toBe(settings.RESP_CODES.OK);
+        expect(devicesBeforeRefreshToken.status).toBe(HTTP_STATUS.OK);
         expect(devicesBeforeRefreshToken.body).toHaveLength(4);
 
         const refreshResponse: any = await request(app)
-            .post(process.env.BASE_URL + consts.AUTH_BASE_END_POINT + consts.END_POINTS.AUTH.REFRESH_TOKEN)
+            .post(AUTH_FULL_URLS.REFRESH_TOKEN)
             .set('Cookie', refreshToken1);
-        expect(refreshResponse.status).toBe(settings.RESP_CODES.OK);
+        expect(refreshResponse.status).toBe(HTTP_STATUS.OK);
 
         const devicesAfterRefreshToken: any = await request(app)
-            .get(process.env.BASE_URL + consts.SECURITY_DEVICES_BASE_END_POINT + consts.END_POINTS.SESSION.GET_ACTIVE_DEVICES)
+            .get(SESSION_FULL_URLS.GET)
             .set('Cookie', refreshResponse.headers['set-cookie']);
-        expect(devicesAfterRefreshToken.status).toBe(settings.RESP_CODES.OK);
+        expect(devicesAfterRefreshToken.status).toBe(HTTP_STATUS.OK);
         expect(devicesAfterRefreshToken.body).toHaveLength(4);
         for (const beforeDevice of devicesBeforeRefreshToken.body) {
             const afterDevice = devicesAfterRefreshToken.body.find(
