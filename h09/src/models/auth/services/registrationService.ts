@@ -5,6 +5,7 @@ import {emailService} from "../../user/services/emailService";
 import {userRepository} from "../../user/repositories";
 import {ErrorResult, ServiceResult} from "../../../general";
 import {userService} from "../../user/services/userService";
+import {registrationEmailTemplate} from "../../../general/email-templates";
 
 export const registrationService = {
     async newUserRegistration(user: UserInputModel): Promise<ServiceResult<ErrorResult>> {
@@ -24,11 +25,11 @@ export const registrationService = {
         if (!newUser.data){
             return { status: false, data: null, msg: newUser.msg};
         }
-
+        const emailTemplate = registrationEmailTemplate(confirmationCode);
         await emailService.sendEmail(
             newUser.data.email,
-            "Confirm your email",
-            `Your confirmation code: ${confirmationCode}`
+            emailTemplate,
+            `Test Email`
         );
 
         return { status: true, data: null };
