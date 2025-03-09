@@ -9,7 +9,7 @@ export const AUTH_ENDPOINTS = {
     REFRESH_TOKEN: `/auth/refresh-token`,
     LOGOUT: `/auth/logout`,
     CONFIRM_NEW_PASSWORD: `/auth/new-password`,
-    RECOVER_PASSWORD: `/auth/password-recovery`
+    PASSWORD_RECOVERY: `/auth/password-recovery`
 }
 
 export const AUTH_FULL_URLS = {
@@ -21,5 +21,5 @@ export const AUTH_FULL_URLS = {
     REFRESH_TOKEN: `${BASE_URL}${AUTH_ENDPOINTS.REFRESH_TOKEN}`,
     LOGOUT: `${BASE_URL}${AUTH_ENDPOINTS.LOGOUT}`,
     CONFIRM_NEW_PASSWORD: `${BASE_URL}${AUTH_ENDPOINTS.CONFIRM_NEW_PASSWORD}`,
-    RECOVER_PASSWORD: `${BASE_URL}${AUTH_ENDPOINTS.RECOVER_PASSWORD}`,
+    RECOVER_PASSWORD: `${BASE_URL}${AUTH_ENDPOINTS.PASSWORD_RECOVERY}`,
 };

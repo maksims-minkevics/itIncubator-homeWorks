@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import {consts} from "../../../general/global-consts";
 import {v4 as uuidv4} from "uuid";
+import {DefaultResult, ServiceResult} from "../../../general";
 
 export class PasswordService{
     async hash(password: string): Promise<string> {
@@ -12,16 +13,20 @@ export class PasswordService{
         }
     };
 
-    async compare(passwordHash: string, password: string): Promise<boolean> {
+    async compare(passwordHash: string, password: string): Promise<ServiceResult<DefaultResult>> {
         try {
-            return await bcrypt.compare(password, passwordHash);
+            const result = await bcrypt.compare(password, passwordHash);
+            if (!result) {
+                throw Error("Compare Failed");
+            }
+            return {data: null, status: true};
         } catch (e) {
             console.error("Password compare failed", e);
-            return false;
+            return {data: null, status: false};
         }
     };
 
-    async generateTempPassword(): Promise<string>{
+    async generateRecoveryCode(): Promise<string>{
         return uuidv4()
     }
 }

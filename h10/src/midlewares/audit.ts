@@ -4,7 +4,7 @@ import {ActivityAuditDbModel} from "../general/index";
 import {consts, HTTP_STATUS} from "../general/global-consts";
 const auditActivityDbHandler = new activityAuditDbHandler();
 export const requestCounter = async (req: Request, resp: Response, next: NextFunction)=> {
-    const a = await auditActivityDbHandler.create(
+    await auditActivityDbHandler.create(
         req.originalUrl,
         new Date(),
         req.ip || ""

@@ -10,6 +10,7 @@ import {PasswordService} from "../../user/services/passwordService";
 import {UserService} from "../../user/services/userService";
 import {passwordRecoveryEmailTemplate} from "../../../general/email-templates";
 import {EmailService} from "../../user/services/emailService";
+import {SERVICE_CUSTOM_MSG} from "../../../general/global-consts";
 
 export class AuthService{
     constructor(
@@ -125,26 +126,31 @@ export class AuthService{
         return {data: null, status: true}
     };
 
-    async recoverPassword(email: string): Promise<ServiceResult<DefaultResult>>{
-        const user = await this.userService.findByField({email: email});
-        if (user.data === null){
+    async pswrdRecovery(email: string): Promise<ServiceResult<DefaultResult>>{
+        if(!email){
             return {data: null, status: false}
         }
-        const tempPassword = await this.passwordService.generateTempPassword();
-        const hashedTempPswrd = await this.passwordService.hash(tempPassword);
-        await this.userService.setTempPassword(hashedTempPswrd,email);
-
-        const emailTemplate = passwordRecoveryEmailTemplate(tempPassword);
+        const code = await this.passwordService.generateRecoveryCode();
+        await this.userService.setRecoveryCode(code, email);
+        const emailTemplate = passwordRecoveryEmailTemplate(code);
         await this.emailService.sendEmail(
             email,
             emailTemplate,
             `Password Recovery`
         );
-
-
+        return {data: null, status: true}
     };
 
-    async confirmNewPassword(pswrd: string, tempPwrd: string): Promise<ServiceResult<DefaultResult>>{
-
+    async confirmNewPassword(pswrd: string, code: string): Promise<ServiceResult<DefaultResult>>{
+        if (!pswrd && !code){
+            return {data: null, status: false}
+        }
+        const user = await this.userService.getUserByRecoveryCode(code);
+        if (!user.data){
+            return {data: null, status: false}
+        }
+        const hashedPswrd = await this.passwordService.hash(pswrd);
+        await this.userService.updatePassword(hashedPswrd, user.data.email, user.data.password);
+        return {data: null, status: true}
     };
 }

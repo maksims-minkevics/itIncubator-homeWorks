@@ -13,10 +13,12 @@ const customValidator: ResultFactory<any> = validationResult.withDefaults({
 export const validationParser = (req: Request, resp: Response, next: NextFunction) =>{
     const errors = customValidator(req);
     if (!errors.isEmpty()){
-        resp
+        return resp
             .status(HTTP_STATUS.BAD_REQUEST)
-            .json({errorsMessages: errors.array({ onlyFirstError: true })})
-        return;
+            .json({
+                errorsMessages: errors.array({ onlyFirstError: true })
+            });
     }
-    next();
+
+    return next();
 }

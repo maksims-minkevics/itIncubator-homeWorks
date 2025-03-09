@@ -1,6 +1,6 @@
 import {UserInputModel, UserViewModel, UserDbModel} from "../dataModels";
 import {getArrayOfUsersViewModels, getUserViewModel} from "./userMapper";
-import { GetResult, ServiceResult} from "../../../general";
+import {DefaultResult, GetResult, ServiceResult} from "../../../general";
 import {paginateResult} from "../../../general/globalServices";
 import {getActiveUserViewModel} from "../../auth/services/authMapper";
 import {ActiveUserViewModel} from "../../auth/dataModels";
@@ -8,6 +8,7 @@ import {DeleteResult, UpdateResult} from "mongodb";
 import {UserRepository} from "../repositories";
 import {UserBusinessValidator} from "../middlewares/validations/userBusinessValidator";
 import {PasswordService} from "./passwordService";
+import e from "express";
 
 export class UserService {
     constructor(
@@ -22,13 +23,14 @@ export class UserService {
     ): Promise<ServiceResult<UserViewModel>> {
         const validationResult = await this.userBusinessValidator.validateUserData(userData)
         if (!validationResult.status) return {data: null, status: false, msg: validationResult.data}
-        userData.password = await this.passwordService.hash(userData.password);
         const newUser = await this.userRepository.create(userData, isActivated, confirmationCode);
+        console.log(newUser)
         const userViewModel = await getUserViewModel(newUser);
         return { data: userViewModel, status: true  };
     }
 
     async createNewUser(userData: UserInputModel): Promise<ServiceResult<UserViewModel>> {
+        userData.password = await this.passwordService.hash(userData.password);
         const newUser = await this.createUser(userData, true);
         if (!newUser.status){
             return {data: null, status: false, msg: newUser.msg}
@@ -100,6 +102,7 @@ export class UserService {
             return {data: null, status: false}
         }
         const result = await this.userRepository.confirmEmail(code);
+        console.log(result)
         if (!result){
             return {data: null, status: false}
         }
@@ -110,11 +113,11 @@ export class UserService {
         return {data: null, status: true}
     };
 
-    async updateConfirmationCode(email: string, code: string): Promise <ServiceResult<UserDbModel>>{
+    async setNewConfirmationCode(email: string, code: string): Promise <ServiceResult<UserDbModel>>{
         if (!email){
             return {data: null, status: false}
         }
-        const result = await this.userRepository.updateUserConfirmationCode(code, email);
+        const result = await this.userRepository.setNewConfirmationCode(code, email);
 
         if(!result){
             return {data: null, status: false}
@@ -123,10 +126,15 @@ export class UserService {
         return {data: null, status: true}
     };
 
-    async updatePassword(password: string, email: string): Promise <ServiceResult<UserDbModel>>{
+    async updatePassword(password: string, email: string, oldPassword: string): Promise <ServiceResult<DefaultResult>>{
         if (!(password && email)){
             return {data: null, status: false}
         }
+
+        if(oldPassword === password){
+            return {data: null, status: false}
+        }
+
         const result = await this.userRepository.updatePassword(password,email);
 
         if(result.matchedCount === 0){
@@ -136,11 +144,26 @@ export class UserService {
         return {data: null, status: true}
     };
 
-    async setTempPassword(password: string, email: string): Promise <ServiceResult<UpdateResult<UserDbModel>>>{
-        if (!(password && email)){
+    async setRecoveryCode(code: string, email: string): Promise <ServiceResult<UpdateResult<UserDbModel>>>{
+        if (!(code && email)){
             return {data: null, status: false}
         }
-        const result = await this.userRepository.updatePassword(password,email);
-    }
+        const result = await this.userRepository.setRecoveryCode(code, email);
+        return {data: result, status: true}
+    };
+
+    async getUserByRecoveryCode(code: string): Promise<ServiceResult<UserDbModel>>
+    {
+        if (!code){
+            return {data: null, status: false}
+        }
+        const result = await this.userRepository.findByField({pswrdRecoveryCode: code});
+        if (!result) {
+            return {data: null, status: false}
+        }
+
+        return {data: result, status: true}
+    };
+
 
 }

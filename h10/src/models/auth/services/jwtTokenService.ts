@@ -34,16 +34,4 @@ export class JwtTokenService {
         return decoded as JwtTokenData;
     };
 
-    async compare(pswrdHash: string, pawrd: string): Promise<ServiceResult<DefaultResult>> {
-        try {
-            const result = await bcrypt.compare(pawrd, pswrdHash);
-            if (!result) {
-                throw Error("Compare Failed")
-            }
-            return {data: null, status: true};
-        } catch (e) {
-            console.error("Password compare failed", e);
-            return {data: null, status: true};
-        }
-    };
 }
