@@ -1,0 +1,5 @@
+//TODO
+//- Refactor Dependency Injection
+//- Convert to class with constructor. in constructor provide (protected repository/service: ClassName)
+//- UserControllerInstance.method.bind(UserControllerInstance) to be added in the router file
+//Create composition-root with initialisations for all models
