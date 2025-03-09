@@ -110,6 +110,17 @@ describe('Auth API End-to-End Tests', () => {
         expect(createdUser.data).toBeDefined();
         expect(userAfterConfirmation.data!.confirmationCode).toBe(createdUser.data!.confirmationCode);
         expect(userAfterConfirmation.data!.isActivated).toBe(true);
+
+        const res = await request(app)
+            .post(AUTH_FULL_URLS.LOGIN)
+            .set('User-Agent', 'DEVICE 1')
+            .send({
+                loginOrEmail: newUserBody.login,
+                password: newUserBody.password,
+            });
+        expect(res.status).toBe(HTTP_STATUS.OK);
+        expect(res.body.accessToken).toBeDefined();
+
     });
 
     it('should not confirm user with incorrect confirmation code', async () => {
@@ -215,6 +226,7 @@ describe('Auth API End-to-End Tests', () => {
         expect(createdUser2.data).toBeDefined();
         expect(createdUser2.data!.confirmationCode).toBeDefined();
         expect(createdUser2.data!.isActivated).toBe(false);
+
     });
 
     it('should resend user registration confirmation code', async () => {

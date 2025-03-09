@@ -62,7 +62,10 @@ export const refreshTokenServiceInstance = new RefreshTokenService(sessionServic
 export const authorizationServiceInstance = new AuthService(
     sessionServiceInstance,
     refreshTokenServiceInstance,
-    jwtTokenServiceInstance
+    jwtTokenServiceInstance,
+    userServiceInstance,
+    passwordServiceInstance,
+    emailServiceInstance
 );
 
 export const authorizationControllerInstance = new AuthController(
@@ -107,7 +110,14 @@ export const instancesList = [
     new RegistrationService(userbizValidatorInstance, userServiceInstance, emailServiceInstance, passwordServiceInstance),
     new JwtTokenService(),
     new RefreshTokenService(sessionServiceInstance),
-    new AuthService(sessionServiceInstance, refreshTokenServiceInstance, jwtTokenServiceInstance),
+    new AuthService(
+        sessionServiceInstance,
+        refreshTokenServiceInstance,
+        jwtTokenServiceInstance,
+        userServiceInstance,
+        passwordServiceInstance,
+        emailServiceInstance
+    ),
     new AuthController(authorizationServiceInstance, userServiceInstance, registrationServiceInstance)
 ];
 

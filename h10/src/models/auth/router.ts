@@ -11,6 +11,8 @@ import {requestCounter} from "../../midlewares/audit";
 import {AUTH_ENDPOINTS} from "./endpoints";
 import {ioc} from "../../general/composition-root";
 import {AuthController} from "./controller";
+import {pswrdRecoveryValidation} from "./middlewares/validations/pswrdRecoveryValidation";
+import {newPswrdValidation} from "./middlewares/validations/newPswrdValidation";
 dotenv.config()
 
 const authorizationControllerInstance = ioc.getInstance<AuthController>(AuthController);
@@ -66,13 +68,17 @@ authRouter.post(
 );
 
 authRouter.post(
-    AUTH_ENDPOINTS.RECOVER_PASSWORD,
-    jwtRefreshTokenAuth,
-    authorizationControllerInstance.recoveryPassword.bind(authorizationControllerInstance)
+    AUTH_ENDPOINTS.PASSWORD_RECOVERY,
+    requestCounter,
+    pswrdRecoveryValidation,
+    validationParser,
+    authorizationControllerInstance.pswrdRecovery.bind(authorizationControllerInstance)
 );
 
 authRouter.post(
     AUTH_ENDPOINTS.CONFIRM_NEW_PASSWORD,
-    jwtRefreshTokenAuth,
+    requestCounter,
+    newPswrdValidation,
+    validationParser,
     authorizationControllerInstance.confirmNewPassword.bind(authorizationControllerInstance)
 );

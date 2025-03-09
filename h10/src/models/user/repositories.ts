@@ -91,7 +91,7 @@ export class UserRepository {
             const newObj = await userCollection.insertOne(newUser as any);
             return {
                 _id: newObj.insertedId,
-                tempPassword: false,
+                pswrdRecoveryCode: "",
                 ...newUser
             };
         } catch (error) {
@@ -132,7 +132,7 @@ export class UserRepository {
         }
     }
 
-    async updateUserConfirmationCode(code: string, email: string): Promise<UserDbModel | null> {
+    async setNewConfirmationCode(code: string, email: string): Promise<UserDbModel | null> {
         try {
             return await userCollection.findOneAndUpdate(
                 {email, isActivated: false},
@@ -140,7 +140,7 @@ export class UserRepository {
                 {returnDocument: "after"}
             );
         } catch (error) {
-            console.error("Error in updateUserConfirmationCode:", error);
+            console.error("Error in setNewConfirmationCode:", error);
             throw new Error("Database error while updating confirmation code");
         }
     }
@@ -156,18 +156,21 @@ export class UserRepository {
 
     async updatePassword(newPswrd: string, email: string): Promise <UpdateResult<UserDbModel>>{
         try {
-            return await userCollection.updateOne({email: email, tempPassword: true}, {password: newPswrd, tempPassword: false});
+            return await userCollection.updateOne(
+                {email: email},
+                {password: newPswrd, pswrdRecoveryCode: ""}
+            );
         } catch (error) {
             console.error("Error in updatePassword:", error);
             throw new Error("Database error while updating password");
         }
     };
 
-    async setTempPassword(tempPswrd: string, email: string): Promise <UpdateResult<UserDbModel>>{
+    async setRecoveryCode(code: string, email: string): Promise <UpdateResult<UserDbModel>>{
         try {
-            return await userCollection.updateOne({email: email}, {tempPassword: true, password: tempPswrd});
+            return await userCollection.updateOne({email: email}, {pswrdRecoveryCode: code});
         } catch (error) {
-            console.error("Error in setTempPassword:", error);
+            console.error("Error in setRecoveryCode:", error);
             throw new Error("Database error while setting temporary password");
         }
     };

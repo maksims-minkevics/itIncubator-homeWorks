@@ -2,7 +2,7 @@ import {UserInputModel} from "../../user/dataModels";
 import {UserBusinessValidator} from "../../user/middlewares/validations/userBusinessValidator";
 import {PasswordService} from "../../user/services/passwordService";
 import {EmailService} from "../../user/services/emailService";
-import {ErrorResult, ServiceResult} from "../../../general";
+import {DefaultResult, ErrorResult, ServiceResult} from "../../../general";
 import {UserService} from "../../user/services/userService";
 import {registrationEmailTemplate} from "../../../general/email-templates";
 
@@ -20,7 +20,8 @@ export class RegistrationService{
             return {data: null, status: false, msg: validationResult.data}
         }
 
-        user.password = await this.passwordService.hash(user.password);
+        const hashedPswrd = await this.passwordService.hash(user.password);
+        user.password = hashedPswrd;
         const confirmationCode = await this.emailService.generateConfirmationCode();
 
         const newUser = await this.userService.createUser(user, false, confirmationCode);
@@ -45,7 +46,7 @@ export class RegistrationService{
         if (!code){
             return { status: false, data: null }
         }
-        const isActivated = await this.emailService.confirmEmail(code);
+        const isActivated = await this.userService.confirmCode(code);
         if (!isActivated.status) {
             return {
                 status: false,
@@ -82,7 +83,7 @@ export class RegistrationService{
         }
 
         const newCode = await this.emailService.generateConfirmationCode();
-        const result = await this.userService.updateConfirmationCode(email, newCode);
+        const result = await this.userService.setNewConfirmationCode(email, newCode);
         if (!result.status){
             return {
                 status: false,

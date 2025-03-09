@@ -1,4 +1,4 @@
-import {Request, Response} from "express";
+import {Request, Response} from 'express';
 import {HTTP_STATUS} from "../../general/global-consts";
 import {settings} from "../../settings";
 import {AuthService} from "./services/authService";
@@ -19,7 +19,7 @@ export class AuthController {
                 req.ip as string,
                 agent,
                 req.user
-                )
+                );
             if (!result.status){
                 throw Error("Invalid Data")
             }
@@ -63,6 +63,7 @@ export class AuthController {
 
     async confirmRegistration(req: Request, resp: Response) {
         try {
+            console.log(req.body.code)
             const result = await this.registrationService.confirmRegistration(req.body.code);
             if(!result.status){
                 return resp
@@ -171,11 +172,39 @@ export class AuthController {
         }
     };
 
-    async recoverPassword(req: Request, resp: Response){
+    async pswrdRecovery(req: Request, resp: Response){
+        try {
+            await this.authService.pswrdRecovery(req.body.email);
+
+            return resp
+                .status(HTTP_STATUS.NO_CONTENT)
+                .end();
+        } catch (error) {
+            console.error("Error in AuthController recoveryPassword:", error);
+            return resp
+                .status(HTTP_STATUS.SERVER_ERROR)
+                .json({message: "Internal Server Error"});
+        }
 
     };
 
     async confirmNewPassword(req: Request, resp: Response){
+        try {
+            const result = await this.authService.confirmNewPassword(req.body.newPassword, req.body.recoveryCode);
+            if (!result.status){
+                return resp
+                    .status(HTTP_STATUS.BAD_REQUEST)
+                    .end();
+            }
+            return resp
+                .status(HTTP_STATUS.NO_CONTENT)
+                .end();
+        } catch (error) {
+            console.error("Error in AuthController confirmNewPassword:", error);
+            return resp
+                .status(HTTP_STATUS.SERVER_ERROR)
+                .json({message: "Internal Server Error"});
+        }
 
     };
 

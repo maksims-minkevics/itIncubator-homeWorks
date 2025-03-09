@@ -2,7 +2,7 @@ import {NextFunction, Request, Response} from "express";
 import dotenv from "dotenv";
 import {HTTP_STATUS} from "../../general/global-consts";
 import {
-    jwtTokenServiceInstance,
+    jwtTokenServiceInstance, passwordServiceInstance,
     refreshTokenServiceInstance,
     userServiceInstance
 } from "../../general/composition-root";
@@ -141,8 +141,10 @@ export const customBasicAuth =
 
         const isAuthorized =
             user && (authHeader.loginOrEmail === user.data.login || authHeader.loginOrEmail === user.data.email)
-            && (await jwtTokenServiceInstance.compare(user.data.password, authHeader.password)).status
-
+            && (await passwordServiceInstance.compare(user.data.password, authHeader.password)).status
+        console.log(user.data.password)
+        console.log(authHeader.password)
+        console.log(isAuthorized)
         if (!isAuthorized) {
             return resp
                 .status(HTTP_STATUS.UNAUTHORIZED)

@@ -27,7 +27,7 @@ export type UserDbModel = {
     createdAt: string
     confirmationCode: string,
     isActivated: boolean,
-    tempPassword: boolean
+    pswrdRecoveryCode: string
 };
 
 export type UserDbInsertModel = {
