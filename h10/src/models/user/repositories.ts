@@ -158,7 +158,7 @@ export class UserRepository {
         try {
             return await userCollection.updateOne(
                 {email: email},
-                {password: newPswrd, pswrdRecoveryCode: ""}
+                { $set: {password: newPswrd, pswrdRecoveryCode: ""}}
             );
         } catch (error) {
             console.error("Error in updatePassword:", error);
@@ -168,7 +168,7 @@ export class UserRepository {
 
     async setRecoveryCode(code: string, email: string): Promise <UpdateResult<UserDbModel>>{
         try {
-            return await userCollection.updateOne({email: email}, {pswrdRecoveryCode: code});
+            return await userCollection.updateOne({email: email}, { $set: {pswrdRecoveryCode: code}});
         } catch (error) {
             console.error("Error in setRecoveryCode:", error);
             throw new Error("Database error while setting temporary password");

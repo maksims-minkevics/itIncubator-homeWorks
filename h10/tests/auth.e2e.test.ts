@@ -1,12 +1,12 @@
 import request from "supertest";
 import {app} from "../src/app";
-import {SESSION_FULL_URLS} from "../src/models/session/endpoints";
 import {HTTP_STATUS} from "../src/general/global-consts";
 import {USER_FULL_URLS} from "../src/models/user/endpoints";
 import {FULL_TESTING_ENDPOINTS} from "../src/models/testing/endpoints";
 import {encodeToBase64ForBasicAuth} from "../src/general/utilities";
 import {AUTH_FULL_URLS} from "../src/models/auth/endpoints";
-import {sessionServiceInstance, userServiceInstance} from "../src/general/composition-root";
+import {passwordServiceInstance, userServiceInstance} from "../src/general/composition-root";
+
 describe('Auth API End-to-End Tests', () => {
     let basicAuth: string;
 
@@ -27,7 +27,7 @@ describe('Auth API End-to-End Tests', () => {
             password: "string1234556",
             email: "itiincubator.training1312@gmail.com"
         };
-        const newuser = await request(app)
+        await request(app)
             .post(AUTH_FULL_URLS.REGISTRATION)
             .send(newUserBody)
             .expect(HTTP_STATUS.NO_CONTENT);
@@ -35,6 +35,52 @@ describe('Auth API End-to-End Tests', () => {
         expect(createdUser.data).toBeDefined();
         expect(createdUser.data!.isActivated).toBe(false);
         expect(createdUser.data!.confirmationCode).toBeDefined();
+    });
+
+    it('should login user with correct data ', async () => {
+        await request(app)
+            .delete(FULL_TESTING_ENDPOINTS.DELETE_ALL_DATA)
+            .expect(HTTP_STATUS.NO_CONTENT);
+        const newUserData = {
+            login: "regUser",
+            password: "string1234556",
+            email: "itiincubator.training1312@gmail.com"
+        };
+        await request(app)
+            .post(AUTH_FULL_URLS.REGISTRATION)
+            .send(newUserData)
+            .expect(HTTP_STATUS.NO_CONTENT);
+        const createdUser = await userServiceInstance.findByField({email: newUserData.email});
+        expect(createdUser.data).toBeDefined();
+        expect(createdUser.data!.isActivated).toBe(false);
+        expect(createdUser.data!.confirmationCode).toBeDefined();
+
+        await request(app)
+            .post(AUTH_FULL_URLS.REG_CONFIRMATION)
+            .send({code: createdUser.data!.confirmationCode})
+            .expect(HTTP_STATUS.NO_CONTENT);
+
+        const agent = 'MyDevice01234'
+        const res = await request(app)
+            .post(AUTH_FULL_URLS.LOGIN)
+            .set('User-Agent', agent)
+            .send({
+                loginOrEmail: newUserData.login,
+                password: newUserData.password,
+            })
+            .expect(HTTP_STATUS.OK);
+        expect(res.body.accessToken).toBeDefined();
+
+        const res1 = await request(app)
+            .post(AUTH_FULL_URLS.LOGIN)
+            .set('User-Agent', agent)
+            .send({
+                loginOrEmail: newUserData.email,
+                password: newUserData.password,
+            })
+            .expect(HTTP_STATUS.OK);
+        expect(res1.body.accessToken).toBeDefined();
+
     });
 
     it('should not register a new user since such user already exists', async () => {
@@ -278,12 +324,258 @@ describe('Auth API End-to-End Tests', () => {
     });
 
     it('should not resend user registration confirmation code for non existing user', async () => {
-
         await request(app)
             .post(AUTH_FULL_URLS.RESEND_REG_CONF_EMAIL)
             .send({email: "fake.email@gfake.com"})
             .expect(HTTP_STATUS.BAD_REQUEST);
+    });
+
+    it('should login user with correct data ', async () => {
+        await request(app)
+            .delete(FULL_TESTING_ENDPOINTS.DELETE_ALL_DATA)
+            .expect(HTTP_STATUS.NO_CONTENT);
+        const newUserData = {
+            login: "regUser",
+            password: "string1234556",
+            email: "itiincubator.training1312@gmail.com"
+        };
+        await request(app)
+            .post(AUTH_FULL_URLS.REGISTRATION)
+            .send(newUserData)
+            .expect(HTTP_STATUS.NO_CONTENT);
+        const createdUser = await userServiceInstance.findByField({email: newUserData.email});
+        expect(createdUser.data).toBeDefined();
+        expect(createdUser.data!.isActivated).toBe(false);
+        expect(createdUser.data!.confirmationCode).toBeDefined();
+
+        await request(app)
+            .post(AUTH_FULL_URLS.REG_CONFIRMATION)
+            .send({code: createdUser.data!.confirmationCode})
+            .expect(HTTP_STATUS.NO_CONTENT);
+
+        const agent = 'MyDevice01234'
+        const res = await request(app)
+            .post(AUTH_FULL_URLS.LOGIN)
+            .set('User-Agent', agent)
+            .send({
+                loginOrEmail: newUserData.login,
+                password: newUserData.password,
+            })
+            .expect(HTTP_STATUS.OK);
+        expect(res.body.accessToken).toBeDefined();
+
+        const res1 = await request(app)
+            .post(AUTH_FULL_URLS.LOGIN)
+            .set('User-Agent', agent)
+            .send({
+                loginOrEmail: newUserData.email,
+                password: newUserData.password,
+            })
+            .expect(HTTP_STATUS.OK);
+        expect(res1.body.accessToken).toBeDefined();
 
     });
 
+    it('should not login user with incorrect data ', async () => {
+        await request(app)
+            .delete(FULL_TESTING_ENDPOINTS.DELETE_ALL_DATA)
+            .expect(HTTP_STATUS.NO_CONTENT);
+        const newUserData = {
+            login: "regUser",
+            password: "string1234556",
+            email: "itiincubator.training1312@gmail.com"
+        };
+        await request(app)
+            .post(AUTH_FULL_URLS.REGISTRATION)
+            .send(newUserData)
+            .expect(HTTP_STATUS.NO_CONTENT);
+        const createdUser = await userServiceInstance.findByField({email: newUserData.email});
+        expect(createdUser.data).toBeDefined();
+        expect(createdUser.data!.isActivated).toBe(false);
+        expect(createdUser.data!.confirmationCode).toBeDefined();
+
+        await request(app)
+            .post(AUTH_FULL_URLS.REG_CONFIRMATION)
+            .send({code: createdUser.data!.confirmationCode})
+            .expect(HTTP_STATUS.NO_CONTENT);
+
+        const agent = 'MyDevice01234'
+        const res = await request(app)
+            .post(AUTH_FULL_URLS.LOGIN)
+            .set('User-Agent', agent)
+            .send({
+                loginOrEmail: newUserData.login,
+                password: newUserData.password,
+            })
+            .expect(HTTP_STATUS.OK);
+        expect(res.body.accessToken).toBeDefined();
+
+        const res1 = await request(app)
+            .post(AUTH_FULL_URLS.LOGIN)
+            .set('User-Agent', agent)
+            .send({
+                loginOrEmail: newUserData.login,
+                password: newUserData.password+'12121212',
+            })
+            .expect(HTTP_STATUS.UNAUTHORIZED);
+        expect(res1.body.accessToken).toBeUndefined();
+
+        await request(app)
+            .post(AUTH_FULL_URLS.LOGIN)
+            .set('User-Agent', agent)
+            .send({
+                loginOrEmail: newUserData.email +'12121212',
+                password: newUserData.password,
+            })
+            .expect(HTTP_STATUS.UNAUTHORIZED);
+        expect(res1.body.accessToken).toBeUndefined();
+
+        await request(app)
+            .post(AUTH_FULL_URLS.LOGIN)
+            .set('User-Agent', agent)
+            .send({
+                loginOrEmail: newUserData.login +'12121212',
+                password: newUserData.password,
+            })
+            .expect(HTTP_STATUS.UNAUTHORIZED);
+        expect(res1.body.accessToken).toBeUndefined();
+    });
+    describe('User Password Resset', () => {
+        let basicAuth: string;
+        const userCreationData = {
+            login: "itiincub12",
+            password: "string1234556",
+            email: "exampl1234@example.com"
+        };
+        const newPswrd = "mySupperStrongP123"
+
+        beforeAll(async () => {
+            await request(app)
+                .delete(FULL_TESTING_ENDPOINTS.DELETE_ALL_DATA)
+                .expect(HTTP_STATUS.NO_CONTENT);
+
+            basicAuth = await encodeToBase64ForBasicAuth(
+                process.env.SUPER_SECRET_NAME || "",
+                process.env.SUPER_SECRET_PSWRD || ""
+            )
+
+            await request(app)
+                .post(USER_FULL_URLS.CREATE)
+                .set('Authorization', `Basic ${basicAuth}`)
+                .send(userCreationData)
+                .expect(HTTP_STATUS.CREATED);
+        });
+
+        it('should send password recovery code for correct email', async () => {
+
+            await request(app)
+                .post(AUTH_FULL_URLS.RECOVER_PASSWORD)
+                .send({email: userCreationData.email})
+                .expect(HTTP_STATUS.NO_CONTENT);
+
+            const createdUser = await userServiceInstance.findByField({email: userCreationData.email});
+            expect(createdUser.data).toBeDefined();
+            expect(createdUser.data!.pswrdRecoveryCode).toBeDefined();
+
+        });
+
+        it('should not send password recovery code for incorrect email', async () => {
+
+            await request(app)
+                .post(AUTH_FULL_URLS.RECOVER_PASSWORD)
+                .send({email: userCreationData.email})
+                .expect(HTTP_STATUS.NO_CONTENT);
+
+            const createdUser = await userServiceInstance.findByField({email: "wrongemail@gmmmaalsfail.com"});
+            expect(createdUser.data).toBe(null);
+
+        });
+
+        it('should not recover without confirmation code', async () => {
+            const user = await userServiceInstance.findByField({email: userCreationData.email});
+            await request(app)
+                .post(AUTH_FULL_URLS.CONFIRM_NEW_PASSWORD)
+                .send({newPassword: newPswrd , recoveryCode: ""})
+                .expect(HTTP_STATUS.BAD_REQUEST);
+
+            const createdUser = await userServiceInstance.findByField({email: userCreationData.email});
+            expect(createdUser.data).toBeDefined();
+            expect(createdUser.data!.password).toBe(user.data!.password);
+        });
+
+
+        it('should not recover without new password', async () => {
+            const user = await userServiceInstance.findByField({email: userCreationData.email});
+            await request(app)
+                .post(AUTH_FULL_URLS.CONFIRM_NEW_PASSWORD)
+                .send({newPassword: "", recoveryCode: user.data!.pswrdRecoveryCode})
+                .expect(HTTP_STATUS.BAD_REQUEST);
+
+            const createdUser = await userServiceInstance.findByField({email: userCreationData.email});
+            expect(createdUser.data).toBeDefined();
+            expect(createdUser.data!.password).toBe(user.data!.password);
+        });
+
+        it('should recover password and update user with new password data', async () => {
+            await request(app)
+                .post(AUTH_FULL_URLS.RECOVER_PASSWORD)
+                .send({email: userCreationData.email})
+                .expect(HTTP_STATUS.NO_CONTENT);
+
+            const user = await userServiceInstance.findByField({email: userCreationData.email});
+
+            expect(user.data).toBeDefined();
+            expect(user.data!.pswrdRecoveryCode).toBeDefined();
+            const pswrBeforeUpdate = user.data!.password;
+
+            await request(app)
+                .post(AUTH_FULL_URLS.CONFIRM_NEW_PASSWORD)
+                .send({newPassword: newPswrd , recoveryCode: user.data!.pswrdRecoveryCode})
+                .expect(HTTP_STATUS.NO_CONTENT);
+
+            const userAfterPswrdUpdate = await userServiceInstance.findByField({email: userCreationData.email});
+            expect(userAfterPswrdUpdate.data).toBeDefined();
+            expect(userAfterPswrdUpdate.data!.pswrdRecoveryCode).toBe("");
+            expect(userAfterPswrdUpdate.data!.password).not.toBe(pswrBeforeUpdate);
+            expect((await passwordServiceInstance.compare(userAfterPswrdUpdate.data!.password, newPswrd)).status).toBe(true);
+        });
+        it('should login with a new password', async () => {
+            const agent = 'MyDevice01234'
+            const res = await request(app)
+                .post(AUTH_FULL_URLS.LOGIN)
+                .set('User-Agent', agent)
+                .send({
+                    loginOrEmail: userCreationData.login,
+                    password: newPswrd,
+                })
+                .expect(HTTP_STATUS.OK);
+            expect(res.body.accessToken).toBeDefined();
+            const agent2 = 'MyDevice01235'
+            const res2 = await request(app)
+                .post(AUTH_FULL_URLS.LOGIN)
+                .set('User-Agent', agent2)
+                .send({
+                    loginOrEmail: userCreationData.email,
+                    password: newPswrd,
+                })
+                .expect(HTTP_STATUS.OK);
+            expect(res2.body.accessToken).toBeDefined();
+        });
+
+
+        it('should not login with an old password', async () => {
+            const agent = 'MyDevice01234'
+            const res = await request(app)
+                .post(AUTH_FULL_URLS.LOGIN)
+                .set('User-Agent', agent)
+                .send({
+                    loginOrEmail: userCreationData.login,
+                    password: userCreationData.password,
+                })
+                .expect(HTTP_STATUS.UNAUTHORIZED);
+            expect(res.body.accessToken).toBeUndefined();
+        });
+
+
+    });
 });

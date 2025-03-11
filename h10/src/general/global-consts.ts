@@ -15,7 +15,7 @@ export const consts = {
     SECURITY_DEVICES_BASE_END_POINT: "security/devices",
     AUDIT_BASE_END_POINT: "audit",
     SALT_ROUNDS: 10,
-    REQUEST_COUNT: 30,
+    REQUEST_COUNT: 5,
 }
 
 export const HTTP_STATUS = {

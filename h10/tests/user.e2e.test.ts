@@ -5,6 +5,8 @@ import {HTTP_STATUS} from "../src/general/global-consts";
 import {USER_FULL_URLS} from "../src/models/user/endpoints";
 import {FULL_TESTING_ENDPOINTS} from "../src/models/testing/endpoints";
 import {encodeToBase64ForBasicAuth} from "../src/general/utilities";
+import {AUTH_FULL_URLS} from "../src/models/auth/endpoints";
+import {userServiceInstance} from "../src/general/composition-root";
 describe('User API End-to-End Tests', () => {
     let basicAuth: string;
 
@@ -27,7 +29,7 @@ describe('User API End-to-End Tests', () => {
             email: "exampl1234@example.com"
         };
 
-        const res = await request(app)
+        await request(app)
             .post(USER_FULL_URLS.CREATE)
             .set('Authorization', `Basic ${basicAuth}`)
             .send(newUserCreationData)
@@ -41,6 +43,21 @@ describe('User API End-to-End Tests', () => {
             (user: any) =>  user.login === newUserCreationData.login
         );
         expect(user).toBeDefined();
+
+        const agent = 'MyDevice01234'
+        const res = await request(app)
+            .post(AUTH_FULL_URLS.LOGIN)
+            .set('User-Agent', agent)
+            .send({
+                loginOrEmail: newUserCreationData.login,
+                password: newUserCreationData.password,
+            })
+            .expect(HTTP_STATUS.OK);
+        expect(res.body.accessToken).toBeDefined();
+        const createdUser = await userServiceInstance.findByField({email: newUserCreationData.email});
+        expect(createdUser.data).toBeDefined();
+        expect(createdUser.data!.isActivated).toBe(true);
+        expect(createdUser.data!.confirmationCode).toBe("");
     });
 
     it('Create new user with existing email', async () => {
@@ -93,6 +110,7 @@ describe('User API End-to-End Tests', () => {
         );
 
         expect(usersWithSameLogin.length).toBe(1);
+
     });
 
     it('Create new user without login', async () => {

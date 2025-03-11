@@ -24,7 +24,11 @@ export class RegistrationService{
         user.password = hashedPswrd;
         const confirmationCode = await this.emailService.generateConfirmationCode();
 
-        const newUser = await this.userService.createUser(user, false, confirmationCode);
+        const newUser = await this.userService
+            .createUser(
+                user,
+                false,
+                confirmationCode);
         if (!newUser.status){
             return { status: false, data: null, msg: newUser.msg};
         }
