@@ -51,3 +51,11 @@ export const encodeToBase64ForBasicAuth = async (username: string, password: str
 
     return `${encodedCredentials}`;
 }
+
+export const getDbSortDir = async (dir: string): Promise< "asc" | "desc"> => {
+
+    if (dir === "asc"){
+        return "asc"
+    }
+    return "desc"
+}

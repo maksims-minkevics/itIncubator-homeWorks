@@ -24,7 +24,6 @@ export class UserService {
         const validationResult = await this.userBusinessValidator.validateUserData(userData)
         if (!validationResult.status) return {data: null, status: false, msg: validationResult.data}
         const newUser = await this.userRepository.create(userData, isActivated, confirmationCode);
-        console.log(newUser)
         const userViewModel = await getUserViewModel(newUser);
         return { data: userViewModel, status: true  };
     }
@@ -102,7 +101,6 @@ export class UserService {
             return {data: null, status: false}
         }
         const result = await this.userRepository.confirmEmail(code);
-        console.log(result)
         if (!result){
             return {data: null, status: false}
         }

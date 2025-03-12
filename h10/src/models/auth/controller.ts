@@ -63,7 +63,6 @@ export class AuthController {
 
     async confirmRegistration(req: Request, resp: Response) {
         try {
-            console.log(req.body.code)
             const result = await this.registrationService.confirmRegistration(req.body.code);
             if(!result.status){
                 return resp
@@ -190,7 +189,8 @@ export class AuthController {
 
     async confirmNewPassword(req: Request, resp: Response){
         try {
-            const result = await this.authService.confirmNewPassword(req.body.newPassword, req.body.recoveryCode);
+            const result = await this.authService
+                .confirmNewPassword(req.body.newPassword, req.body.recoveryCode);
             if (!result.status){
                 return resp
                     .status(HTTP_STATUS.BAD_REQUEST)

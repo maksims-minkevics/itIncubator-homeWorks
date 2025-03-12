@@ -138,13 +138,9 @@ export const customBasicAuth =
                 .status(HTTP_STATUS.UNAUTHORIZED)
                 .end();
         }
-
         const isAuthorized =
             user && (authHeader.loginOrEmail === user.data.login || authHeader.loginOrEmail === user.data.email)
             && (await passwordServiceInstance.compare(user.data.password, authHeader.password)).status
-        console.log(user.data.password)
-        console.log(authHeader.password)
-        console.log(isAuthorized)
         if (!isAuthorized) {
             return resp
                 .status(HTTP_STATUS.UNAUTHORIZED)

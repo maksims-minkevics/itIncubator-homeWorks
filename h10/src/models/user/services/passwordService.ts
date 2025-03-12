@@ -17,7 +17,7 @@ export class PasswordService{
         try {
             const result = await bcrypt.compare(password, passwordHash);
             if (!result) {
-                throw Error("Compare Failed");
+                return {data: null, status: false};
             }
             return {data: null, status: true};
         } catch (e) {

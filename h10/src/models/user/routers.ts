@@ -9,20 +9,23 @@ import {ioc} from "../../general/composition-root";
 import {UserController} from "./controller";
 export const userRouter = Router();
 const userControllerInstance = ioc.getInstance(UserController);
-userRouter.get(USER_ENDPOINTS.GET_ALL,
+userRouter.get(
+    USER_ENDPOINTS.GET_ALL,
     authorization1,
     getUserQueryExtander,
     userControllerInstance.findByEmailOrLogin.bind(userControllerInstance)
 );
 
-userRouter.post(USER_ENDPOINTS.CREATE,
+userRouter.post(
+    USER_ENDPOINTS.CREATE,
     authorization1,
     userValidator,
     validationParser,
     userControllerInstance.createNew.bind(userControllerInstance)
     );
 
-userRouter.delete(USER_ENDPOINTS.DELETE_BY_ID(":id"),
+userRouter.delete(
+    USER_ENDPOINTS.DELETE_BY_ID(":id"),
     authorization1,
     objectIdValidator,
     userControllerInstance.deleteById.bind(userControllerInstance)

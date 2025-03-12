@@ -8,7 +8,7 @@ import {sessionRouter} from "./models/session/routers";
 import {BASE_URL, consts} from "./general/global-consts";
 import {commentRouter} from "./models/comment/router";
 import {blogRouter} from "./models/blog/router";
-import {authRouter} from "./models/auth/router";
+import {authRouter} from "./models/auth/routers";
 import {ioc} from "./general/composition-root";
 import {SessionController} from "./models/session/controller";
 dotenv.config();
