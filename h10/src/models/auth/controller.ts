@@ -191,6 +191,11 @@ export class AuthController {
         try {
             const result = await this.authService
                 .confirmNewPassword(req.body.newPassword, req.body.recoveryCode);
+            if (!result.status && result.msg){
+                return resp
+                    .status(HTTP_STATUS.BAD_REQUEST)
+                    .json(result.msg);
+            }
             if (!result.status){
                 return resp
                     .status(HTTP_STATUS.BAD_REQUEST)
