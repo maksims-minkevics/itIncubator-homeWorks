@@ -147,7 +147,7 @@ export class AuthService{
         }
         const user = await this.userService.getUserByRecoveryCode(code);
         if (!user.data){
-            return {data: null, status: false}
+            return {data: null, status: false, msg: { errorsMessages: [{ message: "Incorrect Code", field: "recoveryCode" }] }}
         }
         const hashedPswrd = await this.passwordService.hash(pswrd);
         await this.userService.updatePassword(hashedPswrd, user.data.email, user.data.password);
