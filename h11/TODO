@@ -1,0 +1,8 @@
+//TODO
+Refactor code. Replace mongodb direct with mnongoose:
+- Users
+- Auth
+- Blogs
+- Posts
+- Comments
+- Session
