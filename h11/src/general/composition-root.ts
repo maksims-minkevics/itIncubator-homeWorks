@@ -124,8 +124,7 @@ export const instancesList = [
         emailServiceInstance
     ),
     new AuthController(authorizationServiceInstance, userServiceInstance, registrationServiceInstance),
-    new
-    new LoggingService()
+    new LoggingService(requestLoggingRepositoryInstance)
 ];
 
 export const ioc = {

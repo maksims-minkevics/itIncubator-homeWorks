@@ -11,3 +11,12 @@ export const commentValidation = checkSchema({
         },
         isString: true,
     }});
+
+export const commentLikeValidation = checkSchema({
+    likeStatus: {
+        trim: true,
+        isString: true,
+        isIn: {
+            options: [["None", "Like", "Dislike"]]
+        }
+    }});

@@ -81,4 +81,8 @@ export class CommentController {
 
     }
 
+    async likeComment(status: string, commentId: string){
+
+    }
+
 }

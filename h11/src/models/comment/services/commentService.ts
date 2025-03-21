@@ -92,4 +92,23 @@ export class CommentsService{
         return {data: null, status: true}
     }
 
+    async updateCommentLikeDislike(commentId: string, status: string, userId: string): Promise<ServiceResult<CommentDbModel>>{
+        if (!(commentId && status && userId)){
+            return {data: null, status: false}
+        }
+        const comment = await this.commentsRepository.findOne(commentId);
+        if (!comment){
+            return {data: null, status: false}
+        }
+        const result = await this.commentsRepository.updateCommentLike(commentId, userId, status);
+        if (!result){
+            return {data: null, status: false}
+        }
+        if (result.modifiedCount === 0 || result.upsertedCount === 0){
+            return {data: null, status: false}
+        }
+
+        return {data: null, status: true}
+    }
+
 }

@@ -1,7 +1,7 @@
 import {Router} from "express";
 import {validationParser} from "../../globals/middleware/validation-parser";
 import {jwtTokenAuth} from "../auth/authorization";
-import {commentValidation} from "./middleware/validations/commentDataValidation";
+import {commentLikeValidation, commentValidation} from "./middleware/validations/commentDataValidation";
 import {idValidator} from "./middleware/validations/commentIdValidation";
 import {COMMENTS_ENDPOINTS} from "./endpoints";
 import {objectIdValidator} from "../../globals/middleware/validators/mongoDbIdValidator";
@@ -35,4 +35,14 @@ commentRouter.delete(
     idValidator,
     validationParser,
     commentsControllerInstance.deleteById.bind(commentsControllerInstance)
+)
+
+commentRouter.put(
+    COMMENTS_ENDPOINTS.DELETE_BY_ID(':id'),
+    jwtTokenAuth,
+    objectIdValidator,
+    idValidator,
+    commentLikeValidation,
+    validationParser,
+    commentsControllerInstance.likeComment.bind(commentsControllerInstance)
 )

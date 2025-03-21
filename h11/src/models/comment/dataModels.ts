@@ -10,13 +10,6 @@ export type CommentViewModel = {
     createdAt: string
 };
 
-export type CommentDbInsertModel = {
-    content: string,
-    commentatorInfo: CommentatorInfoModel,
-    createdAt: string,
-    postId: string
-};
-
 export type CommentsDbQueryResultForPagination = {
     data: CommentDbModel[] | [],
     totalCount: number
@@ -27,8 +20,20 @@ export type CommentDbModel = {
     content: string,
     commentatorInfo: CommentatorInfoModel,
     createdAt: string,
-    postId: string
+    postId: string,
 };
+
+export type CommentLikeInfo = {
+    userId: string,
+    status: string,
+    commentId: string
+}
+
+export type CommentLikesDislikesCount = {
+    dislikeCount: number,
+    likeCount: number,
+    commentId: string
+}
 
 export type CommentatorInfoModel = {
     userId: string,
