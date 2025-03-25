@@ -1,12 +1,13 @@
 import {Router} from "express";
 import {validationParser} from "../../globals/middleware/validation-parser";
 import {jwtTokenAuth} from "../auth/authorization";
-import {commentValidation} from "./middleware/validations/commentDataValidation";
+import {commentLikeValidation, commentValidation} from "./middleware/validations/commentDataValidation";
 import {idValidator} from "./middleware/validations/commentIdValidation";
 import {COMMENTS_ENDPOINTS} from "./endpoints";
 import {objectIdValidator} from "../../globals/middleware/validators/mongoDbIdValidator";
 import {ioc} from "../../general/composition-root";
 import {CommentController} from "./controller";
+import {getUserFromJwtToken} from "../../globals/middleware/extenders/getUserFromJwtToken";
 export const commentRouter = Router();
 const commentsControllerInstance = ioc.getInstance(CommentController);
 
@@ -15,6 +16,7 @@ commentRouter.get(
     objectIdValidator,
     idValidator,
     validationParser,
+    getUserFromJwtToken,
     commentsControllerInstance.getById.bind(commentsControllerInstance)
 )
 
@@ -35,4 +37,14 @@ commentRouter.delete(
     idValidator,
     validationParser,
     commentsControllerInstance.deleteById.bind(commentsControllerInstance)
+)
+
+commentRouter.put(
+    COMMENTS_ENDPOINTS.LIKE_COMMENT(':id'),
+    jwtTokenAuth,
+    objectIdValidator,
+    idValidator,
+    commentLikeValidation,
+    validationParser,
+    commentsControllerInstance.likeComment.bind(commentsControllerInstance)
 )

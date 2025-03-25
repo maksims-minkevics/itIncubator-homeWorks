@@ -3,17 +3,99 @@ import {
     CommentDbModel,
     CommentInputModel,
     CommentatorInfoModel,
-    CommentsDbQueryResultForPagination
+    CommentsDbQueryResultForPagination,
+    UserCommentLikeInfo, CommentLikesDislikesCount, CommentModelWithLikeData
 } from "./dataModels";
 import {getFormattedDate} from "../../general/utilities";
-import {CommentsModel} from "../../general/all-classes";
+import {CommentsLikesModel, CommentsModel} from "../../general/all-classes";
 import {SortOrder} from "mongoose";
 import {getCommentDbModel} from "./services/commentMapper";
+import {ICommentsLikeInfo} from "./schemas";
 
 export class CommentsRepository {
-    async findOne(id: string): Promise<CommentDbModel | null>{
+
+    async findOneSimple(id: string): Promise<CommentDbModel | null>{
         try {
-            return CommentsModel.findOne({_id: new ObjectId(id)}).lean<CommentDbModel>();
+            return await CommentsModel.findOne({_id: new ObjectId(id)}).exec();
+        }
+        catch (error) {
+            console.error("❌ Error in findOneSimple:", error);
+            return null
+        }
+
+    }
+    async findOne(id: string, userId: string): Promise<CommentModelWithLikeData | null>{
+        try {
+            const result = await CommentsModel.aggregate([
+                {
+                    $match: {
+                        _id: new ObjectId(id)
+                    }
+                },
+
+                {
+                    $lookup: {
+                        from: 'commentslikes',
+                        localField: '_id',
+                        foreignField: 'commentId',
+                        as: 'likesData'
+                    }
+                },
+                {
+                    $addFields: {
+                        likeCount: {
+                            $size: {
+                                $filter: {
+                                    input: "$likesData",
+                                    as: "like",
+                                    cond: { $eq: ["$$like.status", "Like"] }
+                                }
+                            }
+                        },
+                        dislikeCount: {
+                            $size: {
+                                $filter: {
+                                    input: "$likesData",
+                                    as: "like",
+                                    cond: { $eq: ["$$like.status", "Dislike"] }
+                                }
+                            }
+                        },
+                        myStatus: {
+                            $let: {
+                                vars: {
+                                    user: {
+                                        $filter: {
+                                            input: "$likesData",
+                                            as: "like",
+                                            cond: { $eq: ["$$like.userId", userId] }
+                                        }
+                                    }
+                                },
+                                in: {
+                                    $cond: [
+                                        { $gt: [{ $size: "$$user" }, 0] },
+                                        { $arrayElemAt: ["$$user.status", 0] },
+                                        "$$user"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        content: 1,
+                        likeCount: 1,
+                        dislikeCount: 1,
+                        myStatus: 1,
+                        createdAt: 1,
+                        commentatorInfo: 1
+                    }
+                }
+            ]).exec();
+            return result[0]
         }
         catch (error) {
             console.error("❌ Error in findOne:", error);
@@ -26,15 +108,90 @@ export class CommentsRepository {
         sortBy: string,
         sortDir: number,
         page: number,
-        size: number
+        size: number,
+        userId: string
     ): Promise<CommentsDbQueryResultForPagination>{
         try {
-            const data = await CommentsModel.find({postId: id})
-                .sort({ [sortBy]: sortDir as SortOrder})
-                .skip((page - 1) * size)
-                .limit(size)
-                .lean<CommentDbModel[]>();
-            const totalCount = await CommentsModel.countDocuments().exec();
+            const sortDirSafe: 1 | -1 = sortDir === 1 ? 1 : -1;
+            const data = await CommentsModel.aggregate([
+                {
+                    $match: {
+                        postId: new ObjectId(id)
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'commentslikes',
+                        localField: '_id',
+                        foreignField: 'commentId',
+                        as: 'likesData'
+                    }
+                },
+                {
+                    $addFields: {
+                        likeCount: {
+                            $size: {
+                                $filter: {
+                                    input: "$likesData",
+                                    as: "like",
+                                    cond: { $eq: ["$$like.status", "Like"] }
+                                }
+                            }
+                        },
+                        dislikeCount: {
+                            $size: {
+                                $filter: {
+                                    input: "$likesData",
+                                    as: "like",
+                                    cond: { $eq: ["$$like.status", "Dislike"] }
+                                }
+                            }
+                        },
+                        myStatus: {
+                            $let: {
+                                vars: {
+                                    user: {
+                                        $filter: {
+                                            input: "$likesData",
+                                            as: "like",
+                                            cond: { $eq: ["$$like.userId", userId] }
+                                        }
+                                    }
+                                },
+                                in: {
+                                    $cond: [
+                                        { $gt: [{ $size: "$$user" }, 0] },
+                                        { $arrayElemAt: ["$$user.status", 0] },
+                                        "None"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        content: 1,
+                        likeCount: 1,
+                        dislikeCount: 1,
+                        myStatus: 1,
+                        createdAt: 1,
+                        commentatorInfo: 1
+                    }
+                },
+                {
+                    $sort: { [sortBy]: sortDirSafe}
+                },
+                {
+                    $skip: (page - 1) * size
+                },
+                {
+                    $limit: size
+                }
+            ]).exec();
+            console.log("comment back -->" , data)
+            const totalCount = await CommentsModel.countDocuments({postId: new ObjectId(id)}).exec();
             return { data: data, totalCount: totalCount };
         }
         catch (error) {
@@ -45,7 +202,7 @@ export class CommentsRepository {
 
     async delete(id: string, userId: string): Promise<DeleteResult | null>{
         try {
-            return CommentsModel.deleteOne({_id: new ObjectId(id), "commentatorInfo.userId": userId}).lean();
+            return await CommentsModel.deleteOne({_id: new ObjectId(id), "commentatorInfo.userId": userId}).lean();
         }
         catch (error) {
             console.error("❌ Error in delete:", error);
@@ -55,7 +212,7 @@ export class CommentsRepository {
 
     async update(id: string, commentData: CommentInputModel, userId: string): Promise<UpdateResult<CommentDbModel> | null>{
         try {
-            return CommentsModel.updateOne(
+            return await CommentsModel.updateOne(
                 { _id: new ObjectId(id), "commentatorInfo.userId": userId},
                 { $set: { content: commentData.content } }
             ).lean()
@@ -69,7 +226,7 @@ export class CommentsRepository {
     async create(comment: CommentInputModel, user: CommentatorInfoModel, postId: string): Promise<CommentDbModel | null> {
         try {
             const newEntry = new CommentsModel({
-                postId: postId,
+                postId: new ObjectId(postId),
                 content: comment.content,
                 createdAt: await getFormattedDate(),
                 commentatorInfo:
@@ -90,9 +247,26 @@ export class CommentsRepository {
     async dropDb(){
         try {
             await CommentsModel.collection.drop();
+            await CommentsLikesModel.collection.drop();
         }
         catch (error) {
             console.error("❌ Error in findBlogById:", error);
         }
     }
+
+    async updateCommentLike(id: string, userId: string, status: string): Promise<UpdateResult<UserCommentLikeInfo> | null>{
+        try {
+            return await CommentsLikesModel.updateOne(
+                { commentId: new ObjectId(id), userId: userId},
+                { $set: { status: status } },
+                {upsert: true}
+            ).lean()
+        }
+        catch (error) {
+            console.error("❌ Error in updateCommentLike:", error);
+            return null
+        }
+    }
+
+
 }

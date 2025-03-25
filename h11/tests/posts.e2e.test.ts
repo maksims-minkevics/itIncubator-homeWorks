@@ -313,9 +313,14 @@ describe('Blogs API End-to-End Tests', () => {
         expect(commentRes.body.content).toBe(commentData.content);
         expect(commentRes.body).toHaveProperty('createdAt');
         expect(commentRes.body).toHaveProperty('commentatorInfo');
+        expect(commentRes.body).toHaveProperty('likesInfo');
+        expect(commentRes.body.likesInfo).toHaveProperty('myStatus');
+        expect(commentRes.body.likesInfo.myStatus).toBe('None');
+        expect(commentRes.body.likesInfo).toHaveProperty('dislikeCount');
+        expect(commentRes.body.likesInfo.dislikeCount).toBe(0);
+        expect(commentRes.body.likesInfo).toHaveProperty('likeCount');
+        expect(commentRes.body.likesInfo.likeCount).toBe(0);
         expect(commentRes.body.commentatorInfo.userLogin).toBe(newUserCreationData.login);
-
-
     });
 
     it('should retrieve comments for a post with pagination', async () => {
@@ -348,7 +353,17 @@ describe('Blogs API End-to-End Tests', () => {
         expect(Array.isArray(commentsRes.body.items)).toBe(true);
         expect(commentsRes.body.items.length).toBeLessThanOrEqual(5);
 
+        for (let index in commentsRes.body.items)
+        {
+            console.log(commentsRes.body.items[index])
+            expect(commentsRes.body.items[index]).toHaveProperty('likesInfo');
+            expect(commentsRes.body.items[index].likesInfo).toHaveProperty('myStatus');
+            expect(commentsRes.body.items[index].likesInfo.myStatus).toBe('None');
+            expect(commentsRes.body.items[index].likesInfo).toHaveProperty('dislikeCount');
+            expect(commentsRes.body.items[index].likesInfo.dislikeCount).toBe(0);
+            expect(commentsRes.body.items[index].likesInfo).toHaveProperty('likeCount');
+            expect(commentsRes.body.items[index].likesInfo.likeCount).toBe(0);
+        }
+
     });
-
-
 });

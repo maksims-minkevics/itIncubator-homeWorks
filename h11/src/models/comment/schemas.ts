@@ -1,18 +1,23 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import {ObjectId} from "mongodb";
 
-// Определение интерфейса для TypeScript
-export interface CommentatorInfo {
-    userId: string;
+export interface ICommentatorInfo {
+    userId: string,
     userLogin: string;
 }
 
+export interface ICommentsLikeInfo {
+    status: string,
+    commentId: ObjectId,
+    userId: string
+}
+
 export interface IComments extends Document {
-    _id: ObjectId
-    content: string;
-    commentatorInfo: CommentatorInfo;
-    createdAt: string;
-    postId: string;
+    _id: ObjectId,
+    content: string,
+    commentatorInfo: ICommentatorInfo,
+    createdAt: string,
+    postId: ObjectId,
 }
 
 export const CommentsSchema = new Schema<IComments>({
@@ -22,5 +27,15 @@ export const CommentsSchema = new Schema<IComments>({
         userLogin: { type: String, required: true },
     },
     createdAt: { type: String, default: () => new Date().toISOString() },
-    postId: { type: String, required: true },
-});
+    postId: { type: mongoose.Schema.Types.ObjectId, ref: "Posts", required: true },
+    },
+    { versionKey: false , _id: true}
+);
+
+export const CommentsLikeSchema= new Schema<ICommentsLikeInfo>({
+    userId: { type: String, required: true },
+    commentId: { type: mongoose.Schema.Types.ObjectId, ref: "Comments", required: true },
+    status: { type: String, default: "None"}
+    },
+    { versionKey: false , _id: true}
+);

@@ -125,6 +125,7 @@ export class PostController {
                 Number(req.query.sortDirection),
                 Number(req.query.pageNumber),
                 Number(req.query.pageSize),
+                req.user.userId
             );
 
             if ((comments.msg === SERVICE_CUSTOM_MSG.NOT_FOUND)) {

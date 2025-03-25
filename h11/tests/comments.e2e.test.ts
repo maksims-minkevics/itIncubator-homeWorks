@@ -159,4 +159,243 @@ describe('Blogs API End-to-End Tests', () => {
             .expect(HTTP_STATUS.NOT_FOUND);
     });
 
+    it('should like a comment', async () => {
+        const commentData = {
+            content: 'stray228 best of the best steamer in the world1234'
+        };
+        const likeData = {
+            likeStatus: "Like"
+        }
+
+        const commentRes = await request(app)
+            .post(POSTS_FULL_URLS.CREATE_COMMENT_FOR_SPECIFIC_POST(createdPost.body.id))
+            .set('Authorization', `Bearer ${user1Token}`)
+            .send(commentData)
+            .expect(HTTP_STATUS.CREATED);
+
+        const commentRes1 = await request(app)
+            .put(COMMENTS_FULL_URLS.LIKE_COMMENT(commentRes.body.id))
+            .set('Authorization', `Bearer ${user1Token}`)
+            .send(likeData)
+            .expect(HTTP_STATUS.NO_CONTENT);
+
+        const comment = await request(app)
+            .get(COMMENTS_FULL_URLS.GET_BY_ID(commentRes.body.id))
+            .set('Authorization', `Bearer ${user1Token}`)
+            .expect(HTTP_STATUS.OK);
+
+        expect(comment.body).toHaveProperty('likesInfo');
+        expect(comment.body.likesInfo).toHaveProperty('myStatus');
+        expect(comment.body.likesInfo.myStatus).toBe('Like');
+        expect(comment.body.likesInfo).toHaveProperty('dislikeCount');
+        expect(comment.body.likesInfo.dislikeCount).toBe(0);
+        expect(comment.body.likesInfo).toHaveProperty('likeCount');
+        expect(comment.body.likesInfo.likeCount).toBe(1);
+    });
+
+    it('should dilike a comment', async () => {
+        const commentData = {
+            content: 'stray228 best of the best steamer in the world1234'
+        };
+        const likeData = {
+            likeStatus: "Dislike"
+        }
+
+        const commentRes = await request(app)
+            .post(POSTS_FULL_URLS.CREATE_COMMENT_FOR_SPECIFIC_POST(createdPost.body.id))
+            .set('Authorization', `Bearer ${user1Token}`)
+            .send(commentData)
+            .expect(HTTP_STATUS.CREATED);
+
+        const commentRes1 = await request(app)
+            .put(COMMENTS_FULL_URLS.LIKE_COMMENT(commentRes.body.id))
+            .set('Authorization', `Bearer ${user1Token}`)
+            .send(likeData)
+            .expect(HTTP_STATUS.NO_CONTENT);
+
+        const comment = await request(app)
+            .get(COMMENTS_FULL_URLS.GET_BY_ID(commentRes.body.id))
+            .set('Authorization', `Bearer ${user1Token}`)
+            .expect(HTTP_STATUS.OK);
+
+        expect(comment.body).toHaveProperty('likesInfo');
+        expect(comment.body.likesInfo).toHaveProperty('myStatus');
+        expect(comment.body.likesInfo.myStatus).toBe('Dislike');
+        expect(comment.body.likesInfo).toHaveProperty('dislikeCount');
+        expect(comment.body.likesInfo.dislikeCount).toBe(1);
+        expect(comment.body.likesInfo).toHaveProperty('likeCount');
+        expect(comment.body.likesInfo.likeCount).toBe(0);
+    });
+
+    it('should not like a comment', async () => {
+        const commentData = {
+            content: 'stray228 best of the best steamer in the world1234'
+        };
+        const likeData = {
+            likeStatus: "None"
+        }
+
+        const commentRes = await request(app)
+            .post(POSTS_FULL_URLS.CREATE_COMMENT_FOR_SPECIFIC_POST(createdPost.body.id))
+            .set('Authorization', `Bearer ${user1Token}`)
+            .send(commentData)
+            .expect(HTTP_STATUS.CREATED);
+
+        const commentRes1 = await request(app)
+            .put(COMMENTS_FULL_URLS.LIKE_COMMENT(commentRes.body.id))
+            .set('Authorization', `Bearer ${user1Token}`)
+            .send(likeData)
+            .expect(HTTP_STATUS.NO_CONTENT);
+
+        const comment = await request(app)
+            .get(COMMENTS_FULL_URLS.GET_BY_ID(commentRes.body.id))
+            .set('Authorization', `Bearer ${user1Token}`)
+            .expect(HTTP_STATUS.OK);
+
+        expect(comment.body).toHaveProperty('likesInfo');
+        expect(comment.body.likesInfo).toHaveProperty('myStatus');
+        expect(comment.body.likesInfo.myStatus).toBe('None');
+        expect(comment.body.likesInfo).toHaveProperty('dislikeCount');
+        expect(comment.body.likesInfo.dislikeCount).toBe(0);
+        expect(comment.body.likesInfo).toHaveProperty('likeCount');
+        expect(comment.body.likesInfo.likeCount).toBe(0);
+    });
+
+    it('should not like a comment with incorrect data', async () => {
+        const commentData = {
+            content: 'stray228 best of the best steamer in the world1234'
+        };
+        const likeData = {
+            likeStatus: "TestString"
+        }
+
+        const commentRes = await request(app)
+            .post(POSTS_FULL_URLS.CREATE_COMMENT_FOR_SPECIFIC_POST(createdPost.body.id))
+            .set('Authorization', `Bearer ${user1Token}`)
+            .send(commentData)
+            .expect(HTTP_STATUS.CREATED);
+
+        const commentRes1 = await request(app)
+            .put(COMMENTS_FULL_URLS.LIKE_COMMENT(commentRes.body.id))
+            .set('Authorization', `Bearer ${user1Token}`)
+            .send(likeData)
+            .expect(HTTP_STATUS.BAD_REQUEST);
+    });
+
+    it('should handle 10 users liking/disliking 3 comments randomly via API', async () => {
+        const users = [];
+        const tokens = [];
+
+        // 1. Создаём 10 пользователей и логинимся
+        for (let i = 0; i < 10; i++) {
+            const userData = {
+                login: `user${i}`,
+                password: 'Password123!',
+                email: `user${i}@example.com`
+            };
+
+            await request(app)
+                .post(USER_FULL_URLS.CREATE)
+                .set('Authorization', `Basic ${basicAuth}`) // твой basic auth
+                .send(userData)
+                .expect(HTTP_STATUS.CREATED);
+
+            const loginRes = await request(app)
+                .post(AUTH_FULL_URLS.LOGIN)
+                .send({
+                    loginOrEmail: userData.login,
+                    password: userData.password
+                })
+                .expect(HTTP_STATUS.OK);
+
+            users.push(userData);
+            tokens.push(loginRes.body.accessToken);
+        }
+
+
+        // 2. Первые 3 пользователя создают комментарии
+        const commentIds = [];
+        for (let i = 0; i < 3; i++) {
+            const commentRes = await request(app)
+                .post(POSTS_FULL_URLS.CREATE_COMMENT_FOR_SPECIFIC_POST(createdPost.body.id))
+                .set('Authorization', `Bearer ${tokens[i]}`)
+                .send({ content: `Comment is too short ${i}` })
+                .expect(HTTP_STATUS.CREATED);
+
+            commentIds.push(commentRes.body.id);
+        }
+
+        // 3. Все 10 пользователей случайно ставят Like / Dislike / None
+        const likeStatuses = ['Like', 'Dislike', 'None'];
+        const expectedResults: Record<string, { likes: number; dislikes: number }> = {};
+        const userStatuses: Record<string, Record<string, string>> = {}; // commentId -> userIndex -> status
+
+        for (const commentId of commentIds) {
+            expectedResults[commentId] = { likes: 0, dislikes: 0 };
+            userStatuses[commentId] = {};
+
+            for (let i = 0; i < tokens.length; i++) {
+                const status = likeStatuses[Math.floor(Math.random() * 3)];
+
+                await request(app)
+                    .put(COMMENTS_FULL_URLS.LIKE_COMMENT(commentId))
+                    .set('Authorization', `Bearer ${tokens[i]}`)
+                    .send({ likeStatus: status })
+                    .expect(HTTP_STATUS.NO_CONTENT);
+
+                userStatuses[commentId][i] = status;
+
+                if (status === 'Like') expectedResults[commentId].likes++;
+                if (status === 'Dislike') expectedResults[commentId].dislikes++;
+            }
+        }
+
+        // 4. Проверка количества лайков/дизлайков и поля myStatus для каждого пользователя
+        for (const commentId of commentIds) {
+            const expected = expectedResults[commentId];
+
+            for (let i = 0; i < tokens.length; i++) {
+                const res = await request(app)
+                    .get(COMMENTS_FULL_URLS.GET_BY_ID(commentId))
+                    .set('Authorization', `Bearer ${tokens[i]}`)
+                    .expect(HTTP_STATUS.OK);
+
+                expect(res.body).toHaveProperty('likesInfo');
+                expect(res.body.likesInfo.likeCount).toBe(expected.likes);
+                expect(res.body.likesInfo.dislikeCount).toBe(expected.dislikes);
+                expect(res.body.likesInfo.myStatus).toBe(userStatuses[commentId][i]);
+            }
+        }
+    });
+
+    it('should change myStatus if like dislike none', async () => {
+        const commentData = {
+            content: 'stray228 best of the best steamer in the world1234'
+        };
+        const likeStatus = [
+            { status: "Dislike", likes: 0, dislikes: 1 },
+            { status: "None", likes: 0, dislikes: 0 },
+            { status: "Like", likes: 1, dislikes: 0 },
+        ]
+        const commentRes = await request(app)
+            .post(POSTS_FULL_URLS.CREATE_COMMENT_FOR_SPECIFIC_POST(createdPost.body.id))
+            .set('Authorization', `Bearer ${user1Token}`)
+            .send(commentData)
+            .expect(HTTP_STATUS.CREATED);
+        for (const index in likeStatus){
+            await request(app)
+                .put(COMMENTS_FULL_URLS.LIKE_COMMENT(commentRes.body.id))
+                .set('Authorization', `Bearer ${user1Token}`)
+                .send({ likeStatus: likeStatus[index].status })
+                .expect(HTTP_STATUS.NO_CONTENT);
+
+            const comment = await request(app)
+                .get(COMMENTS_FULL_URLS.GET_BY_ID(commentRes.body.id))
+                .set('Authorization', `Bearer ${user1Token}`)
+                .expect(HTTP_STATUS.OK);
+            expect(comment.body.likesInfo.myStatus).toBe(likeStatus[index].status);
+            expect(comment.body.likesInfo.dislikeCount).toBe(likeStatus[index].dislikes);
+            expect(comment.body.likesInfo.likeCount).toBe(likeStatus[index].likes);
+        }
+    });
 });

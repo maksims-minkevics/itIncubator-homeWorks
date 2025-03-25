@@ -4,19 +4,23 @@ import {getArrayOfCommentViewModels, getCommentViewModel} from "./commentMapper"
 import {CommentatorInfoModel, CommentDbModel, CommentInputModel, CommentViewModel} from "../dataModels";
 import {SERVICE_CUSTOM_MSG} from "../../../general/global-consts";
 import {paginateResult} from "../../../general/globalServices";
+import {ObjectId} from "mongodb";
 
 export class CommentsService{
     constructor(protected commentsRepository: CommentsRepository) {
     }
-    async find(id: string): Promise<ServiceResult<CommentViewModel>>{
+    async find(id: string, userId: string): Promise<ServiceResult<CommentViewModel>>{
         if (!id){
             return {data: null, status: false}
         }
-        const comment = await this.commentsRepository.findOne(id);
-        if (!comment){
+        if (!ObjectId.isValid(id)){
             return {data: null, status: false}
         }
-        const commentViewModel = await getCommentViewModel(comment);
+        const commentLikes = await this.commentsRepository.findOne(id, userId)
+        if (!commentLikes){
+            return {data: null, status: false}
+        }
+        const commentViewModel = await getCommentViewModel(commentLikes);
         return {data:  commentViewModel, status: true}
     }
 
@@ -55,16 +59,16 @@ export class CommentsService{
         sortBy: string,
         sortDir: number,
         page: number,
-        size: number
+        size: number,
+        userId: string
     ): Promise<ServiceResult<GetResult<CommentViewModel>>>{
         if (!postId){
             return {data: null, status: false, msg: SERVICE_CUSTOM_MSG.NOT_FOUND}
         }
-        const comments = await this.commentsRepository.findManyByPostId(postId, sortBy, sortDir, page, size);
+        const comments = await this.commentsRepository.findManyByPostId(postId, sortBy, sortDir, page, size, userId);
         if (!comments){
             return {data: null, status: false, msg: SERVICE_CUSTOM_MSG.NOT_FOUND}
         }
-
         const arrayOfCommentViewModels = await getArrayOfCommentViewModels(comments.data);
         const paginatedResult = paginateResult(
             {
@@ -77,16 +81,37 @@ export class CommentsService{
         return {data: paginatedResult, status: true}
     }
 
-    async deleteById(postId: string, userId: string): Promise<ServiceResult<CommentDbModel>>{
-        if (!postId){
+    async deleteById(id: string, userId: string): Promise<ServiceResult<CommentDbModel>>{
+        if (!id){
             return {data: null, status: false, msg: SERVICE_CUSTOM_MSG.NOT_FOUND}
         }
-        const deleteResult = await this.commentsRepository.delete(postId, userId);
+        const deleteResult = await this.commentsRepository.delete(id, userId);
         if (!deleteResult){
             return {data: null, status: false, msg: SERVICE_CUSTOM_MSG.ACCESS_DENIED}
         }
         if (deleteResult.deletedCount === 0){
             return {data: null, status: false, msg: SERVICE_CUSTOM_MSG.ACCESS_DENIED}
+        }
+
+        return {data: null, status: true}
+    }
+
+    async updateCommentLikeDislike(commentId: string, status: string, userId: string): Promise<ServiceResult<CommentDbModel>>{
+        if (!(commentId && status && userId)){
+            return {data: null, status: false}
+        }
+        const comment = await this.commentsRepository.findOneSimple(commentId);
+        if (!comment){
+            return {data: null, status: false, msg: SERVICE_CUSTOM_MSG.NOT_FOUND}
+        }
+        const result = await this.commentsRepository.updateCommentLike(commentId, userId, status);
+
+        if (!result){
+            return {data: null, status: false}
+        }
+
+        if (result.matchedCount == 0 && result.upsertedCount == 0){
+            return {data: null, status: false}
         }
 
         return {data: null, status: true}

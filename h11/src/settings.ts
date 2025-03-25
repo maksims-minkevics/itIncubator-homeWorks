@@ -9,7 +9,7 @@ export const settings = {
         UNAUTHORIZED: 401
     },
     REFRESH_TOKEN_PARAMETERS: {httpOnly: true, secure: true},
-    REFRESH_TOKEN_EXP_TIME: 20,
-    AUTH_TOKEN_EXP_TIME: 10
+    REFRESH_TOKEN_EXP_TIME: 86400,
+    AUTH_TOKEN_EXP_TIME: 300
 };
 

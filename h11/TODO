@@ -1,8 +1,7 @@
 //TODO
-Refactor code. Replace mongodb direct with mnongoose:
-- Users
-- Auth
-- Blogs
-- Posts
-- Comments
-- Session
+Изменить гет запросы для комментариев. Добавить нформацию о лайках/дизлайках, и также мой статус
+Переписать апдейт, если статуса нет?
+Изменить viewmodel
+Изменить маппер
+Написать e2e
+Исправить метод в controller

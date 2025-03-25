@@ -7,7 +7,7 @@ export class CommentController {
     }
    async getById (req: Request, resp: Response) {
        try {
-           const comment = await this.commentsService.find(req.params.id as string)
+           const comment = await this.commentsService.find(req.params.id, req.user.userId)
            if (!comment.status) {
                return resp
                    .sendStatus(HTTP_STATUS.NOT_FOUND);
@@ -81,4 +81,20 @@ export class CommentController {
 
     }
 
+    async likeComment(req: Request, resp: Response){
+        const result = await this.commentsService.updateCommentLikeDislike(req.params.id, req.body.likeStatus, req.user.userId);
+        if (!result.status && result.msg){
+            resp
+                .status(HTTP_STATUS.NOT_FOUND)
+                .end();
+        }
+        if (!result.status){
+            resp
+                .status(HTTP_STATUS.BAD_REQUEST)
+                .end();
+        }
+        resp
+            .status(HTTP_STATUS.NO_CONTENT)
+            .end();
+    }
 }

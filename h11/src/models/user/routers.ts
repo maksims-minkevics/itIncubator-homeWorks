@@ -9,7 +9,6 @@ import {ioc} from "../../general/composition-root";
 import {UserController} from "./controller";
 export const userRouter = Router();
 const userControllerInstance = ioc.getInstance(UserController);
-
 userRouter.get(
     USER_ENDPOINTS.GET_ALL,
     authorization1,
