@@ -14,7 +14,6 @@ export class LoggingService{
     }
 
     async get(url: string, ip: string): Promise<ServiceResult<DefaultResult>>{
-        console.log("called")
         const tenSecondsAgo = new Date(new Date().getTime() - 10 * 1000);
         const result = await this.logRepository.getRequestNumberByDate(url, ip, tenSecondsAgo);
         return {data: result, status: true}

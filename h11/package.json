@@ -15,8 +15,8 @@
     "uuid": "^11.0.5"
   },
   "scripts": {
-    "dev": "npx nodemon --inspect dist/index.js && cross-env CLEAR=true",
-    "watch": "tsc -w && cross-env CLEAR=true",
+    "dev": "npx nodemon --inspect dist/index.js",
+    "watch": "tsc -w",
     "jest": "jest -i",
     "test": "jest --detectOpenHandles --forceExit",
     "tsc": "tsc",
