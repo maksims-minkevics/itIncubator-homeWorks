@@ -20,7 +20,7 @@
     "jest": "jest -i",
     "test": "jest --detectOpenHandles --forceExit",
     "tsc": "tsc",
-    "testO": "npm test -- tests/device-management.e2e.test.ts"
+    "testO": "npm test -- tests/COMMENTS.e2e.test.ts"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

@@ -9,6 +9,7 @@ import {getPostQueryExtander} from "./middleware/extenders/postGetQueryExtander"
 import {objectIdValidator} from "../../globals/middleware/validators/mongoDbIdValidator";
 import {ioc} from "../../general/composition-root";
 import {PostController} from "./controller";
+import {getUserFromJwtToken} from "../../globals/middleware/extenders/getUserFromJwtToken";
 export const postRouter = Router();
 const postsControllerInstance = ioc.getInstance(PostController);
 postRouter.get(
@@ -62,5 +63,6 @@ postRouter.get(
     getPostQueryExtander,
     idValidator,
     validationParser,
+    getUserFromJwtToken,
     postsControllerInstance.getCommentsByPostId.bind(postsControllerInstance)
 );

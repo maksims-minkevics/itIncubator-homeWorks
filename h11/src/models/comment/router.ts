@@ -7,6 +7,7 @@ import {COMMENTS_ENDPOINTS} from "./endpoints";
 import {objectIdValidator} from "../../globals/middleware/validators/mongoDbIdValidator";
 import {ioc} from "../../general/composition-root";
 import {CommentController} from "./controller";
+import {getUserFromJwtToken} from "../../globals/middleware/extenders/getUserFromJwtToken";
 export const commentRouter = Router();
 const commentsControllerInstance = ioc.getInstance(CommentController);
 
@@ -15,6 +16,7 @@ commentRouter.get(
     objectIdValidator,
     idValidator,
     validationParser,
+    getUserFromJwtToken,
     commentsControllerInstance.getById.bind(commentsControllerInstance)
 )
 
@@ -38,7 +40,7 @@ commentRouter.delete(
 )
 
 commentRouter.put(
-    COMMENTS_ENDPOINTS.DELETE_BY_ID(':id'),
+    COMMENTS_ENDPOINTS.LIKE_COMMENT(':id'),
     jwtTokenAuth,
     objectIdValidator,
     idValidator,

@@ -1,8 +1,25 @@
-import {CommentDbModel, CommentViewModel} from "../dataModels";
-import {IComments} from "../schemas";
+import {
+    CommentDbModel,
+    CommentLikeInfo,
+    CommentLikesDislikesCount,
+    CommentModelWithLikeData,
+    CommentViewModel
+} from "../dataModels";
+import {IComments, ICommentsLikeInfo} from "../schemas";
 
-export const getCommentViewModel = async (comment: CommentDbModel): Promise<CommentViewModel | null> => {
+export const getCommentViewModel = async (comment: CommentModelWithLikeData | CommentDbModel | null): Promise<CommentViewModel | null> => {
     if (!comment) return null;
+
+    const hasLikesInfo = (
+        comment: CommentDbModel | CommentModelWithLikeData
+    ): comment is CommentModelWithLikeData => {
+        return (
+            'likeCount' in comment &&
+            'dislikeCount' in comment &&
+            'myStatus' in comment
+        );
+    };
+
     return {
             content: comment.content,
             id: comment._id.toString(),
@@ -10,8 +27,14 @@ export const getCommentViewModel = async (comment: CommentDbModel): Promise<Comm
                 userId: comment.commentatorInfo.userId,
                 userLogin: comment.commentatorInfo.userLogin
             },
-            createdAt: comment.createdAt
+            createdAt: comment.createdAt,
+            likesInfo: {
+                likeCount: hasLikesInfo(comment) ? comment.likeCount : 0,
+                dislikeCount: hasLikesInfo(comment) ? comment.dislikeCount : 0,
+                myStatus: hasLikesInfo(comment) ? comment.myStatus : 'None',
+            }
     };
+
 };
 
 export const getCommentDbModel = async (comment: IComments): Promise<CommentDbModel | null> => {
@@ -29,7 +52,7 @@ export const getCommentDbModel = async (comment: IComments): Promise<CommentDbMo
 };
 
 
-export const getArrayOfCommentViewModels = async (comments: CommentDbModel[] | []): Promise<CommentViewModel[] | []> => {
+export const getArrayOfCommentViewModels = async (comments: CommentModelWithLikeData[] | []): Promise<CommentViewModel[] | []> => {
     if (Array.isArray(comments)){
         return comments.map(comment => ({
             content: comment.content,
@@ -38,7 +61,12 @@ export const getArrayOfCommentViewModels = async (comments: CommentDbModel[] | [
                 userId: comment.commentatorInfo.userId,
                 userLogin: comment.commentatorInfo.userLogin
             },
-            createdAt: comment.createdAt
+            createdAt: comment.createdAt,
+            likesInfo: {
+                dislikeCount: comment.dislikeCount,
+                likeCount: comment.likeCount,
+                myStatus: comment.myStatus,
+            }
         }));
     }
     return []
