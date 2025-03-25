@@ -190,7 +190,6 @@ export class CommentsRepository {
                     $limit: size
                 }
             ]).exec();
-            console.log("comment back -->" , data)
             const totalCount = await CommentsModel.countDocuments({postId: new ObjectId(id)}).exec();
             return { data: data, totalCount: totalCount };
         }

@@ -355,7 +355,6 @@ describe('Blogs API End-to-End Tests', () => {
 
         for (let index in commentsRes.body.items)
         {
-            console.log(commentsRes.body.items[index])
             expect(commentsRes.body.items[index]).toHaveProperty('likesInfo');
             expect(commentsRes.body.items[index].likesInfo).toHaveProperty('myStatus');
             expect(commentsRes.body.items[index].likesInfo.myStatus).toBe('None');
