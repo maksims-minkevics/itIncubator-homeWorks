@@ -316,10 +316,10 @@ describe('Blogs API End-to-End Tests', () => {
         expect(commentRes.body).toHaveProperty('likesInfo');
         expect(commentRes.body.likesInfo).toHaveProperty('myStatus');
         expect(commentRes.body.likesInfo.myStatus).toBe('None');
-        expect(commentRes.body.likesInfo).toHaveProperty('dislikeCount');
-        expect(commentRes.body.likesInfo.dislikeCount).toBe(0);
-        expect(commentRes.body.likesInfo).toHaveProperty('likeCount');
-        expect(commentRes.body.likesInfo.likeCount).toBe(0);
+        expect(commentRes.body.likesInfo).toHaveProperty('dislikesCount');
+        expect(commentRes.body.likesInfo.dislikesCount).toBe(0);
+        expect(commentRes.body.likesInfo).toHaveProperty('likesCount');
+        expect(commentRes.body.likesInfo.likesCount).toBe(0);
         expect(commentRes.body.commentatorInfo.userLogin).toBe(newUserCreationData.login);
     });
 
@@ -358,10 +358,10 @@ describe('Blogs API End-to-End Tests', () => {
             expect(commentsRes.body.items[index]).toHaveProperty('likesInfo');
             expect(commentsRes.body.items[index].likesInfo).toHaveProperty('myStatus');
             expect(commentsRes.body.items[index].likesInfo.myStatus).toBe('None');
-            expect(commentsRes.body.items[index].likesInfo).toHaveProperty('dislikeCount');
-            expect(commentsRes.body.items[index].likesInfo.dislikeCount).toBe(0);
-            expect(commentsRes.body.items[index].likesInfo).toHaveProperty('likeCount');
-            expect(commentsRes.body.items[index].likesInfo.likeCount).toBe(0);
+            expect(commentsRes.body.items[index].likesInfo).toHaveProperty('dislikesCount');
+            expect(commentsRes.body.items[index].likesInfo.dislikesCount).toBe(0);
+            expect(commentsRes.body.items[index].likesInfo).toHaveProperty('likesCount');
+            expect(commentsRes.body.items[index].likesInfo.likesCount).toBe(0);
         }
 
     });

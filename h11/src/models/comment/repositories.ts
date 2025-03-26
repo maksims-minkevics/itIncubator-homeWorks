@@ -43,7 +43,7 @@ export class CommentsRepository {
                 },
                 {
                     $addFields: {
-                        likeCount: {
+                        likesCount: {
                             $size: {
                                 $filter: {
                                     input: "$likesData",
@@ -52,7 +52,7 @@ export class CommentsRepository {
                                 }
                             }
                         },
-                        dislikeCount: {
+                        dislikesCount: {
                             $size: {
                                 $filter: {
                                     input: "$likesData",
@@ -76,7 +76,7 @@ export class CommentsRepository {
                                     $cond: [
                                         { $gt: [{ $size: "$$user" }, 0] },
                                         { $arrayElemAt: ["$$user.status", 0] },
-                                        "$$user"
+                                        "None"
                                     ]
                                 }
                             }
@@ -87,8 +87,8 @@ export class CommentsRepository {
                     $project: {
                         _id: 1,
                         content: 1,
-                        likeCount: 1,
-                        dislikeCount: 1,
+                        likesCount: 1,
+                        dislikesCount: 1,
                         myStatus: 1,
                         createdAt: 1,
                         commentatorInfo: 1
@@ -129,7 +129,7 @@ export class CommentsRepository {
                 },
                 {
                     $addFields: {
-                        likeCount: {
+                        likesCount: {
                             $size: {
                                 $filter: {
                                     input: "$likesData",
@@ -138,7 +138,7 @@ export class CommentsRepository {
                                 }
                             }
                         },
-                        dislikeCount: {
+                        dislikesCount: {
                             $size: {
                                 $filter: {
                                     input: "$likesData",
@@ -173,8 +173,8 @@ export class CommentsRepository {
                     $project: {
                         _id: 1,
                         content: 1,
-                        likeCount: 1,
-                        dislikeCount: 1,
+                        likesCount: 1,
+                        dislikesCount: 1,
                         myStatus: 1,
                         createdAt: 1,
                         commentatorInfo: 1
