@@ -14,11 +14,12 @@ export const getCommentViewModel = async (comment: CommentModelWithLikeData | Co
         comment: CommentDbModel | CommentModelWithLikeData
     ): comment is CommentModelWithLikeData => {
         return (
-            'likeCount' in comment &&
-            'dislikeCount' in comment &&
+            'likesCount' in comment &&
+            'dislikesCount' in comment &&
             'myStatus' in comment
         );
     };
+    console.log(comment)
 
     return {
             content: comment.content,
@@ -29,8 +30,8 @@ export const getCommentViewModel = async (comment: CommentModelWithLikeData | Co
             },
             createdAt: comment.createdAt,
             likesInfo: {
-                likeCount: hasLikesInfo(comment) ? comment.likeCount : 0,
-                dislikeCount: hasLikesInfo(comment) ? comment.dislikeCount : 0,
+                likesCount: hasLikesInfo(comment) ? comment.likesCount : 0,
+                dislikesCount: hasLikesInfo(comment) ? comment.dislikesCount : 0,
                 myStatus: hasLikesInfo(comment) ? comment.myStatus : 'None',
             }
     };
@@ -63,8 +64,8 @@ export const getArrayOfCommentViewModels = async (comments: CommentModelWithLike
             },
             createdAt: comment.createdAt,
             likesInfo: {
-                dislikeCount: comment.dislikeCount,
-                likeCount: comment.likeCount,
+                dislikesCount: comment.dislikesCount,
+                likesCount: comment.likesCount,
                 myStatus: comment.myStatus,
             }
         }));

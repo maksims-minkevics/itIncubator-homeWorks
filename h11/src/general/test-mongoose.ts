@@ -23,7 +23,7 @@ export const test123 = async () => {
         },
         {
             $addFields: {
-                likeCount: {
+                likesCount: {
                     $size: {
                         $filter: {
                             input: "$likesData",
@@ -32,7 +32,7 @@ export const test123 = async () => {
                         }
                     }
                 },
-                dislikeCount: {
+                dislikesCount: {
                     $size: {
                         $filter: {
                             input: "$likesData",
@@ -67,8 +67,8 @@ export const test123 = async () => {
             $project: {
                 _id: 1,
                 content: 1,
-                likeCount: 1,
-                dislikeCount: 1,
+                likesCount: 1,
+                dislikesCount: 1,
                 myStatus: 1,
                 createdAt: 1,
                 commentatorInfo: 1

@@ -187,10 +187,10 @@ describe('Blogs API End-to-End Tests', () => {
         expect(comment.body).toHaveProperty('likesInfo');
         expect(comment.body.likesInfo).toHaveProperty('myStatus');
         expect(comment.body.likesInfo.myStatus).toBe('Like');
-        expect(comment.body.likesInfo).toHaveProperty('dislikeCount');
-        expect(comment.body.likesInfo.dislikeCount).toBe(0);
-        expect(comment.body.likesInfo).toHaveProperty('likeCount');
-        expect(comment.body.likesInfo.likeCount).toBe(1);
+        expect(comment.body.likesInfo).toHaveProperty('dislikesCount');
+        expect(comment.body.likesInfo.dislikesCount).toBe(0);
+        expect(comment.body.likesInfo).toHaveProperty('likesCount');
+        expect(comment.body.likesInfo.likesCount).toBe(1);
     });
 
     it('should dilike a comment', async () => {
@@ -221,10 +221,10 @@ describe('Blogs API End-to-End Tests', () => {
         expect(comment.body).toHaveProperty('likesInfo');
         expect(comment.body.likesInfo).toHaveProperty('myStatus');
         expect(comment.body.likesInfo.myStatus).toBe('Dislike');
-        expect(comment.body.likesInfo).toHaveProperty('dislikeCount');
-        expect(comment.body.likesInfo.dislikeCount).toBe(1);
-        expect(comment.body.likesInfo).toHaveProperty('likeCount');
-        expect(comment.body.likesInfo.likeCount).toBe(0);
+        expect(comment.body.likesInfo).toHaveProperty('dislikesCount');
+        expect(comment.body.likesInfo.dislikesCount).toBe(1);
+        expect(comment.body.likesInfo).toHaveProperty('likesCount');
+        expect(comment.body.likesInfo.likesCount).toBe(0);
     });
 
     it('should not like a comment', async () => {
@@ -255,10 +255,10 @@ describe('Blogs API End-to-End Tests', () => {
         expect(comment.body).toHaveProperty('likesInfo');
         expect(comment.body.likesInfo).toHaveProperty('myStatus');
         expect(comment.body.likesInfo.myStatus).toBe('None');
-        expect(comment.body.likesInfo).toHaveProperty('dislikeCount');
-        expect(comment.body.likesInfo.dislikeCount).toBe(0);
-        expect(comment.body.likesInfo).toHaveProperty('likeCount');
-        expect(comment.body.likesInfo.likeCount).toBe(0);
+        expect(comment.body.likesInfo).toHaveProperty('dislikesCount');
+        expect(comment.body.likesInfo.dislikesCount).toBe(0);
+        expect(comment.body.likesInfo).toHaveProperty('likesCount');
+        expect(comment.body.likesInfo.likesCount).toBe(0);
     });
 
     it('should not like a comment with incorrect data', async () => {
@@ -361,8 +361,8 @@ describe('Blogs API End-to-End Tests', () => {
                     .expect(HTTP_STATUS.OK);
 
                 expect(res.body).toHaveProperty('likesInfo');
-                expect(res.body.likesInfo.likeCount).toBe(expected.likes);
-                expect(res.body.likesInfo.dislikeCount).toBe(expected.dislikes);
+                expect(res.body.likesInfo.likesCount).toBe(expected.likes);
+                expect(res.body.likesInfo.dislikesCount).toBe(expected.dislikes);
                 expect(res.body.likesInfo.myStatus).toBe(userStatuses[commentId][i]);
             }
         }
@@ -394,8 +394,8 @@ describe('Blogs API End-to-End Tests', () => {
                 .set('Authorization', `Bearer ${user1Token}`)
                 .expect(HTTP_STATUS.OK);
             expect(comment.body.likesInfo.myStatus).toBe(likeStatus[index].status);
-            expect(comment.body.likesInfo.dislikeCount).toBe(likeStatus[index].dislikes);
-            expect(comment.body.likesInfo.likeCount).toBe(likeStatus[index].likes);
+            expect(comment.body.likesInfo.dislikesCount).toBe(likeStatus[index].dislikes);
+            expect(comment.body.likesInfo.likesCount).toBe(likeStatus[index].likes);
         }
     });
 });

@@ -18,8 +18,8 @@ export type UserCommentLikeInfo = {
 }
 
 export type CommentLikeInfo = {
-    dislikeCount: number,
-    likeCount: number,
+    dislikesCount: number,
+    likesCount: number,
     myStatus: string
 }
 
@@ -41,14 +41,14 @@ export type CommentModelWithLikeData = {
     content: string,
     commentatorInfo: CommentatorInfoModel,
     createdAt: string,
-    dislikeCount: number,
-    likeCount: number,
+    dislikesCount: number,
+    likesCount: number,
     myStatus: string
 };
 
 export type CommentLikesDislikesCount = {
-    dislikeCount: number,
-    likeCount: number,
+    dislikesCount: number,
+    likesCount: number,
     commentId: string
 }
 
