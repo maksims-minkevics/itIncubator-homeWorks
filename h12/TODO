@@ -1,0 +1,22 @@
+//TODO
+заменить service result на Result Object
+Типичная структура Result Object включает в себя:
+
+status (ResultStatus) — статус выполнения операции.
+errorMessage? (string) — описание ошибки (если есть).
+extensions (ExtensionType[]) — массив дополнительных данных об ошибках, например, о некорректных полях.
+data (T) — полезные данные результата.
+
+type ExtensionType = {
+  field: string | null;
+  message: string;
+};
+
+export type Result<T = null> = {
+  status: ResultStatus;
+  errorMessage?: string;
+  extensions: ExtensionType[];
+  data: T;
+};
+https://samurai.it-incubator.io/lessons/lessons/view/6318be7d70f92c453de7a2da?blockId=3
+Разделить логику на Domains сделать после 12 домашки

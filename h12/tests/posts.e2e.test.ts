@@ -1,0 +1,676 @@
+import request from "supertest";
+import {app} from "../src/app";
+import {HTTP_STATUS} from "../src/general/global-consts";
+import {encodeToBase64ForBasicAuth} from "../src/general/utilities";
+import {FULL_TESTING_ENDPOINTS} from "../src/models/testing/endpoints";
+import {BLOGS_FULL_URLS} from "../src/models/blog/endpoints";
+import {POSTS_FULL_URLS} from "../src/models/post/endpoints";
+import {USER_FULL_URLS} from "../src/models/user/endpoints";
+import {AUTH_FULL_URLS} from "../src/models/auth/endpoints";
+import mongoose from "mongoose";
+import {COMMENTS_FULL_URLS} from "../src/models/comment/endpoints";
+describe('Posts API End-to-End Tests', () => {
+    let basicAuth: string;
+    let blogId: string;
+    let blogName: string;
+    let createdPosts: any[] = [];
+    let userToken: string;
+    let user1Token: string;
+    let user2Token: string;
+    let user1CreationData: any
+    let user1: any
+
+    beforeAll(async () => {
+        await mongoose.connect(process.env.MONGOOSE_URL || "mongodb://localhost:27017/testdb");
+        console.log("✅ Connected to test database");
+        await request(app)
+            .delete(FULL_TESTING_ENDPOINTS.DELETE_ALL_DATA)
+            .expect(HTTP_STATUS.NO_CONTENT);
+
+        basicAuth = await encodeToBase64ForBasicAuth(
+            process.env.SUPER_SECRET_NAME || "",
+            process.env.SUPER_SECRET_PSWRD || ""
+        )
+
+        const newBlogCreationData = {
+            "name": "MM Post4",
+            "description": "asdsadas dasdasdasdasd2",
+            "websiteUrl": "https://localhost2.com"
+        };
+
+        let newBlog = await request(app)
+            .post(BLOGS_FULL_URLS.CREATE)
+            .set('Authorization', `Basic ${basicAuth}`)
+            .send(newBlogCreationData)
+            .expect(HTTP_STATUS.CREATED);
+        expect(newBlog).toBeDefined();
+        blogId = newBlog.body.id;
+        blogName = newBlog.body.name;
+        user1CreationData = {
+            login: 'CARKORONI',
+            password: 'string14344556',
+            email: 'examp666@example.com'
+        };
+
+        const createdUser1 = await request(app)
+            .post(USER_FULL_URLS.CREATE)
+            .set('Authorization', `Basic ${basicAuth}`)
+            .send(user1CreationData)
+            .expect(HTTP_STATUS.CREATED);
+        user1 = createdUser1.body;
+
+        const login1Res = await request(app)
+            .post(AUTH_FULL_URLS.LOGIN)
+            .send({
+                loginOrEmail: 'examp666@example.com',
+                password: 'string14344556'
+            })
+            .expect(HTTP_STATUS.OK);
+
+        user1Token = login1Res.body.accessToken;
+
+        const user2CreationData = {
+            login: 'CARKORONI1',
+            password: 'string14344556',
+            email: 'examp6661@example.com'
+        };
+
+        await request(app)
+            .post(USER_FULL_URLS.CREATE)
+            .set('Authorization', `Basic ${basicAuth}`)
+            .send(user2CreationData)
+            .expect(HTTP_STATUS.CREATED);
+
+        const login2Res = await request(app)
+            .post(AUTH_FULL_URLS.LOGIN)
+            .send({
+                loginOrEmail: 'examp6661@example.com',
+                password: 'string14344556'
+            })
+            .expect(HTTP_STATUS.OK);
+
+        user2Token = login2Res.body.accessToken;
+    });
+
+    it('Create new post', async () => {
+        const newPostCreationData = {
+            "title": "my first post121",
+            "shortDescription": "my first post",
+            "content": "my first post111111111111111111111111111111111111111",
+            "blogId": blogId
+        };
+
+        const newPost = await request(app)
+            .post(POSTS_FULL_URLS.CREATE)
+            .set('Authorization', `Basic ${basicAuth}`)
+            .send(newPostCreationData)
+            .expect(HTTP_STATUS.CREATED);
+
+        expect(newPostCreationData.title).toBe(newPost.body.title);
+        expect(newPostCreationData.shortDescription).toBe(newPost.body.shortDescription);
+        expect(newPostCreationData.content).toBe(newPost.body.content);
+        expect(blogId).toBe(newPost.body.blogId);
+        expect(newPost.body.createdAt).toBeDefined();
+        expect(newPost.body.extendedLikesInfo).toBeDefined();
+        expect(newPost.body.extendedLikesInfo).toHaveProperty("likesCount");
+        expect(newPost.body.extendedLikesInfo.likesCount).toBe(0);
+        expect(newPost.body.extendedLikesInfo).toHaveProperty("dislikesCount");
+        expect(newPost.body.extendedLikesInfo.dislikesCount).toBe(0);
+        expect(newPost.body.extendedLikesInfo).toHaveProperty("myStatus");
+        expect(newPost.body.extendedLikesInfo.myStatus).toBe("None");
+        expect(newPost.body.extendedLikesInfo).toHaveProperty("newestLikes");
+        expect(newPost.body.extendedLikesInfo.newestLikes).toHaveLength(0);
+    });
+
+    it('Create new post without title', async () => {
+        const newPostCreationData = {
+            "title": "",
+            "shortDescription": "my first post",
+            "content": "my first post111111111111111111111111111111111111111",
+            "blogId": blogId
+        };
+
+        const newPost = await request(app)
+            .post(POSTS_FULL_URLS.CREATE)
+            .set('Authorization', `Basic ${basicAuth}`)
+            .send(newPostCreationData)
+            .expect(HTTP_STATUS.BAD_REQUEST);
+        expect(newPost.body).toHaveProperty('errorsMessages');
+        expect(Array.isArray(newPost.body.errorsMessages)).toBe(true);
+        expect(newPost.body.errorsMessages.length).toBeGreaterThan(0);
+
+        expect(newPost.body.errorsMessages).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    field: "title",
+                    message: "Invalid value",
+                }),
+            ])
+        );
+    });
+
+    it('Create new post without shortDescription', async () => {
+        const newPostCreationData = {
+            "title": "my first post121",
+            "shortDescription": "",
+            "content": "my first post111111111111111111111111111111111111111",
+            "blogId": blogId
+        };
+
+        const newPost = await request(app)
+            .post(POSTS_FULL_URLS.CREATE)
+            .set('Authorization', `Basic ${basicAuth}`)
+            .send(newPostCreationData)
+            .expect(HTTP_STATUS.BAD_REQUEST);
+        expect(newPost.body).toHaveProperty('errorsMessages');
+        expect(Array.isArray(newPost.body.errorsMessages)).toBe(true);
+        expect(newPost.body.errorsMessages.length).toBeGreaterThan(0);
+
+        expect(newPost.body.errorsMessages).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    field: "shortDescription",
+                    message: "Invalid value",
+                }),
+            ])
+        );
+    });
+
+    it('Create new post without content', async () => {
+        const newPostCreationData = {
+            "title": "my first post121",
+            "shortDescription": "my first post",
+            "content": "",
+            "blogId": blogId
+        };
+
+        const newPost = await request(app)
+            .post(POSTS_FULL_URLS.CREATE)
+            .set('Authorization', `Basic ${basicAuth}`)
+            .send(newPostCreationData)
+            .expect(HTTP_STATUS.BAD_REQUEST);
+        expect(newPost.body).toHaveProperty('errorsMessages');
+        expect(Array.isArray(newPost.body.errorsMessages)).toBe(true);
+        expect(newPost.body.errorsMessages.length).toBeGreaterThan(0);
+
+        expect(newPost.body.errorsMessages).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    field: "content",
+                    message: "Invalid value",
+                }),
+            ])
+        );
+    });
+
+    it('Create new post without blogId', async () => {
+        const newPostCreationData = {
+            "title": "my first post121",
+            "shortDescription": "my first post",
+            "content": "my first post111111111111111111111111111111111111111",
+            "blogId": ""
+        };
+
+        const newPost = await request(app)
+            .post(POSTS_FULL_URLS.CREATE)
+            .set('Authorization', `Basic ${basicAuth}`)
+            .send(newPostCreationData)
+            .expect(HTTP_STATUS.BAD_REQUEST);
+        expect(newPost.body).toHaveProperty('errorsMessages');
+        expect(Array.isArray(newPost.body.errorsMessages)).toBe(true);
+        expect(newPost.body.errorsMessages.length).toBeGreaterThan(0);
+
+        expect(newPost.body.errorsMessages).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    field: "blogId",
+                    message: "Invalid value",
+                }),
+            ])
+        );
+    });
+
+    it('should create posts and verify pagination', async () => {
+        // 2️⃣ Создаём 15 постов для теста пагинации
+        for (let i = 1; i <= 15; i++) {
+            const newPostCreationData = {
+                title: `Test Post ${i}`,
+                shortDescription: `Short Description ${i}`,
+                content: `Content ${i}`,
+                blogId: blogId,
+            };
+
+            const newPostRes = await request(app)
+                .post(POSTS_FULL_URLS.CREATE)
+                .set('Authorization', `Basic ${basicAuth}`)
+                .send(newPostCreationData)
+                .expect(HTTP_STATUS.CREATED);
+            createdPosts.push(newPostRes.body);
+        }
+
+        const queryParams = new URLSearchParams({
+            pageSize: '10',
+            pageNumber: '1',
+        }).toString();
+
+        const res = await request(app)
+            .get(POSTS_FULL_URLS.GET_WITH_QUERY_PARAMS(queryParams))
+            .expect(HTTP_STATUS.OK);
+
+        expect(res.body).toHaveProperty('pagesCount');
+        expect(res.body).toHaveProperty('page', 1);
+        expect(res.body).toHaveProperty('pageSize', 10);
+        expect(res.body.totalCount).toBeGreaterThanOrEqual(createdPosts.length);
+        expect(res.body).toHaveProperty('items');
+        expect(res.body.items.length).toBeLessThanOrEqual(10);
+    });
+
+    it('should get a post by ID', async () => {
+        const postToCheck = createdPosts[0];
+        const res = await request(app)
+            .get(POSTS_FULL_URLS.GET_BY_ID(postToCheck.id))
+            .expect(HTTP_STATUS.OK);
+
+        expect(res.body).toHaveProperty('id', postToCheck.id);
+        expect(res.body).toHaveProperty('title', postToCheck.title);
+        expect(res.body).toHaveProperty('shortDescription', postToCheck.shortDescription);
+        expect(res.body).toHaveProperty('content', postToCheck.content);
+        expect(res.body).toHaveProperty('blogId', blogId);
+        expect(res.body).toHaveProperty('blogName', blogName);
+        expect(res.body).toHaveProperty('createdAt');
+
+        await request(app)
+            .get(POSTS_FULL_URLS.GET_BY_ID("FAKE ID"))
+            .expect(HTTP_STATUS.NOT_FOUND);
+    });
+
+    it('should delete a post', async () => {
+        const postToDelete = createdPosts[0];
+
+        await request(app)
+            .delete(POSTS_FULL_URLS.DELETE_BY_ID(postToDelete.id))
+            .set('Authorization', `Basic ${basicAuth}`)
+            .expect(HTTP_STATUS.NO_CONTENT);
+
+        await request(app)
+            .get(POSTS_FULL_URLS.GET_BY_ID(postToDelete.id))
+            .expect(HTTP_STATUS.NOT_FOUND);
+
+        await request(app)
+            .delete(POSTS_FULL_URLS.DELETE_BY_ID("FAKE iD"))
+            .set('Authorization', `Basic ${basicAuth}`)
+            .expect(HTTP_STATUS.NOT_FOUND);
+    });
+
+    it('should update a post', async () => {
+        const postToUpdate = createdPosts[1];
+        const updatedData = {
+            title: 'Updated Title',
+            shortDescription: 'Updated Short Description',
+            content: 'Updated Content',
+            blogId: postToUpdate.blogId
+        };
+
+        await request(app)
+            .put(POSTS_FULL_URLS.UPDATE_BY_ID(postToUpdate.id))
+            .set('Authorization', `Basic ${basicAuth}`)
+            .send(updatedData)
+            .expect(HTTP_STATUS.NO_CONTENT);
+
+        const res = await request(app)
+            .get(POSTS_FULL_URLS.GET_BY_ID(postToUpdate.id))
+            .expect(HTTP_STATUS.OK);
+
+        expect(res.body.title).toBe(updatedData.title);
+        expect(res.body.shortDescription).toBe(updatedData.shortDescription);
+        expect(res.body.content).toBe(updatedData.content);
+
+        await request(app)
+            .put(POSTS_FULL_URLS.UPDATE_BY_ID("FAKE ID"))
+            .set('Authorization', `Basic ${basicAuth}`)
+            .send(updatedData)
+            .expect(HTTP_STATUS.NOT_FOUND);
+    });
+
+    it('should create a comment for specific post', async () => {
+        const liginData = {
+            loginOrEmail: user1CreationData.login,
+            password: user1CreationData.password
+        }
+
+        const loginRes = await request(app)
+            .post(AUTH_FULL_URLS.LOGIN)
+            .set('User-Agent', "agent")
+            .send(liginData);
+
+        userToken = loginRes.body.accessToken;
+
+        const postToComment = createdPosts[2];
+        const commentData = {
+            content: 'stray228 best of the best steamer in the world123'
+        };
+
+
+        const commentRes = await request(app)
+            .post(POSTS_FULL_URLS.CREATE_COMMENT_FOR_SPECIFIC_POST(postToComment.id))
+            .set('Authorization', `Bearer ${userToken}`)
+            .send(commentData)
+            .expect(HTTP_STATUS.CREATED);
+        expect(commentRes.body).toHaveProperty('id');
+        expect(commentRes.body.content).toBe(commentData.content);
+        expect(commentRes.body).toHaveProperty('createdAt');
+        expect(commentRes.body).toHaveProperty('commentatorInfo');
+        expect(commentRes.body).toHaveProperty('likesInfo');
+        expect(commentRes.body.likesInfo).toHaveProperty('myStatus');
+        expect(commentRes.body.likesInfo.myStatus).toBe('None');
+        expect(commentRes.body.likesInfo).toHaveProperty('dislikesCount');
+        expect(commentRes.body.likesInfo.dislikesCount).toBe(0);
+        expect(commentRes.body.likesInfo).toHaveProperty('likesCount');
+        expect(commentRes.body.likesInfo.likesCount).toBe(0);
+        expect(commentRes.body.commentatorInfo.userLogin).toBe(user1CreationData.login);
+    });
+
+    it('should retrieve comments for a post with pagination', async () => {
+        const queryParams = new URLSearchParams({
+            pageSize: '5',
+            pageNumber: '1',
+        }).toString();
+        const postToComment = createdPosts[2];
+        for (let i = 1; i <= 12; i++) {
+            const commentData = {
+                content: `Test comment ${i} фыыфыфыфыфыфыфыфыфыфыфыфыфыфыф`
+            };
+
+            await request(app)
+                .post(POSTS_FULL_URLS.CREATE_COMMENT_FOR_SPECIFIC_POST(postToComment.id))
+                .set('Authorization', `Bearer ${userToken}`)
+                .send(commentData)
+                .expect(HTTP_STATUS.CREATED);
+        };
+
+        const commentsRes = await request(app)
+            .get(POSTS_FULL_URLS.GET_COMMENTS_FOR_SPECIFIC_POST_WITH_QUERY_PARAMS(postToComment.id, queryParams))
+            .expect(HTTP_STATUS.OK);
+
+        expect(commentsRes.body).toHaveProperty('pagesCount');
+        expect(commentsRes.body).toHaveProperty('page');
+        expect(commentsRes.body).toHaveProperty('pageSize', 5);
+        expect(commentsRes.body).toHaveProperty('totalCount');
+        expect(commentsRes.body).toHaveProperty('items');
+        expect(Array.isArray(commentsRes.body.items)).toBe(true);
+        expect(commentsRes.body.items.length).toBeLessThanOrEqual(5);
+
+        for (let index in commentsRes.body.items)
+        {
+            expect(commentsRes.body.items[index]).toHaveProperty('likesInfo');
+            expect(commentsRes.body.items[index].likesInfo).toHaveProperty('myStatus');
+            expect(commentsRes.body.items[index].likesInfo.myStatus).toBe('None');
+            expect(commentsRes.body.items[index].likesInfo).toHaveProperty('dislikesCount');
+            expect(commentsRes.body.items[index].likesInfo.dislikesCount).toBe(0);
+            expect(commentsRes.body.items[index].likesInfo).toHaveProperty('likesCount');
+            expect(commentsRes.body.items[index].likesInfo.likesCount).toBe(0);
+        }
+
+    });
+
+    it('should handle 10 users liking/disliking 3 posts randomly via API and validate newestLikes', async () => {
+        const users = [];
+        const tokens = [];
+        const userIds: string[] = [];
+
+        // 1. Создаём 10 пользователей и логинимся
+        for (let i = 0; i < 10; i++) {
+            const userData = {
+                login: `user${i}`,
+                password: 'Password123!',
+                email: `user${i}@example.com`
+            };
+
+            const newUser = await request(app)
+                .post(USER_FULL_URLS.CREATE)
+                .set('Authorization', `Basic ${basicAuth}`)
+                .send(userData)
+                .expect(HTTP_STATUS.CREATED);
+
+            const loginRes = await request(app)
+                .post(AUTH_FULL_URLS.LOGIN)
+                .send({
+                    loginOrEmail: userData.login,
+                    password: userData.password
+                })
+                .expect(HTTP_STATUS.OK);
+
+            users.push({...userData, id: newUser.body.id});
+            tokens.push(loginRes.body.accessToken);
+        }
+
+        const newPostCreationData = {
+            title: "my first post121",
+            shortDescription: "my first post",
+            content: "my first post111111111111111111111111111111111111111",
+            blogId: blogId
+        };
+
+        // 2. Первые 3 пользователя создают посты
+        const postIds = [];
+        for (let i = 0; i < 3; i++) {
+            const newPost = await request(app)
+                .post(POSTS_FULL_URLS.CREATE)
+                .set('Authorization', `Basic ${basicAuth}`)
+                .send({ ...newPostCreationData, content: newPostCreationData.content + i })
+                .expect(HTTP_STATUS.CREATED);
+
+            postIds.push(newPost.body.id);
+        }
+
+        // 3. Все 10 пользователей случайно ставят Like / Dislike / None
+        const likeStatuses = ['Like', 'Dislike', 'None'];
+        const expectedResults: Record<string, { likes: number; dislikes: number}> = {};
+        const userStatuses: Record<string, Record<string, string>> = {};
+
+        for (const postId of postIds) {
+            expectedResults[postId] = { likes: 0, dislikes: 0};
+            userStatuses[postId] = {};
+
+            for (let i = 0; i < tokens.length; i++) {
+                const status = likeStatuses[Math.floor(Math.random() * 3)];
+
+                await request(app)
+                    .put(POSTS_FULL_URLS.LIKE_POST(postId))
+                    .set('Authorization', `Bearer ${tokens[i]}`)
+                    .send({ likeStatus: status })
+                    .expect(HTTP_STATUS.NO_CONTENT);
+
+                userStatuses[postId][i] = status;
+
+                if (status === 'Like') {
+                    expectedResults[postId].likes++;
+                }
+
+                if (status === 'Dislike') {
+                    expectedResults[postId].dislikes++;
+                }
+
+                await new Promise(res => setTimeout(res, 10)); // слегка разнести по времени
+            }
+        }
+
+        // 4. Проверка количества лайков/дизлайков и поля myStatus и newestLikes
+        for (const postId of postIds) {
+            const expected = expectedResults[postId];
+
+            for (let i = 0; i < tokens.length; i++) {
+                const res = await request(app)
+                    .get(POSTS_FULL_URLS.GET_BY_ID(postId))
+                    .set('Authorization', `Bearer ${tokens[i]}`)
+                    .expect(HTTP_STATUS.OK);
+
+                expect(res.body).toHaveProperty('extendedLikesInfo');
+                expect(res.body.extendedLikesInfo.likesCount).toBe(expected.likes);
+                expect(res.body.extendedLikesInfo.dislikesCount).toBe(expected.dislikes);
+                expect(res.body.extendedLikesInfo.myStatus).toBe(userStatuses[postId][i]);
+
+                const newestLikes = res.body.extendedLikesInfo.newestLikes;
+                expect(Array.isArray(newestLikes)).toBe(true);
+                expect(newestLikes.length).toBeLessThanOrEqual(3);
+            }
+        }
+    });
+    describe("basic post like scenario", () => {
+        let newPost: any;
+        beforeAll(async () => {
+            const newPostCreationData = {
+                "title": "my first post121",
+                "shortDescription": "my first post",
+                "content": "my first post111111111111111111111111111111111111111",
+                "blogId": blogId
+            };
+
+            newPost = await request(app)
+                .post(POSTS_FULL_URLS.CREATE)
+                .set('Authorization', `Basic ${basicAuth}`)
+                .send(newPostCreationData)
+                .expect(HTTP_STATUS.CREATED);
+
+        });
+
+        it('should change myStatus if like dislike none', async () => {
+            const likeStatus = [
+                { status: "Dislike", likes: 0, dislikes: 1 },
+                { status: "Like", likes: 1, dislikes: 0 },
+                { status: "None", likes: 0, dislikes: 0 },
+            ]
+
+            for (const index in likeStatus){
+                await request(app)
+                    .put(POSTS_FULL_URLS.LIKE_POST(newPost.body.id))
+                    .set('Authorization', `Bearer ${user1Token}`)
+                    .send({ likeStatus: likeStatus[index].status })
+                    .expect(HTTP_STATUS.NO_CONTENT);
+
+                const post = await request(app)
+                    .get(POSTS_FULL_URLS.GET_BY_ID(newPost.body.id))
+                    .set('Authorization', `Bearer ${user1Token}`)
+                    .expect(HTTP_STATUS.OK);
+                expect(post.body.extendedLikesInfo.myStatus).toBe(likeStatus[index].status);
+                expect(post.body.extendedLikesInfo.dislikesCount).toBe(likeStatus[index].dislikes);
+                expect(post.body.extendedLikesInfo.likesCount).toBe(likeStatus[index].likes);
+                expect(post.body.extendedLikesInfo.newestLikes).toBeDefined();
+                expect(post.body.extendedLikesInfo.newestLikes[0].userId).toBe(user1.id);
+                expect(post.body.extendedLikesInfo.newestLikes[0].login).toBe(user1.login);
+            }
+        });
+
+        it('should not like a post with incorrect data', async () => {
+            const likeData = {
+                likeStatus: "TestString"
+            }
+
+            await request(app)
+                .put(POSTS_FULL_URLS.LIKE_POST(newPost.body.id))
+                .set('Authorization', `Bearer ${user1Token}`)
+                .send(likeData)
+                .expect(HTTP_STATUS.BAD_REQUEST);
+        });
+    })
+    it('should update newestLikes when a new user likes the post (4 users total)', async () => {
+        const createdUsers: { id: string, login: string, accessToken: string }[] = [];
+
+        // Создаём 4 пользователя и логинимся
+        for (let i = 0; i < 4; i++) {
+            const userData = {
+                login: `userTest${i}`,
+                password: 'Password123!',
+                email: `userTest${i}@example.com`
+            };
+
+            const createRes = await request(app)
+                .post(USER_FULL_URLS.CREATE)
+                .set('Authorization', `Basic ${basicAuth}`)
+                .send(userData)
+                .expect(HTTP_STATUS.CREATED);
+
+            const loginRes = await request(app)
+                .post(AUTH_FULL_URLS.LOGIN)
+                .send({
+                    loginOrEmail: userData.login,
+                    password: userData.password
+                })
+                .expect(HTTP_STATUS.OK);
+
+            createdUsers.push({
+                id: createRes.body.id,
+                login: createRes.body.login,
+                accessToken: loginRes.body.accessToken
+            });
+        }
+
+        // Создаём пост
+        const postRes = await request(app)
+            .post(POSTS_FULL_URLS.CREATE)
+            .set('Authorization', `Basic ${basicAuth}`)
+            .send({
+                title: 'newestLikes test post',
+                shortDescription: 'short',
+                content: 'content',
+                blogId: blogId
+            })
+            .expect(HTTP_STATUS.CREATED);
+
+        const postId = postRes.body.id;
+
+        // Первые 3 пользователя ставят лайки
+        for (let i = 0; i < 3; i++) {
+            await request(app)
+                .put(POSTS_FULL_URLS.LIKE_POST(postId))
+                .set('Authorization', `Bearer ${createdUsers[i].accessToken}`)
+                .send({ likeStatus: 'Like' })
+                .expect(HTTP_STATUS.NO_CONTENT);
+
+            await new Promise(res => setTimeout(res, 10)); // немного разнести по времени
+        }
+
+        // Проверяем newestLikes содержит первых 3 пользователей
+        const getRes1 = await request(app)
+            .get(POSTS_FULL_URLS.GET_BY_ID(postId))
+            .set('Authorization', `Bearer ${createdUsers[0].accessToken}`) // любой пользователь
+            .expect(HTTP_STATUS.OK);
+
+        const newestLikes1 = getRes1.body.extendedLikesInfo.newestLikes;
+
+        expect(newestLikes1.length).toBe(3);
+        expect(newestLikes1[0].userId).toBe(createdUsers[0].id);
+        expect(newestLikes1[1].userId).toBe(createdUsers[1].id);
+        expect(newestLikes1[2].userId).toBe(createdUsers[2].id);
+
+        // 4-й пользователь ставит лайк
+        await request(app)
+            .put(POSTS_FULL_URLS.LIKE_POST(postId))
+            .set('Authorization', `Bearer ${createdUsers[3].accessToken}`)
+            .send({ likeStatus: 'Like' })
+            .expect(HTTP_STATUS.NO_CONTENT);
+
+        // Проверяем newestLikes: первый лайк исчезает, появляются 2-3-4
+        const getRes2 = await request(app)
+            .get(POSTS_FULL_URLS.GET_BY_ID(postId))
+            .set('Authorization', `Bearer ${createdUsers[0].accessToken}`) // не важно чей
+            .expect(HTTP_STATUS.OK);
+
+        const newestLikes2 = getRes2.body.extendedLikesInfo.newestLikes;
+
+        interface LikeEntry {
+            userId: string;
+            login: string;
+            addedAt: string;
+        }
+
+        expect(newestLikes2.length).toBe(3);
+        expect((newestLikes2 as LikeEntry[]).map(u => u.userId)).toEqual([
+            createdUsers[1].id,
+            createdUsers[2].id,
+            createdUsers[3].id
+        ]);
+    });
+
+
+});
