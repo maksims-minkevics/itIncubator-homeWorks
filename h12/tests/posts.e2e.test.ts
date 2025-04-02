@@ -674,13 +674,10 @@ describe('Posts API End-to-End Tests', () => {
 
             // Проверяем что все 3 лайка есть в правильном порядке (от новых к старым)
             const newest1 = await getNewestLikes(postId);
-            console.log(newest1)
             const expected1 = [...activeLikes]
                 .sort((a, b) => b.addedAt.localeCompare(a.addedAt))
                 .map(l => l.userId).slice(0,3);
-            console.log(expected1.slice(0,3))
             const actual1 = newest1.map(l => l.userId);
-            console.log(actual1)
             expect(actual1).toEqual(expected1);
 
             // === Шаг 2: первый пользователь меняет Like → Dislike (удаляется из newestLikes)
@@ -844,6 +841,84 @@ describe('Posts API End-to-End Tests', () => {
                 const actual = (await getNewestLikes(postId)).map(l => l.userId);
                 expect(actual).toEqual(expected);
             }
+        });
+
+        it('should track newestLikes separately for each post', async () => {
+            // === Подготовка: два автора создают по одному посту ===
+            const author1 = createdUsers[0];
+            const author2 = createdUsers[1];
+
+            const postRes1 = await request(app)
+                .post(POSTS_FULL_URLS.CREATE)
+                .set('Authorization', `Basic ${basicAuth}`)
+                .send({
+                    title: 'Post by user0',
+                    shortDescription: 'desc 1',
+                    content: 'content 1',
+                    blogId: blogId
+                })
+                .expect(HTTP_STATUS.CREATED);
+
+            const postRes2 = await request(app)
+                .post(POSTS_FULL_URLS.CREATE)
+                .set('Authorization', `Basic ${basicAuth}`)
+                .send({
+                    title: 'Post by user1',
+                    shortDescription: 'desc 2',
+                    content: 'content 2',
+                    blogId: blogId
+                })
+                .expect(HTTP_STATUS.CREATED);
+
+            const postA = postRes1.body.id;
+            const postB = postRes2.body.id;
+
+            // === Случайные пользователи ставят лайки на разные посты ===
+            // user2 и user3 лайкают postA
+            for (const i of [2, 3]) {
+                await request(app)
+                    .put(POSTS_FULL_URLS.LIKE_POST(postA))
+                    .set('Authorization', `Bearer ${createdUsers[i].accessToken}`)
+                    .send({ likeStatus: 'Like' })
+                    .expect(HTTP_STATUS.NO_CONTENT);
+                await new Promise(res => setTimeout(res, 10));
+            }
+
+            // user1 и user3 лайкают postB
+            for (const i of [1, 3]) {
+                await request(app)
+                    .put(POSTS_FULL_URLS.LIKE_POST(postB))
+                    .set('Authorization', `Bearer ${createdUsers[i].accessToken}`)
+                    .send({ likeStatus: 'Like' })
+                    .expect(HTTP_STATUS.NO_CONTENT);
+                await new Promise(res => setTimeout(res, 10));
+            }
+
+            // === Проверка: newestLikes для каждого поста ===
+
+            const newestLikesPostA = await getNewestLikes(postA);
+            const newestLikesPostB = await getNewestLikes(postB);
+
+            // Post A должен показывать только user3 и user2 (последний — первый)
+            expect(newestLikesPostA.map(l => l.userId)).toEqual([
+                createdUsers[3].id,
+                createdUsers[2].id
+            ]);
+
+            // Post B должен показывать только user3 и user1 (user3 лайкал позже)
+            expect(newestLikesPostB.map(l => l.userId)).toEqual([
+                createdUsers[3].id,
+                createdUsers[1].id
+            ]);
+
+            // Убедимся, что нет "перепутанных" лайков
+            const allPostAUserIds = newestLikesPostA.map(l => l.userId);
+            const allPostBUserIds = newestLikesPostB.map(l => l.userId);
+
+            // Пользователь 2 не должен быть в посте B
+            expect(allPostBUserIds).not.toContain(createdUsers[2].id);
+            // Пользователь 1 не должен быть в посте A
+            expect(allPostAUserIds).not.toContain(createdUsers[1].id);
         });
 
     })

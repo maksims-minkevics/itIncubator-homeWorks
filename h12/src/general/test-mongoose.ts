@@ -93,4 +93,3 @@ export const test123 = async () => {
         },
 
     ])
-    console.log(JSON.stringify(result, null, 2));}
