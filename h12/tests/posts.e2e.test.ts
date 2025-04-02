@@ -8,7 +8,6 @@ import {POSTS_FULL_URLS} from "../src/models/post/endpoints";
 import {USER_FULL_URLS} from "../src/models/user/endpoints";
 import {AUTH_FULL_URLS} from "../src/models/auth/endpoints";
 import mongoose from "mongoose";
-import {COMMENTS_FULL_URLS} from "../src/models/comment/endpoints";
 describe('Posts API End-to-End Tests', () => {
     let basicAuth: string;
     let blogId: string;
@@ -333,7 +332,7 @@ describe('Posts API End-to-End Tests', () => {
     });
 
     it('should create a comment for specific post', async () => {
-        const liginData = {
+        const loginData = {
             loginOrEmail: user1CreationData.login,
             password: user1CreationData.password
         }
@@ -341,7 +340,7 @@ describe('Posts API End-to-End Tests', () => {
         const loginRes = await request(app)
             .post(AUTH_FULL_URLS.LOGIN)
             .set('User-Agent', "agent")
-            .send(liginData);
+            .send(loginData);
 
         userToken = loginRes.body.accessToken;
 
@@ -536,9 +535,9 @@ describe('Posts API End-to-End Tests', () => {
 
         it('should change myStatus if like dislike none', async () => {
             const likeStatus = [
-                { status: "Dislike", likes: 0, dislikes: 1 },
-                { status: "Like", likes: 1, dislikes: 0 },
-                { status: "None", likes: 0, dislikes: 0 },
+                { status: "Dislike", likes: 0, dislikes: 1, newestLikes: 0 },
+                { status: "Like", likes: 1, dislikes: 0, newestLikes: 1 },
+                { status: "None", likes: 0, dislikes: 0, newestLikes: 0 },
             ]
 
             for (const index in likeStatus){
@@ -556,8 +555,7 @@ describe('Posts API End-to-End Tests', () => {
                 expect(post.body.extendedLikesInfo.dislikesCount).toBe(likeStatus[index].dislikes);
                 expect(post.body.extendedLikesInfo.likesCount).toBe(likeStatus[index].likes);
                 expect(post.body.extendedLikesInfo.newestLikes).toBeDefined();
-                expect(post.body.extendedLikesInfo.newestLikes[0].userId).toBe(user1.id);
-                expect(post.body.extendedLikesInfo.newestLikes[0].login).toBe(user1.login);
+                expect(post.body.extendedLikesInfo.newestLikes).toHaveLength(likeStatus[index].newestLikes);
             }
         });
 
@@ -573,104 +571,283 @@ describe('Posts API End-to-End Tests', () => {
                 .expect(HTTP_STATUS.BAD_REQUEST);
         });
     })
-    it('should update newestLikes when a new user likes the post (4 users total)', async () => {
-        const createdUsers: { id: string, login: string, accessToken: string }[] = [];
 
-        // Создаём 4 пользователя и логинимся
-        for (let i = 0; i < 4; i++) {
-            const userData = {
-                login: `userTest${i}`,
-                password: 'Password123!',
-                email: `userTest${i}@example.com`
-            };
+    describe("basic post like scenario with multiple users ", () => {
 
-            const createRes = await request(app)
-                .post(USER_FULL_URLS.CREATE)
-                .set('Authorization', `Basic ${basicAuth}`)
-                .send(userData)
-                .expect(HTTP_STATUS.CREATED);
-
-            const loginRes = await request(app)
-                .post(AUTH_FULL_URLS.LOGIN)
-                .send({
-                    loginOrEmail: userData.login,
-                    password: userData.password
-                })
+        // 1. Функция получения текущих newestLikes
+        async function getNewestLikes(postId: string): Promise<LikeEntry[]> {
+            const res = await request(app)
+                .get(POSTS_FULL_URLS.GET_BY_ID(postId))
+                .set('Authorization', `Bearer ${createdUsers[0].accessToken}`)
                 .expect(HTTP_STATUS.OK);
 
-            createdUsers.push({
-                id: createRes.body.id,
-                login: createRes.body.login,
-                accessToken: loginRes.body.accessToken
-            });
+            return res.body.extendedLikesInfo.newestLikes;
         }
-
-        // Создаём пост
-        const postRes = await request(app)
-            .post(POSTS_FULL_URLS.CREATE)
-            .set('Authorization', `Basic ${basicAuth}`)
-            .send({
-                title: 'newestLikes test post',
-                shortDescription: 'short',
-                content: 'content',
-                blogId: blogId
-            })
-            .expect(HTTP_STATUS.CREATED);
-
-        const postId = postRes.body.id;
-
-        // Первые 3 пользователя ставят лайки
-        for (let i = 0; i < 3; i++) {
-            await request(app)
-                .put(POSTS_FULL_URLS.LIKE_POST(postId))
-                .set('Authorization', `Bearer ${createdUsers[i].accessToken}`)
-                .send({ likeStatus: 'Like' })
-                .expect(HTTP_STATUS.NO_CONTENT);
-
-            await new Promise(res => setTimeout(res, 10)); // немного разнести по времени
+        interface CreatedUser {
+            id: string;
+            login: string;
+            accessToken: string;
         }
-
-        // Проверяем newestLikes содержит первых 3 пользователей
-        const getRes1 = await request(app)
-            .get(POSTS_FULL_URLS.GET_BY_ID(postId))
-            .set('Authorization', `Bearer ${createdUsers[0].accessToken}`) // любой пользователь
-            .expect(HTTP_STATUS.OK);
-
-        const newestLikes1 = getRes1.body.extendedLikesInfo.newestLikes;
-
-        expect(newestLikes1.length).toBe(3);
-        expect(newestLikes1[0].userId).toBe(createdUsers[0].id);
-        expect(newestLikes1[1].userId).toBe(createdUsers[1].id);
-        expect(newestLikes1[2].userId).toBe(createdUsers[2].id);
-
-        // 4-й пользователь ставит лайк
-        await request(app)
-            .put(POSTS_FULL_URLS.LIKE_POST(postId))
-            .set('Authorization', `Bearer ${createdUsers[3].accessToken}`)
-            .send({ likeStatus: 'Like' })
-            .expect(HTTP_STATUS.NO_CONTENT);
-
-        // Проверяем newestLikes: первый лайк исчезает, появляются 2-3-4
-        const getRes2 = await request(app)
-            .get(POSTS_FULL_URLS.GET_BY_ID(postId))
-            .set('Authorization', `Bearer ${createdUsers[0].accessToken}`) // не важно чей
-            .expect(HTTP_STATUS.OK);
-
-        const newestLikes2 = getRes2.body.extendedLikesInfo.newestLikes;
-
         interface LikeEntry {
             userId: string;
             login: string;
             addedAt: string;
         }
 
-        expect(newestLikes2.length).toBe(3);
-        expect((newestLikes2 as LikeEntry[]).map(u => u.userId)).toEqual([
-            createdUsers[1].id,
-            createdUsers[2].id,
-            createdUsers[3].id
-        ]);
-    });
+        let postId: string = "";
+        let createdUsers: Array<CreatedUser> = [];
+        let postIds: string[] = [];
+        let postLikeMap: Record<string, LikeEntry[]> = {};
+
+        beforeAll(async () => {
+            // 1. Создание 4 пользователей
+            for (let i = 0; i < 4; i++) {
+                const userData = {
+                    login: `userD${i}`,
+                    password: 'Password123!',
+                    email: `userDeterministic${i}@example.com`
+                };
+
+                const createRes = await request(app)
+                    .post(USER_FULL_URLS.CREATE)
+                    .set('Authorization', `Basic ${basicAuth}`)
+                    .send(userData)
+                    .expect(HTTP_STATUS.CREATED);
+
+                const loginRes = await request(app)
+                    .post(AUTH_FULL_URLS.LOGIN)
+                    .send({
+                        loginOrEmail: userData.login,
+                        password: userData.password
+                    })
+                    .expect(HTTP_STATUS.OK);
+
+                createdUsers.push({
+                    id: createRes.body.id,
+                    login: createRes.body.login,
+                    accessToken: loginRes.body.accessToken
+                });
+            }
+
+            for (let i = 0; i < 2; i++) {
+                const postRes = await request(app)
+                    .post(POSTS_FULL_URLS.CREATE)
+                    .set('Authorization', `Basic ${basicAuth}`)
+                    .send({
+                        title: `Post ${i}`,
+                        shortDescription: 'desc',
+                        content: 'some content',
+                        blogId: blogId
+                    })
+                    .expect(HTTP_STATUS.CREATED);
+
+                postIds.push(postRes.body.id);
+                postLikeMap[postRes.body.id] = [];
+            }
+            postId = postIds[0];
+
+        });
+
+        it('should update newestLikes correctly when users switch statuses and verify by addedAt', async () => {
+            const activeLikes: LikeEntry[] = [];
+
+            // === Шаг 1: каждый пользователь ставит Like и сохраняем addedAt
+            for (const user of createdUsers) {
+                await request(app)
+                    .put(POSTS_FULL_URLS.LIKE_POST(postId))
+                    .set('Authorization', `Bearer ${user.accessToken}`)
+                    .send({ likeStatus: 'Like' })
+                    .expect(HTTP_STATUS.NO_CONTENT);
+
+                await new Promise(res => setTimeout(res, 20)); // гарантируем уникальный addedAt
+
+                const newest = await getNewestLikes(postId);
+                const thisUserLike = newest.find(l => l.userId === user.id);
+                if (thisUserLike) {
+                    activeLikes.push({
+                        userId: user.id,
+                        login: user.login,
+                        addedAt: thisUserLike.addedAt
+                    });
+                }
+            }
+
+            // Проверяем что все 3 лайка есть в правильном порядке (от новых к старым)
+            const newest1 = await getNewestLikes(postId);
+            console.log(newest1)
+            const expected1 = [...activeLikes]
+                .sort((a, b) => b.addedAt.localeCompare(a.addedAt))
+                .map(l => l.userId).slice(0,3);
+            console.log(expected1.slice(0,3))
+            const actual1 = newest1.map(l => l.userId);
+            console.log(actual1)
+            expect(actual1).toEqual(expected1);
+
+            // === Шаг 2: первый пользователь меняет Like → Dislike (удаляется из newestLikes)
+            await request(app)
+                .put(POSTS_FULL_URLS.LIKE_POST(postId))
+                .set('Authorization', `Bearer ${createdUsers[0].accessToken}`)
+                .send({ likeStatus: 'Dislike' })
+                .expect(HTTP_STATUS.NO_CONTENT);
+
+            const index0 = activeLikes.findIndex(l => l.userId === createdUsers[0].id);
+            if (index0 !== -1) activeLikes.splice(index0, 1); // удаляем лайк
+
+            const newest2 = await getNewestLikes(postId);
+
+            const expected2 = [...activeLikes]
+                .sort((a, b) => b.addedAt.localeCompare(a.addedAt))
+                .map(l => l.userId);
+            const actual2 = newest2.map(l => l.userId);
+            expect(actual2).toEqual(expected2);
+
+            // === Шаг 3: второй пользователь меняет Like → None
+            await request(app)
+                .put(POSTS_FULL_URLS.LIKE_POST(postId))
+                .set('Authorization', `Bearer ${createdUsers[1].accessToken}`)
+                .send({ likeStatus: 'None' })
+                .expect(HTTP_STATUS.NO_CONTENT);
+
+            const index1 = activeLikes.findIndex(l => l.userId === createdUsers[1].id);
+            if (index1 !== -1) activeLikes.splice(index1, 1);
+
+            const newest3 = await getNewestLikes(postId);
+            const expected3 = [...activeLikes]
+                .sort((a, b) => b.addedAt.localeCompare(a.addedAt))
+                .map(l => l.userId);
+            const actual3 = newest3.map(l => l.userId);
+            expect(actual3).toEqual(expected3);
+
+            // === Шаг 4: user0 снова ставит Like — появляется в начале списка
+            await request(app)
+                .put(POSTS_FULL_URLS.LIKE_POST(postId))
+                .set('Authorization', `Bearer ${createdUsers[0].accessToken}`)
+                .send({ likeStatus: 'Like' })
+                .expect(HTTP_STATUS.NO_CONTENT);
+
+            await new Promise(res => setTimeout(res, 20));
+            const newestAfterUser0 = await getNewestLikes(postId);
+            const user0Like = newestAfterUser0.find(l => l.userId === createdUsers[0].id);
+            if (user0Like) {
+                activeLikes.push({
+                    userId: createdUsers[0].id,
+                    login: createdUsers[0].login,
+                    addedAt: user0Like.addedAt
+                });
+            }
+
+            const expected4 = [...activeLikes]
+                .sort((a, b) => b.addedAt.localeCompare(a.addedAt))
+                .map(l => l.userId);
+            const actual4 = newestAfterUser0.map(l => l.userId);
+            expect(actual4).toEqual(expected4);
+        });
+
+        it('should update newestLikes to show only the latest 3 likes sorted by addedAt DESC', async () => {
+
+            const likeEntries: LikeEntry[] = [];
+
+            // 1. Первые 3 пользователя ставят лайки
+            for (let i = 0; i < 3; i++) {
+                await request(app)
+                    .put(POSTS_FULL_URLS.LIKE_POST(postId))
+                    .set('Authorization', `Bearer ${createdUsers[i].accessToken}`)
+                    .send({ likeStatus: 'Like' })
+                    .expect(HTTP_STATUS.NO_CONTENT);
+
+                await new Promise(res => setTimeout(res, 10)); // немного разнесём по времени
+
+                const newestLikes = await getNewestLikes(postId);
+                const thisLike = newestLikes.find(l => l.userId === createdUsers[i].id);
+                if (thisLike) {
+                    likeEntries.push({
+                        userId: thisLike.userId,
+                        login: thisLike.login,
+                        addedAt: thisLike.addedAt
+                    });
+                }
+            }
+
+            // 2. Проверка, что в newestLikes 3 первых пользователя (в порядке по addedAt DESC)
+            const expectedFirst = [...likeEntries]
+                .sort((a, b) => b.addedAt.localeCompare(a.addedAt))
+                .slice(0, 3)
+                .map(l => l.userId);
+
+            const currentLikes1 = await getNewestLikes(postId);
+            const actual1 = currentLikes1.map(l => l.userId);
+
+            expect(actual1).toEqual(expectedFirst);
+
+            // 3. 4-й пользователь ставит лайк
+            await request(app)
+                .put(POSTS_FULL_URLS.LIKE_POST(postId))
+                .set('Authorization', `Bearer ${createdUsers[3].accessToken}`)
+                .send({ likeStatus: 'Like' })
+                .expect(HTTP_STATUS.NO_CONTENT);
+
+            await new Promise(res => setTimeout(res, 10));
+
+            const newestLikesAfter4 = await getNewestLikes(postId);
+            const user4Like = newestLikesAfter4.find(l => l.userId === createdUsers[3].id);
+            if (user4Like) {
+                likeEntries.push({
+                    userId: user4Like.userId,
+                    login: user4Like.login,
+                    addedAt: user4Like.addedAt
+                });
+            }
+
+            // 4. Проверка, что самый старый (user0) ушёл, остались user1, user2, user3 (в порядке по времени)
+            const expectedFinal = [...likeEntries]
+                .sort((a, b) => b.addedAt.localeCompare(a.addedAt))
+                .slice(0, 3)
+                .map(l => l.userId);
+
+            const currentLikes2 = await getNewestLikes(postId);
+            const actual2 = currentLikes2.map(l => l.userId);
+            expect(actual2).toEqual(expectedFinal);
+        });
+
+        it('should track newestLikes separately for each post', async () => {
+
+            // 1. Каждый пользователь лайкает оба поста
+            for (const user of createdUsers) {
+                for (const postId of postIds) {
+                    await request(app)
+                        .put(POSTS_FULL_URLS.LIKE_POST(postId))
+                        .set('Authorization', `Bearer ${user.accessToken}`)
+                        .send({ likeStatus: 'Like' })
+                        .expect(HTTP_STATUS.NO_CONTENT);
+
+                    await new Promise(res => setTimeout(res, 10)); // разнесём время
+
+                    const newestLikes = await getNewestLikes(postId);
+                    const userLike = newestLikes.find(l => l.userId === user.id);
+                    if (userLike) {
+                        postLikeMap[postId].push({
+                            userId: user.id,
+                            login: user.login,
+                            addedAt: userLike.addedAt
+                        });
+                    }
+                }
+            }
+
+            // 2. Проверка newestLikes для каждого поста
+            for (const postId of postIds) {
+                const expected = [...postLikeMap[postId]]
+                    .sort((a, b) => b.addedAt.localeCompare(a.addedAt))
+                    .slice(0, 3)
+                    .map(l => l.userId);
+
+                const actual = (await getNewestLikes(postId)).map(l => l.userId);
+                expect(actual).toEqual(expected);
+            }
+        });
+
+    })
+
 
 
 });

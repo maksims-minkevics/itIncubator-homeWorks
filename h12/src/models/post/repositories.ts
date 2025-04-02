@@ -66,24 +66,39 @@ export class PostsRepository {
                         newestLikes: {
                             $let: {
                                 vars: {
-                                    likes: {
-                                        $lastN: {
+                                    filteredLikes: {
+                                        $filter: {
                                             input: "$likesData",
-                                            n: 3
+                                            as: "like",
+                                            cond: { $eq: ["$$like.status", "Like"] }
+                                        }
+                                    },
+                                    sortedLikes: {
+                                        $sortArray: {
+                                            input: {
+                                                $filter: {
+                                                    input: "$likesData",
+                                                    as: "like",
+                                                    cond: { $eq: ["$$like.status", "Like"] }
+                                                }
+                                            },
+                                            sortBy: { addedAt: -1 }
                                         }
                                     }
                                 },
                                 in: {
                                     $cond: [
-                                        { $gt: [{ $size: "$$likes" }, 0] },
+                                        { $gt: [{ $size: "$$sortedLikes" }, 0] },
                                         {
                                             $map: {
-                                                input: "$$likes",
+                                                input: {
+                                                    $slice: ["$$sortedLikes", 0, 3]
+                                                },
                                                 as: "likeData",
                                                 in: {
                                                     userId: "$$likeData.userId",
                                                     addedAt: "$$likeData.addedAt",
-                                                    login: "$$likeData.login",
+                                                    login: "$$likeData.login"
                                                 }
                                             }
                                         },
@@ -182,24 +197,39 @@ export class PostsRepository {
                         newestLikes: {
                             $let: {
                                 vars: {
-                                    likes: {
-                                        $lastN: {
+                                    filteredLikes: {
+                                        $filter: {
                                             input: "$likesData",
-                                            n: 3
+                                            as: "like",
+                                            cond: { $eq: ["$$like.status", "Like"] }
+                                        }
+                                    },
+                                    sortedLikes: {
+                                        $sortArray: {
+                                            input: {
+                                                $filter: {
+                                                    input: "$likesData",
+                                                    as: "like",
+                                                    cond: { $eq: ["$$like.status", "Like"] }
+                                                }
+                                            },
+                                            sortBy: { addedAt: -1 }
                                         }
                                     }
                                 },
                                 in: {
                                     $cond: [
-                                        { $gt: [{ $size: "$$likes" }, 0] },
+                                        { $gt: [{ $size: "$$sortedLikes" }, 0] },
                                         {
                                             $map: {
-                                                input: "$$likes",
+                                                input: {
+                                                    $slice: ["$$sortedLikes", 0, 3]
+                                                },
                                                 as: "likeData",
                                                 in: {
                                                     userId: "$$likeData.userId",
                                                     addedAt: "$$likeData.addedAt",
-                                                    login: "$$likeData.login",
+                                                    login: "$$likeData.login"
                                                 }
                                             }
                                         },
@@ -304,24 +334,39 @@ export class PostsRepository {
                         newestLikes: {
                             $let: {
                                 vars: {
-                                    likes: {
-                                        $lastN: {
+                                    filteredLikes: {
+                                        $filter: {
                                             input: "$likesData",
-                                            n: 3
+                                            as: "like",
+                                            cond: { $eq: ["$$like.status", "Like"] }
+                                        }
+                                    },
+                                    sortedLikes: {
+                                        $sortArray: {
+                                            input: {
+                                                $filter: {
+                                                    input: "$likesData",
+                                                    as: "like",
+                                                    cond: { $eq: ["$$like.status", "Like"] }
+                                                }
+                                            },
+                                            sortBy: { addedAt: -1 }
                                         }
                                     }
                                 },
                                 in: {
                                     $cond: [
-                                        { $gt: [{ $size: "$$likes" }, 0] },
+                                        { $gt: [{ $size: "$$sortedLikes" }, 0] },
                                         {
                                             $map: {
-                                                input: "$$likes",
+                                                input: {
+                                                    $slice: ["$$sortedLikes", 0, 3]
+                                                },
                                                 as: "likeData",
                                                 in: {
                                                     userId: "$$likeData.userId",
                                                     addedAt: "$$likeData.addedAt",
-                                                    login: "$$likeData.login",
+                                                    login: "$$likeData.login"
                                                 }
                                             }
                                         },
